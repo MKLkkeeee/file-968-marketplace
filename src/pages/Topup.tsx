@@ -7,17 +7,17 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { adjustPoints, findDiscountByCode, isReceiverNameMatch, recordTopup, updateDiscount, verifyBankSlip, verifyTruewalletGift } from "@/lib/store";
+import { SHOP_TRUEWALLET_PHONE, SHOP_PROMPTPAY, BANK_RECEIVER_NAME } from "@/lib/firebase";
 import { toast } from "sonner";
-import { Building2, Gift, Loader2, Upload, Wallet } from "lucide-react";
+import { Building2, Copy, Gift, Loader2, Upload, Wallet } from "lucide-react";
 import { Html5Qrcode } from "html5-qrcode";
-import { Card as CardEl } from "@/components/ui/card";
 
 export default function Topup() {
   const { user, profile, refreshProfile } = useAuth();
   const [tab, setTab] = useState("truewallet");
 
   // TrueWallet
-  const [phone, setPhone] = useState("");
+  const [phone, setPhone] = useState(SHOP_TRUEWALLET_PHONE);
   const [giftLink, setGiftLink] = useState("");
   const [twLoading, setTwLoading] = useState(false);
 
