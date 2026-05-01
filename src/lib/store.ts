@@ -203,3 +203,12 @@ export const redeemPointCode = async (
     amount: item.value
   };
 };
+
+export async function hasUserUsedCode(codeId: string, uid: string) {
+  const snap = await get(ref(db, `discountUses/${codeId}/${uid}`));
+  return snap.exists();
+}
+
+export async function markUserUsedCode(codeId: string, uid: string) {
+  await set(ref(db, `discountUses/${codeId}/${uid}`), true);
+}
