@@ -27,6 +27,7 @@ export interface DiscountCode {
   value: number;
   maxUses: number;
   usedCount: number;
+  usedBy?: Record<string, boolean>;
   active: boolean;
   createdAt: number;
 }
@@ -155,4 +156,50 @@ export const isReceiverNameMatch = (name: string) => {
   if (!name) return false;
   const normalize = (s: string) => s.replace(/\s+/g, "").toLowerCase();
   return normalize(name).includes(normalize(BANK_RECEIVER_NAME));
+};
+
+export const redeemPointCode = async (
+  uid: string,
+  code: string
+): Promise<{ success: boolean; message: string; amount?: number }> => {
+  const snap = await get(ref(db, "discounts"));
+
+  if (!snap.exists()) {
+    return { success: false, message: "ไม่พบโค้ด" };
+  }
+
+  const list = Object.values(snap.val()) as DiscountCode[];
+
+  const item = list.find(
+    (d) => d.code.toUpperCase() === code.toUpperCase() && d.active
+  );
+
+  if (!item) {
+    return { success: false, message: "โค้ดไม่ถูกต้อง" };
+  }
+
+  if (item.type !== "point") {
+    return { success: false, message: "โค้ดนี้ไม่ใช่ Point Code" };
+  }
+
+  if (item.usedBy?.[uid]) {
+    return { success: false, message: "คุณใช้โค้ดนี้ไปแล้ว" };
+  }
+
+  if (item.usedCount >= item.maxUses) {
+    return { success: false, message: "โค้ดถูกใช้ครบแล้ว" };
+  }
+
+  await adjustPoints(uid, item.value);
+
+  await update(ref(db, `discounts/${item.id}`), {
+    usedCount: item.usedCount + 1,
+    [`usedBy/${uid}`]: true
+  });
+
+  return {
+    success: true,
+    message: "ใช้โค้ดสำเร็จ",
+    amount: item.value
+  };
 };
