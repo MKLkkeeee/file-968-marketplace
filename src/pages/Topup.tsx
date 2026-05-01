@@ -170,6 +170,34 @@ export default function Topup() {
           </Card>
         )}
 
+        {/* Special Code (point) */}
+        <Card className="card-elegant mt-6 p-6">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-primary">
+              <Gift className="h-5 w-5 text-primary-foreground" />
+            </div>
+            <div>
+              <h3 className="font-display text-lg font-semibold">Special Code</h3>
+              <p className="text-xs text-muted-foreground">โค้ดพิเศษสำหรับเพิ่ม Point เท่านั้น</p>
+            </div>
+          </div>
+          <div className="mt-4 flex gap-2">
+            <Input
+              value={specialCode}
+              onChange={(e) => setSpecialCode(e.target.value.toUpperCase())}
+              placeholder="ใส่โค้ดของคุณ เช่น GIFT100"
+              className="font-mono"
+            />
+            <Button
+              onClick={handleSpecialCode}
+              disabled={codeLoading}
+              className="bg-gradient-primary text-primary-foreground"
+            >
+              {codeLoading && <Loader2 className="h-4 w-4 animate-spin" />} ใช้โค้ด
+            </Button>
+          </div>
+        </Card>
+
         <Tabs value={tab} onValueChange={setTab} className="mt-8">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="truewallet"><Wallet className="h-4 w-4" />TrueMoney</TabsTrigger>
