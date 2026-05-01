@@ -252,36 +252,26 @@ export default function Topup() {
           <TabsContent value="truewallet">
             <Card className="card-elegant p-6">
               <h3 className="font-display text-xl font-semibold">เติมผ่านซองอั่งเปา TrueMoney</h3>
-              <p className="mb-4 mt-1 text-sm text-muted-foreground">
-                ส่งซองของขวัญมาที่เบอร์ของร้าน แล้ววางลิงก์ซองด้านล่าง
-              </p>
+              <p className="mb-4 mt-1 text-sm text-muted-foreground">วางลิงก์ซองด้านล่าง</p>
 
-              <div className="mb-4 rounded-xl border border-primary/30 bg-primary/10 p-4">
-                <p className="text-xs text-muted-foreground">เบอร์รับเงินของร้าน</p>
-                <div className="flex items-center justify-between gap-2">
-                  <p className="font-display text-2xl font-bold gradient-text">{SHOP_TRUEWALLET_PHONE}</p>
-                  <Button size="sm" variant="outline" onClick={() => { navigator.clipboard.writeText(SHOP_TRUEWALLET_PHONE); toast.success("คัดลอกเบอร์แล้ว"); }}>
-                    <Copy className="h-4 w-4" /> คัดลอก
-                  </Button>
-                </div>
-              </div>
+              <div className="mb-4"></div>
 
               <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label>เบอร์ผู้รับ (เบอร์ร้าน)</Label>
-                  <Input value={phone} readOnly className="cursor-not-allowed bg-muted" placeholder="0XXXXXXXXX" />
-                </div>
-                <div className="space-y-2">
-                  <Label>ลิงก์ซองของขวัญ</Label>
-                  <Input value={giftLink} onChange={(e) => setGiftLink(e.target.value)} placeholder="https://gift.truemoney.com/campaign/?v=..." />
-                </div>
-                <Button onClick={handleTrueWallet} disabled={twLoading} className="w-full bg-gradient-primary text-primary-foreground">
-                  {twLoading && <Loader2 className="h-4 w-4 animate-spin" />}เติมเงิน
-                </Button>
+              <div className="space-y-2">
+              <Label>ลิงก์ซองของขวัญ</Label>
+              <Input
+               value={giftLink}
+               onChange={(e) => setGiftLink(e.target.value)}
+               placeholder="https://gift.truemoney.com/campaign/?v=..."/>
               </div>
-            </Card>
-          </TabsContent>
 
+              <Button
+               onClick={handleTrueWallet}
+               disabled={twLoading}
+               className="w-full bg-gradient-primary text-primary-foreground">{twLoading && <Loader2 className="h-4 w-4 animate-spin" />}เติมเงิน</Button>
+            </div>
+          </Card>
+          </TabsContent>
           <TabsContent value="bank">
             <Card className="card-elegant p-6">
               <h3 className="font-display text-xl font-semibold">โอนเงินผ่านพร้อมเพย์</h3>
