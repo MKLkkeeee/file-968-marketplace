@@ -283,12 +283,8 @@ export default function Topup() {
                 <div>
                   <p className="text-xs text-muted-foreground">พร้อมเพย์</p>
                   <div className="flex justify-center">
-                    <img src="https://cdn.discordapp.com/attachments/1499030047783260282/1499905322339274855/IMG_9706.jpg" alt="PromptPay QR" className="w-72 rounded-xl border shadow-md"/>
+                    <img src="https://cdn.discordapp.com/attachments/1499030047783260282/1499905322339274855/IMG_9706.jpg?ex=69f67f2f&is=69f52daf&hm=87866243b07ac3bc2b406a32f4fb62cb22d9fc572ba0c7d7107205ffa47c290b&" alt="PromptPay QR" className="w-72 rounded-xl border shadow-md"/>
                 </div>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">ชื่อผู้รับ</p>
-                  <p className="font-semibold">{BANK_RECEIVER_NAME}</p>
                 </div>
               </div>
               <div className="mt-5 space-y-4">
