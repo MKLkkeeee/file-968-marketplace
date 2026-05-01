@@ -22,7 +22,7 @@ export const PLANARIA_API_KEY = "273bdfe95844615a5ae960a14907b2f5";
 export const TRUEWALLET_API = "https://www.planariashop.com/api/truewallet.php";
 export const CHECKSLIP_API = "https://www.planariashop.com/api/checkslip.php";
 // ชื่อผู้รับที่ยอมรับสำหรับสลิปธนาคาร
-export const BANK_RECEIVER_NAME = "ด.ช. ธวัชชัย คอทอง";
+export const BANK_RECEIVER_NAME = "ด.ช. ธวัชชัย ค";
 // เบอร์/พร้อมเพย์ของร้าน
 export const SHOP_TRUEWALLET_PHONE = "0832045174";
 export const SHOP_PROMPTPAY = "0832045174";
