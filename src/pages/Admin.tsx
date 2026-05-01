@@ -18,6 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { onValue, ref } from "firebase/database";
+import { adjustPoints } from "@/lib/store";
 import { db, ADMIN_SECRET } from "@/lib/firebase";
 import {
   Category, DiscountCode, Product, Topup, Order, stockCount,
@@ -41,6 +42,30 @@ export default function Admin() {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [topups, setTopups] = useState<Topup[]>([]);
+  const [userSearch, setUserSearch] = useState("");
+  const [pointInputs, setPointInputs] = useState<Record<string, string>>({});
+
+  const handleAddPoint = async (uid: string) => {
+    const amount = Number(pointInputs[uid]);
+  
+    if (!amount || amount <= 0) {
+      toast.error("ใส่จำนวน Point");
+      return;
+    }
+  
+    try {
+      await adjustPoints(uid, amount);
+  
+      toast.success(`เพิ่ม ${amount} Point สำเร็จ`);
+  
+      setPointInputs((prev) => ({
+        ...prev,
+        [uid]: "",
+      }));
+    } catch {
+      toast.error("เพิ่ม Point ไม่สำเร็จ");
+    }
+  };
 
   useEffect(() => {
     const off1 = onValue(ref(db, "categories"), (s) => setCategories(s.exists() ? Object.values(s.val()) : []));
@@ -133,6 +158,14 @@ export default function Admin() {
           {/* ============ Users ============ */}
           <TabsContent value="users">
             <Card className="card-elegant p-6">
+              <div className="mb-4">
+                <Input
+                  placeholder="ค้นหา username / email / uid"
+                  value={userSearch}
+                  onChange={(e) => setUserSearch(e.target.value)}
+                />
+              </div>
+
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -140,23 +173,73 @@ export default function Admin() {
                     <TableHead>Email</TableHead>
                     <TableHead>Point</TableHead>
                     <TableHead>Role</TableHead>
+                    <TableHead>เพิ่ม Point</TableHead>
                     <TableHead></TableHead>
                   </TableRow>
                 </TableHeader>
+
                 <TableBody>
-                  {users.map((u) => (
-                    <TableRow key={u.uid}>
-                      <TableCell>{u.username}</TableCell>
-                      <TableCell>{u.email}</TableCell>
-                      <TableCell>{u.points?.toLocaleString() ?? 0}</TableCell>
-                      <TableCell><Badge variant={u.role === "admin" ? "default" : "outline"}>{u.role}</Badge></TableCell>
-                      <TableCell>
-                        <Button size="sm" variant="outline" onClick={() => setUserRole(u.uid, u.role === "admin" ? "user" : "admin")}>
-                          {u.role === "admin" ? "ลด เป็น user" : "เลื่อน เป็น admin"}
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {users
+                    .filter((u) =>
+                      `${u.username} ${u.email} ${u.uid}`
+                        .toLowerCase()
+                        .includes(userSearch.toLowerCase())
+                    )
+                    .map((u) => (
+                      <TableRow key={u.uid}>
+                        <TableCell>{u.username}</TableCell>
+                        <TableCell>{u.email}</TableCell>
+                        <TableCell>{u.points?.toLocaleString() ?? 0}</TableCell>
+
+                        <TableCell>
+                          <Badge variant={u.role === "admin" ? "default" : "outline"}>
+                            {u.role}
+                          </Badge>
+                        </TableCell>
+
+                        <TableCell>
+                          <div className="flex gap-2">
+                            <Input
+                              type="number"
+                              placeholder="100"
+                              className="w-24"
+                              value={pointInputs[u.uid] || ""}
+                              onChange={(e) =>
+                                setPointInputs((prev) => ({
+                                  ...prev,
+                                  [u.uid]: e.target.value,
+                                }))
+                              }
+                            />
+
+                            <Button
+                              size="sm"
+                              className="bg-gradient-primary text-primary-foreground"
+                              onClick={() => handleAddPoint(u.uid)}
+                            >
+                              เพิ่ม
+                            </Button>
+                          </div>
+                        </TableCell>
+
+                        <TableCell>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() =>
+                              setUserRole(
+                                u.uid,
+                                u.role === "admin" ? "user" : "admin"
+                              )
+                            }
+                          >
+                            {u.role === "admin"
+                              ? "ลดเป็น user"
+                              : "เลื่อนเป็น admin"}
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
                 </TableBody>
               </Table>
             </Card>
@@ -175,20 +258,39 @@ export default function Admin() {
                     <TableHead>จ่ายจริง</TableHead>
                   </TableRow>
                 </TableHeader>
+
                 <TableBody>
-                  {orders.sort((a, b) => b.createdAt - a.createdAt).map((o) => (
-                    <TableRow key={o.id}>
-                      <TableCell className="text-xs">{new Date(o.createdAt).toLocaleString("th-TH")}</TableCell>
-                      <TableCell>{o.username}</TableCell>
-                      <TableCell className="text-xs">
-                        {(o.items || []).map((it, i) => (
-                          <div key={i}>{it.productName} ({it.price})</div>
-                        ))}
-                      </TableCell>
-                      <TableCell>{o.discountCode || "-"}</TableCell>
-                      <TableCell className="font-semibold gradient-text">{o.finalPrice}</TableCell>
-                    </TableRow>
-                  ))}
+                  {orders
+                    .sort((a, b) => b.createdAt - a.createdAt)
+                    .map((o) => (
+                      <TableRow key={o.id}>
+                        <TableCell className="text-xs">
+                          {new Date(o.createdAt).toLocaleString("th-TH")}
+                        </TableCell>
+
+                        <TableCell>{o.username}</TableCell>
+
+                        <TableCell className="text-xs">
+                          {Object.entries(
+                            (o.items || []).reduce((acc: any, item: any) => {
+                              acc[item.productName] =
+                                (acc[item.productName] || 0) + 1;
+                              return acc;
+                            }, {})
+                          ).map(([name, qty]: any) => (
+                            <div key={name}>
+                              {name} x{qty}
+                            </div>
+                          ))}
+                        </TableCell>
+
+                        <TableCell>{o.discountCode || "-"}</TableCell>
+
+                        <TableCell className="font-semibold gradient-text">
+                          {o.finalPrice}
+                        </TableCell>
+                      </TableRow>
+                    ))}
                 </TableBody>
               </Table>
             </Card>
