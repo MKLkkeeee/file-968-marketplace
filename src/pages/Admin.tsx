@@ -20,7 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { onValue, ref } from "firebase/database";
 import { db, ADMIN_SECRET } from "@/lib/firebase";
 import {
-  Category, DiscountCode, Product, Topup, Order,
+  Category, DiscountCode, Product, Topup, Order, stockCount,
   createCategory, createDiscount, createProduct, deleteCategory,
   deleteDiscount, deleteProduct, setUserRole, updateCategory,
   updateDiscount, updateProduct,
@@ -171,7 +171,6 @@ export default function Admin() {
                     <TableHead>เวลา</TableHead>
                     <TableHead>ผู้ซื้อ</TableHead>
                     <TableHead>สินค้า</TableHead>
-                    <TableHead>ราคา</TableHead>
                     <TableHead>โค้ด</TableHead>
                     <TableHead>จ่ายจริง</TableHead>
                   </TableRow>
@@ -181,8 +180,11 @@ export default function Admin() {
                     <TableRow key={o.id}>
                       <TableCell className="text-xs">{new Date(o.createdAt).toLocaleString("th-TH")}</TableCell>
                       <TableCell>{o.username}</TableCell>
-                      <TableCell>{o.productName}</TableCell>
-                      <TableCell>{o.price}</TableCell>
+                      <TableCell className="text-xs">
+                        {(o.items || []).map((it, i) => (
+                          <div key={i}>{it.productName} ({it.price})</div>
+                        ))}
+                      </TableCell>
                       <TableCell>{o.discountCode || "-"}</TableCell>
                       <TableCell className="font-semibold gradient-text">{o.finalPrice}</TableCell>
                     </TableRow>
@@ -283,9 +285,9 @@ function CategoryManager({ categories }: { categories: Category[] }) {
 function ProductManager({ categories, products }: { categories: Category[]; products: Product[] }) {
   const [open, setOpen] = useState(false);
   const [edit, setEdit] = useState<Product | null>(null);
-  const [form, setForm] = useState({ name: "", description: "", price: 0, image: "", categoryId: "", stock: 0 });
+  const [form, setForm] = useState({ name: "", description: "", price: 0, image: "", categoryId: "", stockItems: "" });
 
-  const reset = () => setForm({ name: "", description: "", price: 0, image: "", categoryId: "", stock: 0 });
+  const reset = () => setForm({ name: "", description: "", price: 0, image: "", categoryId: "", stockItems: "" });
 
   const submit = async () => {
     if (!form.name || !form.categoryId) return toast.error("กรอกชื่อและหมวดหมู่");
@@ -309,21 +311,34 @@ function ProductManager({ categories, products }: { categories: Category[]; prod
             <DialogHeader><DialogTitle>{edit ? "แก้ไข" : "เพิ่ม"}สินค้า</DialogTitle></DialogHeader>
             <div className="space-y-3">
               <div><Label>ชื่อสินค้า</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
-              <div><Label>รายละเอียด</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>
+              <div><Label>รายละเอียดสินค้า</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="ข้อมูลสินค้า รายละเอียดที่ลูกค้าจะเห็น" /></div>
               <div className="grid grid-cols-2 gap-3">
                 <div><Label>ราคา (point)</Label><Input type="number" value={form.price} onChange={(e) => setForm({ ...form, price: Number(e.target.value) })} /></div>
-                <div><Label>Stock</Label><Input type="number" value={form.stock} onChange={(e) => setForm({ ...form, stock: Number(e.target.value) })} /></div>
-              </div>
-              <div>
-                <Label>หมวดหมู่</Label>
-                <Select value={form.categoryId} onValueChange={(v) => setForm({ ...form, categoryId: v })}>
-                  <SelectTrigger><SelectValue placeholder="เลือกหมวดหมู่" /></SelectTrigger>
-                  <SelectContent>
-                    {categories.map((c) => <SelectItem key={c.id} value={c.id}>{c.icon} {c.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+                <div>
+                  <Label>หมวดหมู่</Label>
+                  <Select value={form.categoryId} onValueChange={(v) => setForm({ ...form, categoryId: v })}>
+                    <SelectTrigger><SelectValue placeholder="เลือก" /></SelectTrigger>
+                    <SelectContent>
+                      {categories.map((c) => <SelectItem key={c.id} value={c.id}>{c.icon} {c.name}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
               <div><Label>URL รูปภาพ</Label><Input value={form.image} onChange={(e) => setForm({ ...form, image: e.target.value })} placeholder="https://..." /></div>
+              <div>
+                <Label>Stock (1 บรรทัด = 1 ชิ้น)</Label>
+                <Textarea
+                  value={form.stockItems}
+                  onChange={(e) => setForm({ ...form, stockItems: e.target.value })}
+                  placeholder={"เช่น:\nlicense-key-001\nhttps://drive.google.com/file/xxx\nuser:pass:server"}
+                  rows={6}
+                  className="font-mono text-sm"
+                />
+                <p className="mt-1 text-xs text-muted-foreground">
+                  จำนวน stock = จำนวนบรรทัดที่ไม่ว่าง — เมื่อมีคนซื้อ ระบบจะส่งบรรทัดบนสุดให้ลูกค้าและตัดออก
+                  ({stockCount(form.stockItems)} ชิ้น)
+                </p>
+              </div>
             </div>
             <DialogFooter><Button onClick={submit} className="bg-gradient-primary text-primary-foreground">บันทึก</Button></DialogFooter>
           </DialogContent>
@@ -336,15 +351,18 @@ function ProductManager({ categories, products }: { categories: Category[]; prod
         <TableBody>
           {products.map((p) => {
             const cat = categories.find((c) => c.id === p.categoryId);
+            const stk = stockCount(p.stockItems);
             return (
               <TableRow key={p.id}>
                 <TableCell>{p.image && <img src={p.image} className="h-10 w-10 rounded object-cover" />}</TableCell>
                 <TableCell className="font-medium">{p.name}</TableCell>
                 <TableCell>{cat ? `${cat.icon} ${cat.name}` : "-"}</TableCell>
                 <TableCell>{p.price}</TableCell>
-                <TableCell>{p.stock}</TableCell>
                 <TableCell>
-                  <Button size="icon" variant="ghost" onClick={() => { setEdit(p); setForm({ name: p.name, description: p.description, price: p.price, image: p.image, categoryId: p.categoryId, stock: p.stock }); setOpen(true); }}>
+                  <Badge variant={stk > 0 ? "outline" : "destructive"}>{stk}</Badge>
+                </TableCell>
+                <TableCell>
+                  <Button size="icon" variant="ghost" onClick={() => { setEdit(p); setForm({ name: p.name, description: p.description, price: p.price, image: p.image, categoryId: p.categoryId, stockItems: p.stockItems || "" }); setOpen(true); }}>
                     <Pencil className="h-4 w-4" />
                   </Button>
                   <Button size="icon" variant="ghost" onClick={() => deleteProduct(p.id)}>
