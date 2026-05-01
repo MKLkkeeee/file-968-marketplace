@@ -1,6 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { get, ref } from "firebase/database";
-import { db } from "@/lib/firebase";;
 import { Navbar } from "@/components/Navbar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -32,80 +30,40 @@ export default function Topup() {
   const [specialCode, setSpecialCode] = useState("");
   const [codeLoading, setCodeLoading] = useState(false);
 
- const handleSpecialCode = async () => {
-  if (!user || !profile) return;
+  const handleSpecialCode = async () => {
+    if (!user || !profile) return;
+    const code = specialCode.trim();
+    if (!code) return toast.error("กรุณาใส่โค้ด");
+    setCodeLoading(true);
+    try {
+      const d = await findDiscountByCode(code);
+      if (!d) return toast.error("ไม่พบโค้ดนี้ หรือถูกปิดใช้งาน");
+      if (d.type !== "point") {
+        return toast.error("โค้ดนี้ไม่ใช่ Special Code", {
+          description: "Special Code ต้องเป็นโค้ดประเภท 'เพิ่ม Point' เท่านั้น (โค้ดส่วนลดใช้ในตะกร้า)",
+        });
+      }
+      if (d.usedCount >= d.maxUses) return toast.error("โค้ดนี้ถูกใช้ครบจำนวนแล้ว");
 
-  const code = specialCode.trim();
-
-  if (!code) {
-    toast.error("กรุณาใส่โค้ด");
-    return;
-  }
-
-  setCodeLoading(true);
-
-  try {
-    const d = await findDiscountByCode(code);
-
-    if (!d) {
-      toast.error("ไม่พบโค้ดนี้ หรือถูกปิดใช้งาน");
-      return;
-    }
-
-    // ต้องเป็นโค้ด point เท่านั้น
-    if (d.type !== "point") {
-      toast.error("โค้ดนี้ไม่ใช่ Special Code", {
-        description: "ใช้ได้เฉพาะโค้ดเพิ่ม Point เท่านั้น",
+      await adjustPoints(user.uid, d.value);
+      await updateDiscount(d.id, { usedCount: d.usedCount + 1 });
+      await recordTopup({
+        userId: user.uid,
+        username: profile.username,
+        method: "code",
+        amount: d.value,
+        ref: `SPECIAL:${d.code}`,
       });
-      return;
+      toast.success(`เติม ${d.value} point สำเร็จ!`);
+      setSpecialCode("");
+      await refreshProfile();
+    } catch (e: any) {
+      toast.error("เกิดข้อผิดพลาด", { description: e.message });
+    } finally {
+      setCodeLoading(false);
     }
+  };
 
-    // เช็กว่า user นี้เคยใช้แล้วไหม
-    if (d.usedBy && d.usedBy[user.uid]) {
-      toast.error("คุณใช้โค้ดนี้ไปแล้ว");
-      return;
-    }
-
-    // ใช้ครบจำนวนหรือยัง
-    if (d.usedCount >= d.maxUses) {
-      toast.error("โค้ดนี้ถูกใช้ครบจำนวนแล้ว");
-      return;
-    }
-
-    // เพิ่ม point
-    await adjustPoints(user.uid, d.value);
-
-    // อัปเดต firebase
-    await updateDiscount(d.id, {
-      usedCount: d.usedCount + 1,
-      usedBy: {
-        ...(d.usedBy || {}),
-        [user.uid]: true,
-      },
-    });
-
-    // บันทึกประวัติ
-    await recordTopup({
-      userId: user.uid,
-      username: profile.username,
-      method: "code",
-      amount: d.value,
-      ref: `SPECIAL:${d.code}`,
-    });
-
-    toast.success(`เติม ${d.value} Point สำเร็จ!`);
-
-    setSpecialCode("");
-    await refreshProfile();
-
-  } catch (e: any) {
-    toast.error("เกิดข้อผิดพลาด", {
-      description: e.message,
-    });
-  } finally {
-    setCodeLoading(false);
-  }
-};
   const handleTrueWallet = async () => {
     if (!user || !profile) return;
     if (!phone || !giftLink) return toast.error("กรุณากรอกข้อมูลให้ครบ");
@@ -136,122 +94,65 @@ export default function Topup() {
   };
 
   const handleSlipFile = async (file: File) => {
-  if (!user || !profile) return;
+    if (!user || !profile) return;
+    setBankLoading(true);
+    setPreviewImg(URL.createObjectURL(file));
 
-  setBankLoading(true);
-  setPreviewImg(URL.createObjectURL(file));
-
-  const tempDivId = "qr-temp-reader";
-  let qrText = "";
-
-  try {
-    const html5QrCode = new Html5Qrcode(tempDivId, { verbose: false } as any);
-    qrText = (await html5QrCode.scanFile(file, false)) as string;
-  } catch {
+    // Decode QR from image
+    const tempDivId = "qr-temp-reader";
+    let qrText = "";
     try {
       const html5QrCode = new Html5Qrcode(tempDivId, { verbose: false } as any);
-      qrText = (await html5QrCode.scanFile(file, true)) as string;
-    } catch {
-      toast.error("อ่าน QR Code จากสลิปไม่สำเร็จ", {
-        description: "กรุณาใช้รูปที่เห็น QR ชัดเจน",
-      });
-      setBankLoading(false);
-      return;
-    }
-  }
-
-  try {
-    const data = await verifyBankSlip(qrText);
-
-    if (data.status !== "success") {
-      const msg =
-        typeof data.message === "string"
-          ? data.message
-          : data.message?.massage_th || "ตรวจสอบไม่สำเร็จ";
-
-      toast.error("สลิปไม่ถูกต้อง", {
-        description: msg,
-      });
-
-      setBankLoading(false);
-      return;
-    }
-
-    // =========================
-    // เช็กชื่อผู้รับ
-    // =========================
-    const receiverName = data.receiver?.name || "";
-
-    if (receiverName !== "ด.ช. ธวัชชัย ค") {
-      toast.error("ชื่อผู้รับไม่ตรง", {
-        description: `ผู้รับในสลิปคือ ${receiverName}`,
-      });
-
-      setBankLoading(false);
-      return;
-    }
-
-    // =========================
-    // กันสลิปซ้ำ
-    // =========================
-    const refId =
-      data.transactionId ||
-      data.transRef ||
-      data.referenceNo ||
-      data.ref;
-
-    if (!refId) {
-      toast.error("ไม่พบเลขอ้างอิงสลิป");
-      setBankLoading(false);
-      return;
-    }
-
-    const topupSnap = await get(ref(db, "topups"));
-
-    if (topupSnap.exists()) {
-      const list = Object.values(topupSnap.val()) as any[];
-
-      const duplicate = list.find(
-        (item) =>
-          item.method === "bank" &&
-          item.ref === refId
-      );
-
-      if (duplicate) {
-        toast.error("สลิปนี้ถูกใช้เติมแล้ว");
+      qrText = (await html5QrCode.scanFile(file, false)) as string;
+    } catch (err) {
+      // Try with showImage=true scan
+      try {
+        const html5QrCode = new Html5Qrcode(tempDivId, { verbose: false } as any);
+        qrText = (await html5QrCode.scanFile(file, true)) as string;
+      } catch (err2) {
+        toast.error("อ่าน QR Code จากสลิปไม่สำเร็จ", { description: "กรุณาลองใหม่ด้วยรูปที่ชัดกว่า" });
         setBankLoading(false);
         return;
       }
     }
 
-    // =========================
-    // เติมเงิน
-    // =========================
-    const amount = Number(data.amount);
+    try {
+      const data = await verifyBankSlip(qrText);
+      if (data.status !== "success") {
+        const msg = typeof data.message === "string" ? data.message : data.message?.massage_th || "ตรวจสอบไม่สำเร็จ";
+        toast.error("สลิปไม่ถูกต้อง", { description: msg });
+        setBankLoading(false);
+        return;
+      }
+      const receiverName = data.receiver?.name || "";
+      if (!isReceiverNameMatch(receiverName)) {
+        toast.error("ชื่อผู้รับไม่ตรงกับร้าน", {
+          description: `ผู้รับในสลิป: ${receiverName} (ต้องเป็น ด.ช. ธวัชชัย ค)`,
+        });
+        setBankLoading(false);
+        return;
+      }
+      const amount = Number(data.amount);
+      // Prevent duplicate by transactionId
+      const ref = data.transactionId;
+      await adjustPoints(user.uid, amount);
+      await recordTopup({
+        userId: user.uid,
+        username: profile.username,
+        method: "bank",
+        amount,
+        ref,
+      });
+      toast.success(`เติมเงินสำเร็จ! +${amount} point`);
+      await refreshProfile();
+      setPreviewImg(null);
+    } catch (e: any) {
+      toast.error("เกิดข้อผิดพลาด", { description: e.message });
+    } finally {
+      setBankLoading(false);
+    }
+  };
 
-    await adjustPoints(user.uid, amount);
-
-    await recordTopup({
-      userId: user.uid,
-      username: profile.username,
-      method: "bank",
-      amount,
-      ref: refId,
-    });
-
-    toast.success(`เติมเงินสำเร็จ +${amount} Point`);
-
-    await refreshProfile();
-    setPreviewImg(null);
-
-  } catch (e: any) {
-    toast.error("เกิดข้อผิดพลาด", {
-      description: e.message,
-    });
-  } finally {
-    setBankLoading(false);
-  }
-};
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -327,7 +228,7 @@ export default function Topup() {
                 </div>
                 <div className="space-y-2">
                   <Label>ลิงก์ซองของขวัญ</Label>
-                  <Input value={giftLink} onChange={(e) => setGiftLink(e.target.value)} placeholder="https://gift.truemoney.com/campaign/?v=..." />
+                  <Input value={giftLink} readOnly className="cursor-not-allowed bg-muted" placeholder="https://gift.truemoney.com/campaign/?v=..." />
                 </div>
                 <Button onClick={handleTrueWallet} disabled={twLoading} className="w-full bg-gradient-primary text-primary-foreground">
                   {twLoading && <Loader2 className="h-4 w-4 animate-spin" />}เติมเงิน
