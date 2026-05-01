@@ -125,7 +125,7 @@ export default function Topup() {
           amount,
           ref: giftLink,
         });
-        toast.success(`เติมเงินสำเร็จ! +${amount} point`);
+        toast.success(`เติมเงินสำเร็จ +${amount} บาท`);
         setPhone(""); setGiftLink("");
         await refreshProfile();
       } else {
