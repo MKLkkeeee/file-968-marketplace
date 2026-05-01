@@ -5,31 +5,20 @@ import { Navbar } from "@/components/Navbar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Category, Product, adjustPoints, createOrder, findDiscountByCode, updateDiscount } from "@/lib/store";
+import { Category, Product, stockCount } from "@/lib/store";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCart } from "@/contexts/CartContext";
 import { toast } from "sonner";
-import { Coins, Package, ShoppingCart, Sparkles, Tag } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Coins, Package, ShoppingCart, Sparkles } from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
 
 export default function Index() {
-  const { user, profile, refreshProfile } = useAuth();
+  const { user } = useAuth();
+  const { add } = useCart();
   const navigate = useNavigate();
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [activeCat, setActiveCat] = useState<string>("all");
-  const [selected, setSelected] = useState<Product | null>(null);
-  const [discountCode, setDiscountCode] = useState("");
-  const [discountInfo, setDiscountInfo] = useState<{ pct: number; code: string } | null>(null);
-  const [buying, setBuying] = useState(false);
 
   useEffect(() => {
     const unsubC = onValue(ref(db, "categories"), (snap) => {
@@ -43,57 +32,12 @@ export default function Index() {
 
   const filtered = activeCat === "all" ? products : products.filter((p) => p.categoryId === activeCat);
 
-  const finalPrice = selected
-    ? Math.max(0, Math.round(selected.price * (1 - (discountInfo?.pct || 0) / 100)))
-    : 0;
-
-  const applyCode = async () => {
-    if (!discountCode.trim()) return;
-    const d = await findDiscountByCode(discountCode.trim());
-    if (!d) return toast.error("ไม่พบโค้ดนี้ หรือถูกปิดใช้งาน");
-    if (d.usedCount >= d.maxUses) return toast.error("โค้ดนี้ถูกใช้ครบจำนวนแล้ว");
-    if (d.type === "point") {
-      if (!user) return toast.error("กรุณาเข้าสู่ระบบ");
-      await adjustPoints(user.uid, d.value);
-      await updateDiscount(d.id, { usedCount: d.usedCount + 1 });
-      toast.success(`เติม ${d.value} point สำเร็จ!`);
-      setDiscountCode("");
-      await refreshProfile();
-    } else {
-      setDiscountInfo({ pct: d.value, code: d.code });
-      toast.success(`ใช้โค้ดส่วนลด ${d.value}% สำเร็จ`);
-    }
-  };
-
-  const handleBuy = async () => {
-    if (!user || !profile || !selected) return;
-    if (profile.points < finalPrice) return toast.error("Point ไม่พอ", { description: "กรุณาเติมเงินก่อน" });
-    setBuying(true);
-    try {
-      await adjustPoints(user.uid, -finalPrice);
-      await createOrder({
-        userId: user.uid,
-        username: profile.username,
-        productId: selected.id,
-        productName: selected.name,
-        price: selected.price,
-        discountCode: discountInfo?.code,
-        finalPrice,
-      });
-      if (discountInfo) {
-        const d = await findDiscountByCode(discountInfo.code);
-        if (d) await updateDiscount(d.id, { usedCount: d.usedCount + 1 });
-      }
-      toast.success("ซื้อสำเร็จ!", { description: `ใช้ไป ${finalPrice} point` });
-      setSelected(null);
-      setDiscountInfo(null);
-      setDiscountCode("");
-      await refreshProfile();
-    } catch (e: any) {
-      toast.error("ซื้อไม่สำเร็จ", { description: e.message });
-    } finally {
-      setBuying(false);
-    }
+  const handleAdd = (e: React.MouseEvent, p: Product) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (stockCount(p.stockItems) <= 0) return toast.error("สินค้าหมดสต๊อก");
+    add(p);
+    toast.success(`เพิ่ม "${p.name}" ลงตะกร้าแล้ว`);
   };
 
   return (
@@ -165,90 +109,46 @@ export default function Index() {
           </Card>
         ) : (
           <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4">
-            {filtered.map((p) => (
-              <Card
-                key={p.id}
-                className="card-elegant group cursor-pointer overflow-hidden p-0 transition-smooth hover:-translate-y-1 hover:shadow-elegant"
-                onClick={() => { setSelected(p); setDiscountInfo(null); setDiscountCode(""); }}
-              >
-                <div className="aspect-square overflow-hidden bg-secondary/30">
-                  {p.image ? (
-                    <img src={p.image} alt={p.name} className="h-full w-full object-cover transition-smooth group-hover:scale-110" />
-                  ) : (
-                    <div className="flex h-full items-center justify-center"><Package className="h-12 w-12 text-muted-foreground" /></div>
-                  )}
-                </div>
-                <div className="p-4">
-                  <h3 className="line-clamp-1 font-semibold">{p.name}</h3>
-                  <p className="line-clamp-2 mt-1 text-xs text-muted-foreground">{p.description}</p>
-                  <div className="mt-3 flex items-center justify-between">
-                    <div className="flex items-center gap-1 text-warning">
-                      <Coins className="h-4 w-4" />
-                      <span className="font-bold">{p.price.toLocaleString()}</span>
+            {filtered.map((p) => {
+              const stk = stockCount(p.stockItems);
+              return (
+                <Link to={`/product/${p.id}`} key={p.id}>
+                  <Card className="card-elegant group cursor-pointer overflow-hidden p-0 transition-smooth hover:-translate-y-1 hover:shadow-elegant">
+                    <div className="aspect-square overflow-hidden bg-secondary/30">
+                      {p.image ? (
+                        <img src={p.image} alt={p.name} className="h-full w-full object-cover transition-smooth group-hover:scale-110" />
+                      ) : (
+                        <div className="flex h-full items-center justify-center"><Package className="h-12 w-12 text-muted-foreground" /></div>
+                      )}
                     </div>
-                    <Badge variant="outline" className="text-xs">stock {p.stock}</Badge>
-                  </div>
-                </div>
-              </Card>
-            ))}
+                    <div className="p-4">
+                      <h3 className="line-clamp-1 font-semibold">{p.name}</h3>
+                      <p className="line-clamp-2 mt-1 text-xs text-muted-foreground">{p.description || "-"}</p>
+                      <div className="mt-3 flex items-center justify-between">
+                        <div className="flex items-center gap-1 text-warning">
+                          <Coins className="h-4 w-4" />
+                          <span className="font-bold">{p.price.toLocaleString()}</span>
+                        </div>
+                        <Badge variant={stk > 0 ? "outline" : "destructive"} className="text-xs">
+                          {stk > 0 ? `stock ${stk}` : "หมด"}
+                        </Badge>
+                      </div>
+                      <Button
+                        size="sm"
+                        className="mt-3 w-full bg-gradient-primary text-primary-foreground"
+                        disabled={stk <= 0}
+                        onClick={(e) => handleAdd(e, p)}
+                      >
+                        <ShoppingCart className="h-4 w-4" /> ใส่ตะกร้า
+                      </Button>
+                    </div>
+                  </Card>
+                </Link>
+              );
+            })}
           </div>
         )}
       </section>
-
-      {/* Buy dialog */}
-      <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
-        <DialogContent className="max-w-md">
-          {selected && (
-            <>
-              <DialogHeader>
-                <DialogTitle className="text-2xl">{selected.name}</DialogTitle>
-                <DialogDescription>{selected.description}</DialogDescription>
-              </DialogHeader>
-              {selected.image && (
-                <img src={selected.image} alt={selected.name} className="aspect-video w-full rounded-lg object-cover" />
-              )}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <Tag className="h-4 w-4 text-muted-foreground" />
-                  <Input placeholder="ใส่โค้ดส่วนลด / โค้ดเติม point" value={discountCode} onChange={(e) => setDiscountCode(e.target.value)} />
-                  <Button variant="outline" onClick={applyCode}>ใช้</Button>
-                </div>
-                <div className="rounded-xl bg-secondary/50 p-4">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">ราคา</span>
-                    <span>{selected.price.toLocaleString()} point</span>
-                  </div>
-                  {discountInfo && (
-                    <div className="mt-1 flex justify-between text-sm text-success">
-                      <span>ส่วนลด {discountInfo.pct}%</span>
-                      <span>-{(selected.price - finalPrice).toLocaleString()}</span>
-                    </div>
-                  )}
-                  <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
-                    <span className="font-semibold">รวม</span>
-                    <span className="font-display text-2xl font-bold gradient-text">{finalPrice.toLocaleString()}</span>
-                  </div>
-                </div>
-                {profile && (
-                  <div className="text-right text-xs text-muted-foreground">
-                    point ของคุณ: {profile.points.toLocaleString()}
-                  </div>
-                )}
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setSelected(null)}>ยกเลิก</Button>
-                {!user ? (
-                  <Button onClick={() => navigate("/login")} className="bg-gradient-primary text-primary-foreground">เข้าสู่ระบบเพื่อซื้อ</Button>
-                ) : (
-                  <Button onClick={handleBuy} disabled={buying} className="bg-gradient-primary text-primary-foreground">
-                    <ShoppingCart className="h-4 w-4" />ซื้อเลย
-                  </Button>
-                )}
-              </DialogFooter>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

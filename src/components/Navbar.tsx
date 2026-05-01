@@ -1,7 +1,8 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCart } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
-import { Coins, LogOut, Package, Shield, User as UserIcon, Wallet } from "lucide-react";
+import { Coins, History, LogOut, Package, Shield, ShoppingCart, User as UserIcon, Wallet } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,9 +11,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
 
 export const Navbar = () => {
   const { user, profile, isAdmin, logout } = useAuth();
+  const { count } = useCart();
   const navigate = useNavigate();
 
   return (
@@ -28,6 +31,16 @@ export const Navbar = () => {
         </Link>
 
         <nav className="flex items-center gap-2">
+          <Button variant="ghost" size="sm" onClick={() => navigate("/cart")} className="relative">
+            <ShoppingCart className="h-4 w-4" />
+            <span className="hidden sm:inline">ตะกร้า</span>
+            {count > 0 && (
+              <Badge className="absolute -right-1 -top-1 h-5 min-w-5 justify-center rounded-full bg-gradient-primary p-0 px-1 text-xs text-primary-foreground">
+                {count}
+              </Badge>
+            )}
+          </Button>
+
           {user && profile ? (
             <>
               <div className="hidden md:flex items-center gap-2 rounded-full bg-secondary/60 px-4 py-1.5 text-sm">
@@ -37,13 +50,13 @@ export const Navbar = () => {
               </div>
               <Button variant="ghost" size="sm" onClick={() => navigate("/topup")}>
                 <Wallet className="h-4 w-4" />
-                เติมเงิน
+                <span className="hidden sm:inline">เติมเงิน</span>
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="rounded-full">
                     <UserIcon className="h-4 w-4" />
-                    {profile.username}
+                    <span className="hidden sm:inline">{profile.username}</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
@@ -56,6 +69,9 @@ export const Navbar = () => {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => navigate("/topup")}>
                     <Wallet className="h-4 w-4" />เติมเงิน
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/orders")}>
+                    <History className="h-4 w-4" />ประวัติการซื้อ
                   </DropdownMenuItem>
                   {isAdmin && (
                     <DropdownMenuItem onClick={() => navigate("/admins")}>
