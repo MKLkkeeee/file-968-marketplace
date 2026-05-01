@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { get } from "firebase/database";
-import { ref } from "firebase/database";
+import { get, ref } from "firebase/database";
+import { db } from "@/lib/firebase";;
 import { Navbar } from "@/components/Navbar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
