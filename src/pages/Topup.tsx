@@ -172,7 +172,7 @@ export default function Topup() {
       const receiverName = data.receiver?.name || "";
       if (!isReceiverNameMatch(receiverName)) {
         toast.error("ชื่อผู้รับไม่ตรงกับร้าน", {
-          description: `ผู้รับในสลิป: ${receiverName} (ต้องเป็น ด.ช. ธวัชชัย ค)`,
+          description: `ผู้รับในสลิป: ${receiverName}`,
         });
         setBankLoading(false);
         return;
@@ -276,7 +276,7 @@ export default function Topup() {
             <Card className="card-elegant p-6">
               <h3 className="font-display text-xl font-semibold">โอนเงินผ่านพร้อมเพย์</h3>
               <p className="mt-1 text-sm text-muted-foreground">
-                โอนเงินมาที่บัญชีด้านล่าง แล้วอัปโหลดสลิปเพื่อเติม Point อัตโนมัติ
+                สแกนคิวอาโค๊ด แล้วอัพโหลดสลิป ในช่องด้านล่าง
               </p>
 
               <div className="mt-4 space-y-3 rounded-xl border border-primary/30 bg-primary/10 p-4">
