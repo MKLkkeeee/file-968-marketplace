@@ -1,4 +1,4 @@
-import { ref, push, set, get, update, remove } from "firebase/database";
+import { ref, push, set, get, update, remove, runTransaction } from "firebase/database";
 import { db, PLANARIA_API_KEY, TRUEWALLET_API, CHECKSLIP_API, BANK_RECEIVER_NAME } from "./firebase";
 
 export interface Product {
@@ -8,7 +8,8 @@ export interface Product {
   price: number;
   image: string;
   categoryId: string;
-  stock: number;
+  /** Multi-line stock: each non-empty line = 1 deliverable item (license / file link / code) */
+  stockItems: string;
   createdAt: number;
 }
 
@@ -34,10 +35,10 @@ export interface Order {
   id: string;
   userId: string;
   username: string;
-  productId: string;
-  productName: string;
-  price: number;
-  discountCode?: string;
+  items: { productId: string; productName: string; price: number; deliveredItem: string }[];
+  subtotal: number;
+  discountCode: string;
+  discountPct: number;
   finalPrice: number;
   createdAt: number;
 }
@@ -46,11 +47,14 @@ export interface Topup {
   id: string;
   userId: string;
   username: string;
-  method: "truewallet" | "bank";
+  method: "truewallet" | "bank" | "code";
   amount: number;
   ref: string;
   createdAt: number;
 }
+
+export const stockCount = (s: string) =>
+  (s || "").split(/\r?\n/).filter((l) => l.trim().length > 0).length;
 
 // CRUD - Categories
 export const createCategory = async (data: Omit<Category, "id" | "createdAt">) => {
@@ -69,6 +73,21 @@ export const createProduct = async (data: Omit<Product, "id" | "createdAt">) => 
 export const updateProduct = (id: string, data: Partial<Product>) =>
   update(ref(db, `products/${id}`), data);
 export const deleteProduct = (id: string) => remove(ref(db, `products/${id}`));
+
+/** Atomically pop the first non-empty stock line from a product. Returns null if out of stock. */
+export const popStockItem = async (productId: string): Promise<string | null> => {
+  let popped: string | null = null;
+  await runTransaction(ref(db, `products/${productId}/stockItems`), (current: string | null) => {
+    if (!current) return current;
+    const lines = current.split(/\r?\n/);
+    const idx = lines.findIndex((l) => l.trim().length > 0);
+    if (idx === -1) return current;
+    popped = lines[idx].trim();
+    lines.splice(idx, 1);
+    return lines.join("\n");
+  });
+  return popped;
+};
 
 // CRUD - Discount Codes
 export const createDiscount = async (data: Omit<DiscountCode, "id" | "createdAt" | "usedCount">) => {
@@ -99,7 +118,11 @@ export const setUserRole = (uid: string, role: "user" | "admin") =>
 // Orders
 export const createOrder = async (data: Omit<Order, "id" | "createdAt">) => {
   const r = push(ref(db, "orders"));
-  await set(r, { ...data, id: r.key, createdAt: Date.now() });
+  // Strip undefined just in case
+  const clean: any = { ...data, id: r.key, createdAt: Date.now() };
+  Object.keys(clean).forEach((k) => clean[k] === undefined && delete clean[k]);
+  await set(r, clean);
+  return r.key as string;
 };
 
 // Topups
@@ -109,7 +132,6 @@ export const recordTopup = async (data: Omit<Topup, "id" | "createdAt">) => {
 };
 
 // ============ Payment APIs ============
-// NOTE: เรียกตรงจาก browser ตามที่ user ระบุ — อาจติด CORS ได้ตามนโยบาย API server
 export const verifyTruewalletGift = async (phone: string, giftLink: string) => {
   const formData = new FormData();
   formData.append("keyapi", PLANARIA_API_KEY);
@@ -117,8 +139,7 @@ export const verifyTruewalletGift = async (phone: string, giftLink: string) => {
   formData.append("gift_link", giftLink);
 
   const res = await fetch(TRUEWALLET_API, { method: "POST", body: formData });
-  const data = await res.json();
-  return data;
+  return await res.json();
 };
 
 export const verifyBankSlip = async (qrcodeText: string) => {
@@ -127,8 +148,7 @@ export const verifyBankSlip = async (qrcodeText: string) => {
   formData.append("qrcode_text", qrcodeText);
 
   const res = await fetch(CHECKSLIP_API, { method: "POST", body: formData });
-  const data = await res.json();
-  return data;
+  return await res.json();
 };
 
 export const isReceiverNameMatch = (name: string) => {

@@ -6,10 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
-import { adjustPoints, isReceiverNameMatch, recordTopup, verifyBankSlip, verifyTruewalletGift } from "@/lib/store";
+import { adjustPoints, findDiscountByCode, isReceiverNameMatch, recordTopup, updateDiscount, verifyBankSlip, verifyTruewalletGift } from "@/lib/store";
 import { toast } from "sonner";
-import { Building2, Loader2, Upload, Wallet } from "lucide-react";
+import { Building2, Gift, Loader2, Upload, Wallet } from "lucide-react";
 import { Html5Qrcode } from "html5-qrcode";
+import { Card as CardEl } from "@/components/ui/card";
 
 export default function Topup() {
   const { user, profile, refreshProfile } = useAuth();
@@ -24,6 +25,44 @@ export default function Topup() {
   const [bankLoading, setBankLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [previewImg, setPreviewImg] = useState<string | null>(null);
+
+  // Special code (point top-up code)
+  const [specialCode, setSpecialCode] = useState("");
+  const [codeLoading, setCodeLoading] = useState(false);
+
+  const handleSpecialCode = async () => {
+    if (!user || !profile) return;
+    const code = specialCode.trim();
+    if (!code) return toast.error("กรุณาใส่โค้ด");
+    setCodeLoading(true);
+    try {
+      const d = await findDiscountByCode(code);
+      if (!d) return toast.error("ไม่พบโค้ดนี้ หรือถูกปิดใช้งาน");
+      if (d.type !== "point") {
+        return toast.error("โค้ดนี้ไม่ใช่ Special Code", {
+          description: "Special Code ต้องเป็นโค้ดประเภท 'เพิ่ม Point' เท่านั้น (โค้ดส่วนลดใช้ในตะกร้า)",
+        });
+      }
+      if (d.usedCount >= d.maxUses) return toast.error("โค้ดนี้ถูกใช้ครบจำนวนแล้ว");
+
+      await adjustPoints(user.uid, d.value);
+      await updateDiscount(d.id, { usedCount: d.usedCount + 1 });
+      await recordTopup({
+        userId: user.uid,
+        username: profile.username,
+        method: "code",
+        amount: d.value,
+        ref: `SPECIAL:${d.code}`,
+      });
+      toast.success(`เติม ${d.value} point สำเร็จ!`);
+      setSpecialCode("");
+      await refreshProfile();
+    } catch (e: any) {
+      toast.error("เกิดข้อผิดพลาด", { description: e.message });
+    } finally {
+      setCodeLoading(false);
+    }
+  };
 
   const handleTrueWallet = async () => {
     if (!user || !profile) return;
@@ -130,6 +169,34 @@ export default function Topup() {
             <Wallet className="h-10 w-10 text-primary" />
           </Card>
         )}
+
+        {/* Special Code (point) */}
+        <Card className="card-elegant mt-6 p-6">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-primary">
+              <Gift className="h-5 w-5 text-primary-foreground" />
+            </div>
+            <div>
+              <h3 className="font-display text-lg font-semibold">Special Code</h3>
+              <p className="text-xs text-muted-foreground">โค้ดพิเศษสำหรับเพิ่ม Point เท่านั้น</p>
+            </div>
+          </div>
+          <div className="mt-4 flex gap-2">
+            <Input
+              value={specialCode}
+              onChange={(e) => setSpecialCode(e.target.value.toUpperCase())}
+              placeholder="ใส่โค้ดของคุณ เช่น GIFT100"
+              className="font-mono"
+            />
+            <Button
+              onClick={handleSpecialCode}
+              disabled={codeLoading}
+              className="bg-gradient-primary text-primary-foreground"
+            >
+              {codeLoading && <Loader2 className="h-4 w-4 animate-spin" />} ใช้โค้ด
+            </Button>
+          </div>
+        </Card>
 
         <Tabs value={tab} onValueChange={setTab} className="mt-8">
           <TabsList className="grid w-full grid-cols-2">
