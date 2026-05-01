@@ -11,6 +11,17 @@ import { SHOP_TRUEWALLET_PHONE, SHOP_PROMPTPAY, BANK_RECEIVER_NAME } from "@/lib
 import { toast } from "sonner";
 import { Building2, Copy, Gift, Loader2, Upload, Wallet } from "lucide-react";
 import { Html5Qrcode } from "html5-qrcode";
+import {
+  adjustPoints,
+  findDiscountByCode,
+  isReceiverNameMatch,
+  recordTopup,
+  updateDiscount,
+  verifyBankSlip,
+  verifyTruewalletGift,
+  hasUserUsedCode,
+  markUserUsedCode
+} from "@/lib/store";
 
 export default function Topup() {
   const { user, profile, refreshProfile } = useAuth();
@@ -31,38 +42,72 @@ export default function Topup() {
   const [codeLoading, setCodeLoading] = useState(false);
 
   const handleSpecialCode = async () => {
-    if (!user || !profile) return;
-    const code = specialCode.trim();
-    if (!code) return toast.error("กรุณาใส่โค้ด");
-    setCodeLoading(true);
-    try {
-      const d = await findDiscountByCode(code);
-      if (!d) return toast.error("ไม่พบโค้ดนี้ หรือถูกปิดใช้งาน");
-      if (d.type !== "point") {
-        return toast.error("โค้ดนี้ไม่ใช่ Special Code", {
-          description: "Special Code ต้องเป็นโค้ดประเภท 'เพิ่ม Point' เท่านั้น (โค้ดส่วนลดใช้ในตะกร้า)",
-        });
-      }
-      if (d.usedCount >= d.maxUses) return toast.error("โค้ดนี้ถูกใช้ครบจำนวนแล้ว");
+  if (!user || !profile) return;
 
-      await adjustPoints(user.uid, d.value);
-      await updateDiscount(d.id, { usedCount: d.usedCount + 1 });
-      await recordTopup({
-        userId: user.uid,
-        username: profile.username,
-        method: "code",
-        amount: d.value,
-        ref: `SPECIAL:${d.code}`,
-      });
-      toast.success(`เติม ${d.value} point สำเร็จ!`);
-      setSpecialCode("");
-      await refreshProfile();
-    } catch (e: any) {
-      toast.error("เกิดข้อผิดพลาด", { description: e.message });
-    } finally {
-      setCodeLoading(false);
+  const code = specialCode.trim();
+  if (!code) return toast.error("กรุณาใส่โค้ด");
+
+  setCodeLoading(true);
+
+  try {
+    const d = await findDiscountByCode(code);
+
+    if (!d) {
+      return toast.error("ไม่พบโค้ดนี้ หรือถูกปิดใช้งาน");
     }
-  };
+
+    if (d.type !== "point") {
+      return toast.error("โค้ดนี้ไม่ใช่ Special Code", {
+        description:
+          "Special Code ต้องเป็นโค้ดประเภทเพิ่ม Point เท่านั้น",
+      });
+    }
+
+    if (d.usedCount >= d.maxUses) {
+      return toast.error("โค้ดนี้ถูกใช้ครบจำนวนแล้ว");
+    }
+
+    // ✅ เช็คเคยใช้ยัง
+    const alreadyUsed = await hasUserUsedCode(d.id, user.uid);
+
+    if (alreadyUsed) {
+      return toast.error("บัญชีนี้ใช้โค้ดนี้ไปแล้ว");
+    }
+
+    // ✅ เติมพ้อย
+    await adjustPoints(user.uid, d.value);
+
+    // ✅ เพิ่มจำนวนใช้
+    await updateDiscount(d.id, {
+      usedCount: d.usedCount + 1,
+    });
+
+    // ✅ บันทึกว่า user นี้ใช้แล้ว
+    await markUserUsedCode(d.id, user.uid);
+
+    // ✅ บันทึกประวัติ
+    await recordTopup({
+      userId: user.uid,
+      username: profile.username,
+      method: "code",
+      amount: d.value,
+      ref: `SPECIAL:${d.code}`,
+    });
+
+    toast.success(`เติม ${d.value} point สำเร็จ!`);
+
+    setSpecialCode("");
+
+    await refreshProfile();
+
+  } catch (e: any) {
+    toast.error("เกิดข้อผิดพลาด", {
+      description: e.message,
+    });
+  } finally {
+    setCodeLoading(false);
+  }
+};
 
   const handleTrueWallet = async () => {
     if (!user || !profile) return;
