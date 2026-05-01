@@ -30,40 +30,80 @@ export default function Topup() {
   const [specialCode, setSpecialCode] = useState("");
   const [codeLoading, setCodeLoading] = useState(false);
 
-  const handleSpecialCode = async () => {
-    if (!user || !profile) return;
-    const code = specialCode.trim();
-    if (!code) return toast.error("กรุณาใส่โค้ด");
-    setCodeLoading(true);
-    try {
-      const d = await findDiscountByCode(code);
-      if (!d) return toast.error("ไม่พบโค้ดนี้ หรือถูกปิดใช้งาน");
-      if (d.type !== "point") {
-        return toast.error("โค้ดนี้ไม่ใช่ Special Code", {
-          description: "Special Code ต้องเป็นโค้ดประเภท 'เพิ่ม Point' เท่านั้น (โค้ดส่วนลดใช้ในตะกร้า)",
-        });
-      }
-      if (d.usedCount >= d.maxUses) return toast.error("โค้ดนี้ถูกใช้ครบจำนวนแล้ว");
+ const handleSpecialCode = async () => {
+  if (!user || !profile) return;
 
-      await adjustPoints(user.uid, d.value);
-      await updateDiscount(d.id, { usedCount: d.usedCount + 1 });
-      await recordTopup({
-        userId: user.uid,
-        username: profile.username,
-        method: "code",
-        amount: d.value,
-        ref: `SPECIAL:${d.code}`,
-      });
-      toast.success(`เติม ${d.value} point สำเร็จ!`);
-      setSpecialCode("");
-      await refreshProfile();
-    } catch (e: any) {
-      toast.error("เกิดข้อผิดพลาด", { description: e.message });
-    } finally {
-      setCodeLoading(false);
+  const code = specialCode.trim();
+
+  if (!code) {
+    toast.error("กรุณาใส่โค้ด");
+    return;
+  }
+
+  setCodeLoading(true);
+
+  try {
+    const d = await findDiscountByCode(code);
+
+    if (!d) {
+      toast.error("ไม่พบโค้ดนี้ หรือถูกปิดใช้งาน");
+      return;
     }
-  };
 
+    // ต้องเป็นโค้ด point เท่านั้น
+    if (d.type !== "point") {
+      toast.error("โค้ดนี้ไม่ใช่ Special Code", {
+        description: "ใช้ได้เฉพาะโค้ดเพิ่ม Point เท่านั้น",
+      });
+      return;
+    }
+
+    // เช็กว่า user นี้เคยใช้แล้วไหม
+    if (d.usedBy && d.usedBy[user.uid]) {
+      toast.error("คุณใช้โค้ดนี้ไปแล้ว");
+      return;
+    }
+
+    // ใช้ครบจำนวนหรือยัง
+    if (d.usedCount >= d.maxUses) {
+      toast.error("โค้ดนี้ถูกใช้ครบจำนวนแล้ว");
+      return;
+    }
+
+    // เพิ่ม point
+    await adjustPoints(user.uid, d.value);
+
+    // อัปเดต firebase
+    await updateDiscount(d.id, {
+      usedCount: d.usedCount + 1,
+      usedBy: {
+        ...(d.usedBy || {}),
+        [user.uid]: true,
+      },
+    });
+
+    // บันทึกประวัติ
+    await recordTopup({
+      userId: user.uid,
+      username: profile.username,
+      method: "code",
+      amount: d.value,
+      ref: `SPECIAL:${d.code}`,
+    });
+
+    toast.success(`เติม ${d.value} Point สำเร็จ!`);
+
+    setSpecialCode("");
+    await refreshProfile();
+
+  } catch (e: any) {
+    toast.error("เกิดข้อผิดพลาด", {
+      description: e.message,
+    });
+  } finally {
+    setCodeLoading(false);
+  }
+};
   const handleTrueWallet = async () => {
     if (!user || !profile) return;
     if (!phone || !giftLink) return toast.error("กรุณากรอกข้อมูลให้ครบ");
