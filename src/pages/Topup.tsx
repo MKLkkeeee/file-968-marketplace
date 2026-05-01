@@ -134,65 +134,122 @@ export default function Topup() {
   };
 
   const handleSlipFile = async (file: File) => {
-    if (!user || !profile) return;
-    setBankLoading(true);
-    setPreviewImg(URL.createObjectURL(file));
+  if (!user || !profile) return;
 
-    // Decode QR from image
-    const tempDivId = "qr-temp-reader";
-    let qrText = "";
+  setBankLoading(true);
+  setPreviewImg(URL.createObjectURL(file));
+
+  const tempDivId = "qr-temp-reader";
+  let qrText = "";
+
+  try {
+    const html5QrCode = new Html5Qrcode(tempDivId, { verbose: false } as any);
+    qrText = (await html5QrCode.scanFile(file, false)) as string;
+  } catch {
     try {
       const html5QrCode = new Html5Qrcode(tempDivId, { verbose: false } as any);
-      qrText = (await html5QrCode.scanFile(file, false)) as string;
-    } catch (err) {
-      // Try with showImage=true scan
-      try {
-        const html5QrCode = new Html5Qrcode(tempDivId, { verbose: false } as any);
-        qrText = (await html5QrCode.scanFile(file, true)) as string;
-      } catch (err2) {
-        toast.error("อ่าน QR Code จากสลิปไม่สำเร็จ", { description: "กรุณาลองใหม่ด้วยรูปที่ชัดกว่า" });
-        setBankLoading(false);
-        return;
-      }
-    }
-
-    try {
-      const data = await verifyBankSlip(qrText);
-      if (data.status !== "success") {
-        const msg = typeof data.message === "string" ? data.message : data.message?.massage_th || "ตรวจสอบไม่สำเร็จ";
-        toast.error("สลิปไม่ถูกต้อง", { description: msg });
-        setBankLoading(false);
-        return;
-      }
-      const receiverName = data.receiver?.name || "";
-      if (!isReceiverNameMatch(receiverName)) {
-        toast.error("ชื่อผู้รับไม่ตรงกับร้าน", {
-          description: `ผู้รับในสลิป: ${receiverName} (ต้องเป็น ด.ช. ธวัชชัย ค)`,
-        });
-        setBankLoading(false);
-        return;
-      }
-      const amount = Number(data.amount);
-      // Prevent duplicate by transactionId
-      const ref = data.transactionId;
-      await adjustPoints(user.uid, amount);
-      await recordTopup({
-        userId: user.uid,
-        username: profile.username,
-        method: "bank",
-        amount,
-        ref,
+      qrText = (await html5QrCode.scanFile(file, true)) as string;
+    } catch {
+      toast.error("อ่าน QR Code จากสลิปไม่สำเร็จ", {
+        description: "กรุณาใช้รูปที่เห็น QR ชัดเจน",
       });
-      toast.success(`เติมเงินสำเร็จ! +${amount} point`);
-      await refreshProfile();
-      setPreviewImg(null);
-    } catch (e: any) {
-      toast.error("เกิดข้อผิดพลาด", { description: e.message });
-    } finally {
       setBankLoading(false);
+      return;
     }
-  };
+  }
 
+  try {
+    const data = await verifyBankSlip(qrText);
+
+    if (data.status !== "success") {
+      const msg =
+        typeof data.message === "string"
+          ? data.message
+          : data.message?.massage_th || "ตรวจสอบไม่สำเร็จ";
+
+      toast.error("สลิปไม่ถูกต้อง", {
+        description: msg,
+      });
+
+      setBankLoading(false);
+      return;
+    }
+
+    // =========================
+    // เช็กชื่อผู้รับ
+    // =========================
+    const receiverName = data.receiver?.name || "";
+
+    if (receiverName !== "ด.ช. ธวัชชัย ค") {
+      toast.error("ชื่อผู้รับไม่ตรง", {
+        description: `ผู้รับในสลิปคือ ${receiverName}`,
+      });
+
+      setBankLoading(false);
+      return;
+    }
+
+    // =========================
+    // กันสลิปซ้ำ
+    // =========================
+    const refId =
+      data.transactionId ||
+      data.transRef ||
+      data.referenceNo ||
+      data.ref;
+
+    if (!refId) {
+      toast.error("ไม่พบเลขอ้างอิงสลิป");
+      setBankLoading(false);
+      return;
+    }
+
+    const topupSnap = await get(ref(db, "topups"));
+
+    if (topupSnap.exists()) {
+      const list = Object.values(topupSnap.val()) as any[];
+
+      const duplicate = list.find(
+        (item) =>
+          item.method === "bank" &&
+          item.ref === refId
+      );
+
+      if (duplicate) {
+        toast.error("สลิปนี้ถูกใช้เติมแล้ว");
+        setBankLoading(false);
+        return;
+      }
+    }
+
+    // =========================
+    // เติมเงิน
+    // =========================
+    const amount = Number(data.amount);
+
+    await adjustPoints(user.uid, amount);
+
+    await recordTopup({
+      userId: user.uid,
+      username: profile.username,
+      method: "bank",
+      amount,
+      ref: refId,
+    });
+
+    toast.success(`เติมเงินสำเร็จ +${amount} Point`);
+
+    await refreshProfile();
+    setPreviewImg(null);
+
+  } catch (e: any) {
+    toast.error("เกิดข้อผิดพลาด", {
+      description: e.message,
+    });
+  } finally {
+    setBankLoading(false);
+  }
+};
   return (
     <div className="min-h-screen">
       <Navbar />
