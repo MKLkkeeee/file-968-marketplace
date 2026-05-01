@@ -49,7 +49,7 @@ export default function Index() {
         <div className="absolute inset-0 bg-gradient-glow" />
         <div className="container relative py-20 md:py-28">
           <Badge className="mb-6 bg-primary/15 text-primary border-primary/30">
-            <Sparkles className="h-3 w-3" /> ร้านขายไฟล์อันดับ 1
+            <Sparkles className="h-3 w-3" /> ONLINE
           </Badge>
           <h1 className="font-display text-5xl md:text-7xl font-extrabold leading-tight">
             FILE <span className="gradient-text">968</span> <br />
