@@ -282,12 +282,9 @@ export default function Topup() {
               <div className="mt-4 space-y-3 rounded-xl border border-primary/30 bg-primary/10 p-4">
                 <div>
                   <p className="text-xs text-muted-foreground">พร้อมเพย์</p>
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="font-display text-2xl font-bold gradient-text">{SHOP_PROMPTPAY}</p>
-                    <Button size="sm" variant="outline" onClick={() => { navigator.clipboard.writeText(SHOP_PROMPTPAY); toast.success("คัดลอกพร้อมเพย์แล้ว"); }}>
-                      <Copy className="h-4 w-4" /> คัดลอก
-                    </Button>
-                  </div>
+                  <div className="flex justify-center">
+                    <img src="https://cdn.discordapp.com/attachments/1499030047783260282/1499905322339274855/IMG_9706.jpg" alt="PromptPay QR" className="w-72 rounded-xl border shadow-md"/>
+                </div>
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">ชื่อผู้รับ</p>
