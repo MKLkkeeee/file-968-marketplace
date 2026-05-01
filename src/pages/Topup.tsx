@@ -224,11 +224,11 @@ export default function Topup() {
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label>เบอร์ผู้รับ (เบอร์ร้าน)</Label>
-                  <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="0XXXXXXXXX" />
+                  <Input value={phone} readOnly className="cursor-not-allowed bg-muted" placeholder="0XXXXXXXXX" />
                 </div>
                 <div className="space-y-2">
                   <Label>ลิงก์ซองของขวัญ</Label>
-                  <Input value={giftLink} readOnly className="cursor-not-allowed bg-muted" placeholder="https://gift.truemoney.com/campaign/?v=..." />
+                  <Input value={giftLink} onChange={(e) => setGiftLink(e.target.value)} placeholder="https://gift.truemoney.com/campaign/?v=..." />
                 </div>
                 <Button onClick={handleTrueWallet} disabled={twLoading} className="w-full bg-gradient-primary text-primary-foreground">
                   {twLoading && <Loader2 className="h-4 w-4 animate-spin" />}เติมเงิน
