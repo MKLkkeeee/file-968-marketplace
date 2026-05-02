@@ -185,7 +185,7 @@ export default function Index() {
                 : "border-red-500/30 bg-red-500/[0.06] text-red-300 hover:border-red-500/50 hover:bg-red-500/[0.12] hover:text-red-200"
             }`}
           >
-            🔥 HOT
+            HOT
           </button>
           {categories.map((c) => (
             <button
@@ -252,7 +252,7 @@ export default function Index() {
                         <FavoriteButton productId={p.id} stopPropagation className="absolute left-2 top-2" />
                         {p.isHot && (
                           <div className="absolute right-2 top-2 select-none rounded-full bg-gradient-to-r from-red-500 to-orange-500 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow-lg shadow-red-500/40 animate-pulse">
-                            🔥 HOT
+                            HOT
                           </div>
                         )}
                       </div>
