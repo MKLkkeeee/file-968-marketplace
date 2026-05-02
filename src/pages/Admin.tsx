@@ -186,82 +186,85 @@ export default function Admin() {
                   />
                 </div>
 
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Username</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Point</TableHead>
-                      <TableHead>Role</TableHead>
-                      <TableHead>เพิ่ม Point</TableHead>
-                      <TableHead></TableHead>
-                    </TableRow>
-                  </TableHeader>
+          <TabsContent value="users">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
+              <Card className="card-elegant p-6">
+                <div className="mb-4 relative">
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+                  <Input
+                    placeholder="ค้นหา username / email / uid"
+                    value={userSearch}
+                    onChange={(e) => { setUserSearch(e.target.value); setUserPage(1); }}
+                    className="pl-9"
+                  />
+                </div>
 
-                  <TableBody>
-                    {users
-                      .filter((u) =>
-                        `${u.username} ${u.email} ${u.uid}`
-                          .toLowerCase()
-                          .includes(userSearch.toLowerCase())
-                      )
-                      .map((u) => (
-                        <TableRow key={u.uid}>
-                          <TableCell>{u.username}</TableCell>
-                          <TableCell>{u.email}</TableCell>
-                          <TableCell>{u.points?.toLocaleString() ?? 0}</TableCell>
-
-                          <TableCell>
-                            <Badge variant={u.role === "admin" ? "default" : "outline"}>
-                              {u.role}
-                            </Badge>
-                          </TableCell>
-
-                          <TableCell>
-                            <div className="flex gap-2">
-                              <Input
-                                type="number"
-                                placeholder="100"
-                                className="w-24"
-                                value={pointInputs[u.uid] || ""}
-                                onChange={(e) =>
-                                  setPointInputs((prev) => ({
-                                    ...prev,
-                                    [u.uid]: e.target.value,
-                                  }))
-                                }
-                              />
-
-                              <Button
-                                size="sm"
-                                className="bg-gradient-primary text-primary-foreground"
-                                onClick={() => handleAddPoint(u.uid)}
-                              >
-                                เพิ่ม
-                              </Button>
-                            </div>
-                          </TableCell>
-
-                          <TableCell>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() =>
-                                setUserRole(
-                                  u.uid,
-                                  u.role === "admin" ? "user" : "admin"
-                                )
-                              }
-                            >
-                              {u.role === "admin"
-                                ? "ลดเป็น user"
-                                : "เลื่อนเป็น admin"}
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                  </TableBody>
-                </Table>
+                {(() => {
+                  const filtered = users.filter((u) =>
+                    `${u.username} ${u.email} ${u.uid}`.toLowerCase().includes(userSearch.toLowerCase())
+                  );
+                  const { slice, totalPages, page } = usePaged(filtered, userPage, 10);
+                  return (
+                    <>
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Username</TableHead>
+                            <TableHead>Email</TableHead>
+                            <TableHead>Point</TableHead>
+                            <TableHead>Role</TableHead>
+                            <TableHead>เพิ่ม Point</TableHead>
+                            <TableHead></TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {slice.map((u) => (
+                            <TableRow key={u.uid}>
+                              <TableCell>{u.username}</TableCell>
+                              <TableCell>{u.email}</TableCell>
+                              <TableCell>{u.points?.toLocaleString() ?? 0}</TableCell>
+                              <TableCell>
+                                <Badge variant={u.role === "admin" ? "default" : "outline"}>{u.role}</Badge>
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex gap-2">
+                                  <Input
+                                    type="number"
+                                    placeholder="100"
+                                    className="w-24"
+                                    value={pointInputs[u.uid] || ""}
+                                    onChange={(e) =>
+                                      setPointInputs((prev) => ({ ...prev, [u.uid]: e.target.value }))
+                                    }
+                                  />
+                                  <Button
+                                    size="sm"
+                                    className="bg-gradient-primary text-primary-foreground"
+                                    onClick={() => handleAddPoint(u.uid)}
+                                  >
+                                    เพิ่ม
+                                  </Button>
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() =>
+                                    setUserRole(u.uid, u.role === "admin" ? "user" : "admin")
+                                  }
+                                >
+                                  {u.role === "admin" ? "ลดเป็น user" : "เลื่อนเป็น admin"}
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                      <Paginator page={page} totalPages={totalPages} onChange={setUserPage} />
+                    </>
+                  );
+                })()}
               </Card>
             </motion.div>
           </TabsContent>
