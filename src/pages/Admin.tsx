@@ -694,7 +694,112 @@ function TopupTable({ topups, search, page, setPage }: {
   );
 }
 
-function AnnouncementManager({ announcements }: { announcements: Announcement[] }) {
+function WelcomePopupManager() {
+  const [enabled, setEnabled] = useState(false);
+  const [imageUrl, setImageUrl] = useState("");
+  const [text, setText] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const cfg = await getWelcomePopup();
+      if (cfg) {
+        setEnabled(!!cfg.enabled);
+        setImageUrl(cfg.imageUrl || "");
+        setText(cfg.text || "");
+      }
+      setLoading(false);
+    })();
+  }, []);
+
+  const submit = async () => {
+    if (enabled && !imageUrl.trim() && !text.trim()) {
+      return toast.error("กรุณากรอกรูปหรือข้อความอย่างน้อย 1 อย่าง");
+    }
+    setSaving(true);
+    try {
+      await saveWelcomePopup({ enabled, imageUrl: imageUrl.trim(), text: text.trim() });
+      toast.success("บันทึกแล้ว");
+    } catch {
+      toast.error("บันทึกไม่สำเร็จ");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return <p className="py-8 text-center text-sm text-white/40">กำลังโหลด...</p>;
+  }
+
+  return (
+    <div className="space-y-5">
+      <div className="flex items-center gap-2">
+        <Megaphone className="h-5 w-5 text-warning" />
+        <h2 className="font-display text-xl font-semibold">ป๊อปอัพต้อนรับ</h2>
+      </div>
+      <p className="text-sm text-white/50">
+        แสดงป๊อปอัพให้ผู้เข้าชมเห็นเมื่อเปิดเว็บครั้งแรก ผู้ใช้สามารถติ๊ก "ไม่แสดงเป็นเวลา 1 ชั่วโมง" ได้
+      </p>
+
+      <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.03] p-3">
+        <div>
+          <p className="text-sm font-medium">เปิดใช้งานป๊อปอัพ</p>
+          <p className="text-xs text-white/40">ปิดเพื่อหยุดแสดงป๊อปอัพ</p>
+        </div>
+        <Switch checked={enabled} onCheckedChange={setEnabled} />
+      </div>
+
+      <div>
+        <Label>URL รูปภาพ (ด้านบน)</Label>
+        <Input
+          value={imageUrl}
+          onChange={(e) => setImageUrl(e.target.value)}
+          placeholder="https://example.com/banner.jpg"
+          className="mt-1"
+        />
+        <p className="mt-1 text-xs text-white/40">วาง URL รูปจากที่อื่น เช่น Imgur, Discord CDN, ฯลฯ</p>
+      </div>
+
+      <div>
+        <Label>ข้อความ (ด้านล่างรูป)</Label>
+        <Textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="เช่น ยินดีต้อนรับสู่ร้านของเรา! โปรโมชันพิเศษวันนี้..."
+          rows={4}
+          maxLength={500}
+          className="mt-1"
+        />
+        <p className="mt-1 text-right text-xs text-white/40">{text.length}/500</p>
+      </div>
+
+      {(imageUrl || text) && (
+        <div>
+          <Label>ตัวอย่าง</Label>
+          <div className="mt-2 overflow-hidden rounded-xl border border-white/10 bg-white/[0.03]">
+            {imageUrl && (
+              <img
+                src={imageUrl}
+                alt="ตัวอย่าง"
+                className="max-h-64 w-full object-cover"
+                onError={(e) => ((e.currentTarget.style.display = "none"))}
+              />
+            )}
+            {text && <p className="whitespace-pre-wrap p-4 text-sm">{text}</p>}
+          </div>
+        </div>
+      )}
+
+      <div className="flex justify-end">
+        <Button onClick={submit} disabled={saving}>
+          {saving ? "กำลังบันทึก..." : "บันทึก"}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
   const [open, setOpen] = useState(false);
   const [edit, setEdit] = useState<Announcement | null>(null);
   const [text, setText] = useState("");
