@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -8,24 +8,57 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
-import { auth } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
+import { ref as dbRef, update } from "firebase/database";
 import {
   EmailAuthProvider,
   reauthenticateWithCredential,
   updatePassword,
 } from "firebase/auth";
 import { toast } from "sonner";
-import { Coins, History, KeyRound, Loader2, Mail, Shield, User as UserIcon, Wallet } from "lucide-react";
+import { Camera, Coins, History, KeyRound, Loader2, Mail, Shield, User as UserIcon, Wallet } from "lucide-react";
 import { motion } from "framer-motion";
+import { fileToResizedDataUrl } from "@/lib/imageUtils";
 
 export default function Profile() {
-  const { user, profile, isAdmin } = useAuth();
+  const { user, profile, isAdmin, refreshProfile } = useAuth();
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [currentPwd, setCurrentPwd] = useState("");
   const [newPwd, setNewPwd] = useState("");
   const [confirmPwd, setConfirmPwd] = useState("");
   const [saving, setSaving] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !user) return;
+    if (file.size > 5 * 1024 * 1024) return toast.error("ไฟล์ใหญ่เกินไป (สูงสุด 5MB)");
+    setUploadingAvatar(true);
+    try {
+      const dataUrl = await fileToResizedDataUrl(file, 256, 0.85);
+      await update(dbRef(db, `users/${user.uid}`), { avatarUrl: dataUrl });
+      await refreshProfile();
+      toast.success("อัปโหลดรูปโปรไฟล์สำเร็จ");
+    } catch (err: any) {
+      toast.error("อัปโหลดไม่สำเร็จ", { description: err?.message });
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
+  const handleRemoveAvatar = async () => {
+    if (!user) return;
+    try {
+      await update(dbRef(db, `users/${user.uid}`), { avatarUrl: null });
+      await refreshProfile();
+      toast.success("ลบรูปโปรไฟล์แล้ว");
+    } catch (e: any) {
+      toast.error("ลบไม่สำเร็จ", { description: e?.message });
+    }
+  };
 
   if (!profile || !user) {
     return (
