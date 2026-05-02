@@ -61,23 +61,30 @@ export default function Index() {
     const unsubP = onValue(ref(db, "products"), (snap) => {
       setProducts(snap.exists() ? Object.values(snap.val()) : []);
     });
-    return () => { unsubC(); unsubP(); };
+    return () => {
+      unsubC();
+      unsubP();
+    };
   }, []);
 
   const byCat = activeCat === "all" ? products : products.filter((p) => p.categoryId === activeCat);
   const byHot = hotOnly ? byCat.filter((p) => p.isHot) : byCat;
   const q = search.trim().toLowerCase();
-  const searched = q
-    ? byHot.filter((p) => `${p.name} ${p.description}`.toLowerCase().includes(q))
-    : byHot;
+  const searched = q ? byHot.filter((p) => `${p.name} ${p.description}`.toLowerCase().includes(q)) : byHot;
   const sorted = [...searched].sort((a, b) => {
     switch (sortBy) {
-      case "price-asc": return a.price - b.price;
-      case "price-desc": return b.price - a.price;
-      case "name-asc": return a.name.localeCompare(b.name);
-      case "name-desc": return b.name.localeCompare(a.name);
-      case "stock-desc": return stockCount(b.stockItems) - stockCount(a.stockItems);
-      default: return 0;
+      case "price-asc":
+        return a.price - b.price;
+      case "price-desc":
+        return b.price - a.price;
+      case "name-asc":
+        return a.name.localeCompare(b.name);
+      case "name-desc":
+        return b.name.localeCompare(a.name);
+      case "stock-desc":
+        return stockCount(b.stockItems) - stockCount(a.stockItems);
+      default:
+        return 0;
     }
   });
   const filteredAll = sorted;
@@ -122,7 +129,7 @@ export default function Index() {
             <span className="block bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent">
               <LetterReveal text="FILE 968" perLetter={42} />
             </span>
-            <span className="mt-1 block bg-gradient-to-b from-white/80 to-white/20 bg-clip-text text-transparent">
+            <span className="mt-1 block bg-gradient-to-b from-white/90 to-white/50 bg-clip-text text-transparent">
               <LetterReveal text="SHOP" perLetter={55} delayStart={380} />
             </span>
           </h1>
@@ -253,14 +260,20 @@ export default function Index() {
                     key={p.id}
                     data-product-card
                     className="cine-in stagger w-[70%] flex-shrink-0 snap-start sm:w-[45%] md:w-[31%] lg:w-[23%]"
-                    style={{ ['--i' as any]: Math.min(idx, 8) }}
+                    style={{ ["--i" as any]: Math.min(idx, 8) }}
                   >
                     <Card className="card-elegant tilt-hover group h-full cursor-pointer overflow-hidden p-0">
                       <div className="relative aspect-square overflow-hidden bg-white/[0.02]">
                         {p.image ? (
-                          <img src={p.image} alt={p.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                          <img
+                            src={p.image}
+                            alt={p.name}
+                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                          />
                         ) : (
-                          <div className="flex h-full items-center justify-center"><Package className="h-12 w-12 text-white/20" /></div>
+                          <div className="flex h-full items-center justify-center">
+                            <Package className="h-12 w-12 text-white/20" />
+                          </div>
                         )}
                         <FavoriteButton productId={p.id} stopPropagation className="absolute left-2 top-2" />
                         {p.isHot && (
@@ -291,15 +304,15 @@ export default function Index() {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); navigate(`/product/${p.id}`); }}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              navigate(`/product/${p.id}`);
+                            }}
                           >
                             <Eye className="h-4 w-4" /> ดูรายละเอียด
                           </Button>
-                          <Button
-                            size="sm"
-                            disabled={stk <= 0}
-                            onClick={(e) => handleAdd(e, p)}
-                          >
+                          <Button size="sm" disabled={stk <= 0} onClick={(e) => handleAdd(e, p)}>
                             <ShoppingCart className="h-4 w-4" /> ใส่ตะกร้า
                           </Button>
                         </div>
