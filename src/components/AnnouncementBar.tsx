@@ -74,15 +74,7 @@ export function AnnouncementBar() {
               </div>
 
               {/* Marquee with edge fade mask */}
-              <div
-                className="relative flex-1 overflow-hidden"
-                style={{
-                  WebkitMaskImage:
-                    "linear-gradient(to right, transparent 0, #000 32px, #000 calc(100% - 32px), transparent 100%)",
-                  maskImage:
-                    "linear-gradient(to right, transparent 0, #000 32px, #000 calc(100% - 32px), transparent 100%)",
-                }}
-              >
+              <div className="relative flex-1 overflow-hidden">
                 <div
                   className={
                     "marquee-track flex whitespace-nowrap text-sm " +
