@@ -238,10 +238,16 @@ export default function Index() {
                         <h3 className="line-clamp-1 font-semibold text-white">{p.name}</h3>
                         <p className="line-clamp-2 mt-1 text-xs text-white/50">{p.description || "-"}</p>
                         <div className="mt-3 flex items-center justify-between">
-                          <div className="flex items-center gap-1 text-warning">
-                            <Coins className="h-4 w-4" />
-                            <span className="font-bold">{p.price.toLocaleString()}</span>
-                          </div>
+                          {p.price === 0 ? (
+                            <span className="rounded-full bg-success/20 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider text-success">
+                              ฟรี
+                            </span>
+                          ) : (
+                            <div className="flex items-center gap-1 text-warning">
+                              <Coins className="h-4 w-4" />
+                              <span className="font-bold">{p.price.toLocaleString()}</span>
+                            </div>
+                          )}
                           <Badge variant={stk > 0 ? "outline" : "destructive"} className="text-xs">
                             {stk > 0 ? `stock ${stk}` : "หมด"}
                           </Badge>
