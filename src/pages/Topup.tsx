@@ -193,12 +193,30 @@ export default function Topup() {
       const data = await verifyBankSlip(qrText);
       if (data.status !== "success") {
         const msg = typeof data.message === "string" ? data.message : data.message?.massage_th || "ตรวจสอบไม่สำเร็จ";
+        await recordTopup({
+          userId: user.uid,
+          username: profile.username,
+          method: "bank",
+          amount: 0,
+          ref: qrText.slice(0, 60),
+          status: "failed",
+          error: msg,
+        });
         toast.error("สลิปไม่ถูกต้อง", { description: msg });
         setBankLoading(false);
         return;
       }
       const receiverName = data.receiver?.name || "";
       if (!isReceiverNameMatch(receiverName)) {
+        await recordTopup({
+          userId: user.uid,
+          username: profile.username,
+          method: "bank",
+          amount: 0,
+          ref: data.transactionId || qrText.slice(0, 60),
+          status: "failed",
+          error: `ผู้รับไม่ตรงกับร้าน: ${receiverName}`,
+        });
         toast.error("ชื่อผู้รับไม่ตรงกับร้าน", {
           description: `ผู้รับในสลิป: ${receiverName}`,
         });
@@ -215,6 +233,7 @@ export default function Topup() {
         method: "bank",
         amount,
         ref,
+        status: "success",
       });
       toast.success(`เติมเงินสำเร็จ! +${amount} point`);
       await refreshProfile();
