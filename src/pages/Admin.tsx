@@ -236,10 +236,10 @@ export default function Admin() {
               </Card>
             </motion.div>
           </TabsContent>
-          <TabsContent value="announcements">
+          <TabsContent value="popup">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
               <Card className="card-elegant p-6">
-                <AnnouncementManager announcements={announcements} />
+                <WelcomePopupManager />
               </Card>
             </motion.div>
           </TabsContent>
