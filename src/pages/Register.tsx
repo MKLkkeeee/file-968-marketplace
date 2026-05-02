@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import boxLogo from "@/assets/box-logo.png";
+import { PasswordStrength } from "@/components/PasswordStrength";
 
 export default function Register() {
   const { register } = useAuth();
@@ -121,6 +122,7 @@ export default function Register() {
                 placeholder="••••••••"
                 className="w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-white/30 focus:bg-white/[0.06]"
               />
+              <PasswordStrength password={password} />
               {password.length > 0 && (
                 <ul className="mt-2 grid grid-cols-1 gap-1 text-xs sm:grid-cols-2">
                   {checks.map((c) => (
