@@ -17,6 +17,7 @@ export interface UserProfile {
   points: number;
   role: "user" | "admin";
   createdAt: number;
+  avatarUrl?: string;
 }
 
 interface AuthContextType {
