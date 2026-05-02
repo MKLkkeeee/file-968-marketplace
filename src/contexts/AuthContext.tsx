@@ -81,6 +81,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       points: 0,
       role: isFirstUser ? "admin" : "user",
       createdAt: Date.now(),
+      lastLoginAt: Date.now(),
+      lastLoginStatus: "success",
+      online: true,
+      lastSeenAt: Date.now(),
     };
     await set(ref(db, `users/${cred.user.uid}`), newProfile);
   };
