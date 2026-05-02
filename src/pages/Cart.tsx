@@ -18,6 +18,17 @@ import {
 import { sendOrderWebhook } from "@/lib/discord";
 import { toast } from "sonner";
 import { Coins, Loader2, Minus, Package, Plus, Search, ShoppingBag, Tag, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function Cart() {
   const navigate = useNavigate();
