@@ -251,11 +251,6 @@ export default function Profile() {
   );
 }
 
-import { useEffect } from "react";
-import { onValue, ref as dbRef2 } from "firebase/database";
-import { Link } from "react-router-dom";
-import { Product } from "@/lib/store";
-import { FavoriteButton } from "@/components/FavoriteButton";
 
 function FavoritesSection() {
   const { user } = useAuth();
