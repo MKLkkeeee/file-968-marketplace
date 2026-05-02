@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
@@ -12,14 +13,26 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 
 export const Navbar = () => {
   const { user, profile, isAdmin, logout } = useAuth();
   const { count } = useCart();
   const navigate = useNavigate();
+  const [logoutOpen, setLogoutOpen] = useState(false);
 
   return (
+    <>
     <header className="sticky top-0 z-50 glass">
       <div className="container flex h-16 items-center justify-between">
         <Link to="/" className="group flex items-center gap-3">
@@ -87,7 +100,10 @@ export const Navbar = () => {
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => logout()}>
+                  <DropdownMenuItem
+                    onSelect={(e) => { e.preventDefault(); setLogoutOpen(true); }}
+                    className="text-destructive focus:text-destructive"
+                  >
                     <LogOut className="h-4 w-4" />ออกจากระบบ
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -104,5 +120,33 @@ export const Navbar = () => {
         </nav>
       </div>
     </header>
+
+    <AlertDialog open={logoutOpen} onOpenChange={setLogoutOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle className="flex items-center gap-2">
+            <LogOut className="h-5 w-5 text-destructive" />
+            ออกจากระบบ
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            คุณแน่ใจใช่ไหมว่าต้องการออกจากระบบ?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={async () => {
+              await logout();
+              setLogoutOpen(false);
+              navigate("/");
+            }}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          >
+            ยืนยันออกจากระบบ
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 };
