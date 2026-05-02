@@ -253,6 +253,7 @@ export default function Admin() {
               </Card>
             </motion.div>
           </TabsContent>
+        </Tabs>
       </motion.div>
     </div>
   );
