@@ -8,7 +8,7 @@ export function Footer() {
           rel="noopener noreferrer"
           className="lux-link transition-colors hover:text-white"
         >
-          ดิสร้าน
+          FILE 968 SHOP
         </a>
       </div>
     </footer>
