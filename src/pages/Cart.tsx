@@ -17,7 +17,7 @@ import {
 } from "@/lib/store";
 import { sendOrderWebhook } from "@/lib/discord";
 import { toast } from "sonner";
-import { Coins, Loader2, Minus, Package, Plus, ShoppingBag, Tag, Trash2 } from "lucide-react";
+import { Coins, Loader2, Minus, Package, Plus, Search, ShoppingBag, Tag, Trash2 } from "lucide-react";
 
 export default function Cart() {
   const navigate = useNavigate();
@@ -27,6 +27,12 @@ export default function Cart() {
   const [discountCode, setDiscountCode] = useState("");
   const [discountInfo, setDiscountInfo] = useState<{ pct: number; code: string; id: string } | null>(null);
   const [buying, setBuying] = useState(false);
+  const [search, setSearch] = useState("");
+
+  const q = search.trim().toLowerCase();
+  const visibleItems = q
+    ? items.filter((it) => `${it.product.name} ${it.product.description}`.toLowerCase().includes(q))
+    : items;
 
   const finalPrice = Math.max(0, Math.round(subtotal * (1 - (discountInfo?.pct || 0) / 100)));
 
@@ -140,7 +146,19 @@ export default function Cart() {
         ) : (
           <div className="mt-8 grid gap-6 md:grid-cols-3">
             <div className="space-y-3 md:col-span-2">
-              {items.map((it) => {
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+                <Input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="ค้นหาในตะกร้า..."
+                  className="pl-9"
+                />
+              </div>
+              {visibleItems.length === 0 && (
+                <p className="py-6 text-center text-sm text-white/40">ไม่พบสินค้าที่ค้นหา</p>
+              )}
+              {visibleItems.map((it) => {
                 const stk = stockCount(it.product.stockItems);
                 return (
                   <Card key={it.product.id} className="card-elegant flex gap-4 p-4">
