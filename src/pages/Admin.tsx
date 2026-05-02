@@ -152,6 +152,7 @@ export default function Admin() {
             <TabsTrigger value="users">ผู้ใช้</TabsTrigger>
             <TabsTrigger value="orders">คำสั่งซื้อ</TabsTrigger>
             <TabsTrigger value="topups">เติมเงิน</TabsTrigger>
+            <TabsTrigger value="announcements">ประกาศ</TabsTrigger>
           </TabsList>
 
           <TabsContent value="products">
