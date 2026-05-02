@@ -68,7 +68,7 @@ export function AnnouncementBar() {
                 ) : (
                   <Megaphone className="h-3.5 w-3.5" />
                 )}
-                {isHigh ? "ด่วน" : "ประกาศ"}
+                {isHigh ? "ประกาศ" : "ประกาศ"}
               </div>
               <div className="relative flex-1 overflow-hidden">
                 <div
