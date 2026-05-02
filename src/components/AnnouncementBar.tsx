@@ -44,8 +44,8 @@ export function AnnouncementBar() {
     <div className="flex flex-col">
       {rows.map((row, idx) => {
         const isHigh = row.kind === "high";
-        // Speed: ~40px per second, min 14s, max 60s — keeps reading speed comfortable
-        const duration = Math.min(60, Math.max(14, Math.round(row.text.length * 0.18)));
+        // Speed: faster — ~90px/sec
+        const duration = Math.min(30, Math.max(8, Math.round(row.text.length * 0.08)));
 
         return (
           <div
