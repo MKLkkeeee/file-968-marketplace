@@ -44,7 +44,7 @@ export const Navbar = () => {
           </div>
         </Link>
 
-        <nav className="flex items-center gap-2">
+        <nav className="flex items-center gap-1.5 sm:gap-2.5">
           {user && profile ? (
             <>
               <div className="hidden md:flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-1.5 text-sm backdrop-blur-md">
@@ -52,28 +52,49 @@ export const Navbar = () => {
                 <span className="font-semibold text-white">{profile.points.toLocaleString()}</span>
                 <span className="text-white/50 text-xs uppercase tracking-wider">point</span>
               </div>
-              <Button variant="ghost" size="sm" onClick={() => navigate("/topup")}>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate("/topup")}
+                className="h-9 rounded-full border border-white/10 bg-white/[0.03] px-2.5 sm:px-3.5 backdrop-blur-md hover:bg-white/[0.08] hover:border-white/20"
+              >
                 <Wallet className="h-4 w-4" />
                 <span className="hidden sm:inline">เติมเงิน</span>
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => navigate("/cart")} className="relative">
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate("/cart")}
+                className="relative h-9 rounded-full border border-white/10 bg-white/[0.03] px-2.5 sm:px-3.5 backdrop-blur-md hover:bg-white/[0.08] hover:border-white/20"
+              >
                 <ShoppingCart className="h-4 w-4" />
                 <span className="hidden sm:inline">ตะกร้า</span>
                 {count > 0 && (
-                  <Badge className="absolute -right-1 -top-1 h-5 min-w-5 justify-center rounded-full bg-white p-0 px-1 text-xs text-black border-transparent">
+                  <Badge className="absolute -right-1 -top-1 h-5 min-w-5 justify-center rounded-full bg-white p-0 px-1 text-xs text-black border-transparent shadow-lg shadow-black/30">
                     {count}
                   </Badge>
                 )}
               </Button>
+
+              <span className="hidden sm:block h-6 w-px bg-white/10 mx-0.5" aria-hidden />
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="rounded-full pl-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-9 rounded-full border-white/15 bg-gradient-to-br from-white/[0.08] to-white/[0.02] pl-1 pr-3 sm:pr-4 backdrop-blur-md hover:border-white/30 hover:from-white/[0.12]"
+                  >
                     {profile.avatarUrl ? (
-                      <img src={profile.avatarUrl} alt="" className="h-6 w-6 rounded-full object-cover" />
+                      <img src={profile.avatarUrl} alt="" className="h-7 w-7 rounded-full object-cover ring-1 ring-white/20" />
                     ) : (
-                      <UserIcon className="h-4 w-4" />
+                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/20">
+                        <UserIcon className="h-3.5 w-3.5" />
+                      </span>
                     )}
-                    <span className="hidden sm:inline">{profile.username}</span>
+                    <span className="hidden sm:inline ml-1 max-w-[100px] truncate font-medium">{profile.username}</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
@@ -110,17 +131,22 @@ export const Navbar = () => {
             </>
           ) : (
             <>
-              <Button variant="ghost" size="sm" onClick={() => navigate("/cart")} className="relative">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate("/cart")}
+                className="relative h-9 rounded-full border border-white/10 bg-white/[0.03] px-2.5 sm:px-3.5 backdrop-blur-md hover:bg-white/[0.08] hover:border-white/20"
+              >
                 <ShoppingCart className="h-4 w-4" />
                 <span className="hidden sm:inline">ตะกร้า</span>
                 {count > 0 && (
-                  <Badge className="absolute -right-1 -top-1 h-5 min-w-5 justify-center rounded-full bg-white p-0 px-1 text-xs text-black border-transparent">
+                  <Badge className="absolute -right-1 -top-1 h-5 min-w-5 justify-center rounded-full bg-white p-0 px-1 text-xs text-black border-transparent shadow-lg shadow-black/30">
                     {count}
                   </Badge>
                 )}
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => navigate("/login")}>เข้าสู่ระบบ</Button>
-              <Button variant="default" size="sm" onClick={() => navigate("/register")} className="bg-gradient-primary">
+              <Button variant="ghost" size="sm" onClick={() => navigate("/login")} className="h-9 rounded-full px-3 sm:px-4">เข้าสู่ระบบ</Button>
+              <Button variant="default" size="sm" onClick={() => navigate("/register")} className="h-9 rounded-full px-3 sm:px-4 bg-gradient-primary shadow-lg shadow-primary/20">
                 สมัครสมาชิก
               </Button>
             </>
