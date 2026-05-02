@@ -29,6 +29,7 @@ export const Navbar = () => {
   const { user, profile, isAdmin, logout } = useAuth();
   const { count } = useCart();
   const navigate = useNavigate();
+  const [logoutOpen, setLogoutOpen] = useState(false);
 
   return (
     <header className="sticky top-0 z-50 glass">
