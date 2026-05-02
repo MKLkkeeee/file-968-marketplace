@@ -30,7 +30,9 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { UserProfile } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { Lock, Megaphone, Pencil, Plus, Shield, Trash2 } from "lucide-react";
+import { Lock, Megaphone, Pencil, Plus, Shield, Trash2, X } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { sendRestockWebhook } from "@/lib/discord";
 import { motion } from "framer-motion";
 import { Paginator, usePaged } from "@/components/Paginator";
@@ -186,7 +188,7 @@ export default function Admin() {
           <TabsContent value="discounts">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
               <Card className="card-elegant p-6">
-                <DiscountManager discounts={discounts} />
+                <DiscountManager discounts={discounts} products={products} categories={categories} />
               </Card>
             </motion.div>
           </TabsContent>
@@ -480,9 +482,19 @@ function ProductManager({ categories, products }: { categories: Category[]; prod
   );
 }
 
-function DiscountManager({ discounts }: { discounts: DiscountCode[] }) {
+function DiscountManager({
+  discounts, products, categories,
+}: {
+  discounts: DiscountCode[]; products: Product[]; categories: Category[];
+}) {
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ code: "", type: "discount" as "discount" | "point", value: 10, maxUses: 100, active: true });
+  const [form, setForm] = useState<{
+    code: string; type: "discount" | "point"; value: number; maxUses: number; active: boolean;
+    productIds: string[]; categoryIds: string[];
+  }>({
+    code: "", type: "discount", value: 10, maxUses: 100, active: true,
+    productIds: [], categoryIds: [],
+  });
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
 
@@ -491,10 +503,32 @@ function DiscountManager({ discounts }: { discounts: DiscountCode[] }) {
       toast.error("กรุณาระบุโค้ด");
       return;
     }
-    await createDiscount(form);
+    const payload: any = {
+      code: form.code, type: form.type, value: form.value,
+      maxUses: form.maxUses, active: form.active,
+    };
+    // เก็บเฉพาะกรณีโค้ดส่วนลด และมีการเลือก
+    if (form.type === "discount") {
+      if (form.productIds.length > 0) payload.productIds = form.productIds;
+      if (form.categoryIds.length > 0) payload.categoryIds = form.categoryIds;
+    }
+    await createDiscount(payload);
     toast.success("บันทึกข้อมูลสำเร็จ");
     setOpen(false); 
-    setForm({ code: "", type: "discount", value: 10, maxUses: 100, active: true });
+    setForm({ code: "", type: "discount", value: 10, maxUses: 100, active: true, productIds: [], categoryIds: [] });
+  };
+
+  const toggleProduct = (id: string) => {
+    setForm((f) => ({
+      ...f,
+      productIds: f.productIds.includes(id) ? f.productIds.filter((x) => x !== id) : [...f.productIds, id],
+    }));
+  };
+  const toggleCategory = (id: string) => {
+    setForm((f) => ({
+      ...f,
+      categoryIds: f.categoryIds.includes(id) ? f.categoryIds.filter((x) => x !== id) : [...f.categoryIds, id],
+    }));
   };
 
   return (
@@ -505,7 +539,7 @@ function DiscountManager({ discounts }: { discounts: DiscountCode[] }) {
           <DialogTrigger asChild>
             <Button className="bg-gradient-primary text-primary-foreground"><Plus className="h-4 w-4" />เพิ่มโค้ด</Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-h-[85vh] overflow-y-auto">
             <DialogHeader><DialogTitle>เพิ่มโค้ดใหม่</DialogTitle></DialogHeader>
             <div className="space-y-3">
               <div><Label>โค้ด</Label><Input value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })} /></div>
@@ -523,6 +557,76 @@ function DiscountManager({ discounts }: { discounts: DiscountCode[] }) {
                 <div><Label>จำนวน</Label><Input type="number" value={form.value} onChange={(e) => setForm({ ...form, value: Number(e.target.value) })} /></div>
                 <div><Label>จำกัดสิทธิ์</Label><Input type="number" value={form.maxUses} onChange={(e) => setForm({ ...form, maxUses: Number(e.target.value) })} /></div>
               </div>
+
+              {form.type === "discount" && (
+                <div className="space-y-3 rounded-lg border border-white/10 bg-white/[0.02] p-3">
+                  <div>
+                    <Label className="text-sm">เงื่อนไขการใช้งาน</Label>
+                    <p className="mt-0.5 text-xs text-white/50">
+                      เว้นว่างไว้ทั้งสอง = ใช้ได้กับทุกสินค้า · เลือกได้หลายรายการ
+                    </p>
+                  </div>
+
+                  <div>
+                    <div className="mb-1.5 flex items-center justify-between">
+                      <Label className="text-xs text-white/70">หมวดหมู่ที่ใช้ได้ ({form.categoryIds.length})</Label>
+                      {form.categoryIds.length > 0 && (
+                        <Button type="button" variant="ghost" size="sm" className="h-6 text-xs"
+                          onClick={() => setForm((f) => ({ ...f, categoryIds: [] }))}>
+                          <X className="h-3 w-3" /> ล้าง
+                        </Button>
+                      )}
+                    </div>
+                    <ScrollArea className="h-28 rounded-md border border-white/10 p-2">
+                      {categories.length === 0 ? (
+                        <p className="py-3 text-center text-xs text-white/40">ยังไม่มีหมวดหมู่</p>
+                      ) : (
+                        <div className="space-y-1.5">
+                          {categories.map((c) => (
+                            <label key={c.id} className="flex cursor-pointer items-center gap-2 rounded px-1.5 py-1 hover:bg-white/5">
+                              <Checkbox
+                                checked={form.categoryIds.includes(c.id)}
+                                onCheckedChange={() => toggleCategory(c.id)}
+                              />
+                              <span className="text-sm">{c.icon} {c.name}</span>
+                            </label>
+                          ))}
+                        </div>
+                      )}
+                    </ScrollArea>
+                  </div>
+
+                  <div>
+                    <div className="mb-1.5 flex items-center justify-between">
+                      <Label className="text-xs text-white/70">สินค้าที่ใช้ได้ ({form.productIds.length})</Label>
+                      {form.productIds.length > 0 && (
+                        <Button type="button" variant="ghost" size="sm" className="h-6 text-xs"
+                          onClick={() => setForm((f) => ({ ...f, productIds: [] }))}>
+                          <X className="h-3 w-3" /> ล้าง
+                        </Button>
+                      )}
+                    </div>
+                    <ScrollArea className="h-40 rounded-md border border-white/10 p-2">
+                      {products.length === 0 ? (
+                        <p className="py-3 text-center text-xs text-white/40">ยังไม่มีสินค้า</p>
+                      ) : (
+                        <div className="space-y-1.5">
+                          {products.map((p) => (
+                            <label key={p.id} className="flex cursor-pointer items-center gap-2 rounded px-1.5 py-1 hover:bg-white/5">
+                              <Checkbox
+                                checked={form.productIds.includes(p.id)}
+                                onCheckedChange={() => toggleProduct(p.id)}
+                              />
+                              <span className="line-clamp-1 text-sm">{p.name}</span>
+                              <span className="ml-auto shrink-0 text-xs text-white/40">{p.price}</span>
+                            </label>
+                          ))}
+                        </div>
+                      )}
+                    </ScrollArea>
+                  </div>
+                </div>
+              )}
             </div>
             <DialogFooter><Button onClick={submit} className="bg-gradient-primary text-primary-foreground">บันทึก</Button></DialogFooter>
           </DialogContent>
