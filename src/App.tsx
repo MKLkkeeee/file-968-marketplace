@@ -16,6 +16,7 @@ import Orders from "./pages/Orders.tsx";
 import ProductDetail from "./pages/ProductDetail.tsx";
 import Profile from "./pages/Profile.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import ResetPassword from "./pages/ResetPassword.tsx";
 import { WelcomePopup } from "@/components/WelcomePopup";
 
 const queryClient = new QueryClient();
