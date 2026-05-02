@@ -56,7 +56,7 @@ export default function Admin() {
   const [topupPage, setTopupPage] = useState(1);
   const [pointInputs, setPointInputs] = useState<Record<string, string>>({});
 
-  const handleAddPoint = async (uid: string) => {
+  const handleAdjustPoint = async (uid: string, mode: "add" | "remove") => {
     const amount = Number(pointInputs[uid]);
     
     if (!amount || amount <= 0) {
@@ -65,14 +65,15 @@ export default function Admin() {
     }
     
     try {
-      await adjustPoints(uid, amount);
-      toast.success(`เพิ่ม ${amount} Point สำเร็จ`);
+      const delta = mode === "add" ? amount : -amount;
+      await adjustPoints(uid, delta);
+      toast.success(mode === "add" ? `เพิ่ม ${amount} Point สำเร็จ` : `ลบ ${amount} Point สำเร็จ`);
       setPointInputs((prev) => ({
         ...prev,
         [uid]: "",
       }));
     } catch {
-      toast.error("เพิ่ม Point ไม่สำเร็จ");
+      toast.error("ดำเนินการไม่สำเร็จ");
     }
   };
 
@@ -198,7 +199,7 @@ export default function Admin() {
                   setPage={setUserPage}
                   pointInputs={pointInputs}
                   setPointInputs={setPointInputs}
-                  handleAddPoint={handleAddPoint}
+                  handleAdjustPoint={handleAdjustPoint}
                 />
               </Card>
             </motion.div>
@@ -562,12 +563,12 @@ function DiscountManager({ discounts }: { discounts: DiscountCode[] }) {
 }
 
 function UserTable({
-  users, search, page, setPage, pointInputs, setPointInputs, handleAddPoint,
+  users, search, page, setPage, pointInputs, setPointInputs, handleAdjustPoint,
 }: {
   users: UserProfile[]; search: string; page: number; setPage: (n: number) => void;
   pointInputs: Record<string, string>;
   setPointInputs: React.Dispatch<React.SetStateAction<Record<string, string>>>;
-  handleAddPoint: (uid: string) => void;
+  handleAdjustPoint: (uid: string, mode: "add" | "remove") => void;
 }) {
   const filtered = users.filter((u) =>
     `${u.username} ${u.email} ${u.uid}`.toLowerCase().includes(search.toLowerCase())
@@ -580,7 +581,7 @@ function UserTable({
           <TableRow>
             <TableHead>Username</TableHead><TableHead>Email</TableHead>
             <TableHead>Point</TableHead><TableHead>Role</TableHead>
-            <TableHead>เพิ่ม Point</TableHead><TableHead></TableHead>
+            <TableHead>ปรับ Point</TableHead><TableHead></TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -597,7 +598,9 @@ function UserTable({
                     onChange={(e) => setPointInputs((prev) => ({ ...prev, [u.uid]: e.target.value }))}
                   />
                   <Button size="sm" className="bg-gradient-primary text-primary-foreground"
-                    onClick={() => handleAddPoint(u.uid)}>เพิ่ม</Button>
+                    onClick={() => handleAdjustPoint(u.uid, "add")}>เพิ่ม</Button>
+                  <Button size="sm" variant="destructive"
+                    onClick={() => handleAdjustPoint(u.uid, "remove")}>ลบ</Button>
                 </div>
               </TableCell>
               <TableCell>
