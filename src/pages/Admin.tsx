@@ -246,7 +246,13 @@ export default function Admin() {
               </Card>
             </motion.div>
           </TabsContent>
-        </Tabs>
+          <TabsContent value="wheel">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
+              <Card className="card-elegant p-6">
+                <WheelManager />
+              </Card>
+            </motion.div>
+          </TabsContent>
       </motion.div>
     </div>
   );
