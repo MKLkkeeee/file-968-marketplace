@@ -247,3 +247,73 @@ export default function Profile() {
     </div>
   );
 }
+
+import { useEffect } from "react";
+import { onValue, ref as dbRef2 } from "firebase/database";
+import { Link } from "react-router-dom";
+import { Product } from "@/lib/store";
+import { FavoriteButton } from "@/components/FavoriteButton";
+
+function FavoritesSection() {
+  const { user } = useAuth();
+  const [favIds, setFavIds] = useState<string[]>([]);
+  const [products, setProducts] = useState<Record<string, Product>>({});
+
+  useEffect(() => {
+    if (!user) return;
+    const offFav = onValue(dbRef2(db, `favorites/${user.uid}`), (snap) => {
+      setFavIds(snap.exists() ? Object.keys(snap.val()) : []);
+    });
+    const offProd = onValue(dbRef2(db, "products"), (snap) => {
+      setProducts(snap.exists() ? snap.val() : {});
+    });
+    return () => { offFav(); offProd(); };
+  }, [user?.uid]);
+
+  const items = favIds.map((id) => products[id]).filter(Boolean) as Product[];
+
+  return (
+    <Card className="card-elegant mt-6 p-6">
+      <div className="mb-5 flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04]">
+          <Heart className="h-5 w-5 text-rose-400" />
+        </div>
+        <div>
+          <h3 className="font-display text-xl font-semibold">รายการโปรด</h3>
+          <p className="text-xs text-white/50">{items.length} รายการ</p>
+        </div>
+      </div>
+
+      {items.length === 0 ? (
+        <div className="flex flex-col items-center gap-3 py-10 text-center">
+          <Package className="h-10 w-10 text-white/20" />
+          <p className="text-sm text-white/50">ยังไม่มีสินค้าที่ชื่นชอบ — กดรูปหัวใจที่สินค้าเพื่อบันทึก</p>
+        </div>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+          {items.map((p) => (
+            <Link to={`/product/${p.id}`} key={p.id}>
+              <Card className="card-elegant group cursor-pointer overflow-hidden p-0">
+                <div className="relative aspect-square overflow-hidden bg-white/[0.02]">
+                  {p.image ? (
+                    <img src={p.image} alt={p.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                  ) : (
+                    <div className="flex h-full items-center justify-center"><Package className="h-10 w-10 text-white/20" /></div>
+                  )}
+                  <FavoriteButton productId={p.id} stopPropagation className="absolute right-2 top-2" />
+                </div>
+                <div className="p-3">
+                  <h4 className="line-clamp-1 text-sm font-semibold text-white">{p.name}</h4>
+                  <div className="mt-1 flex items-center gap-1 text-warning">
+                    <Coins className="h-3.5 w-3.5" />
+                    <span className="text-sm font-bold">{p.price.toLocaleString()}</span>
+                  </div>
+                </div>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      )}
+    </Card>
+  );
+}
