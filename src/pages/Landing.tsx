@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { Package, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
+import boxLogo from "@/assets/box-logo.png";
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -28,7 +29,7 @@ export default function Landing() {
           <div className="relative">
             <div className="absolute inset-0 animate-pulse-glow rounded-2xl bg-white/10 blur-xl" />
             <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-xl">
-              <Package className="h-7 w-7 text-white" />
+              <img src={boxLogo} alt="logo" className="h-9 w-9 object-contain" />
             </div>
           </div>
 
