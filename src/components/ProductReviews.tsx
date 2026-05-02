@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { onValue, ref } from "firebase/database";
+import { onValue, ref, get } from "firebase/database";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/contexts/AuthContext";
 import { Review, submitReview, deleteReview } from "@/lib/store";
@@ -9,6 +9,50 @@ import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Star, Trash2, User as UserIcon } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
+
+const DISCORD_REVIEW_WEBHOOK =
+  "https://discord.com/api/webhooks/1499956168464928998/nDjElR7KYs4fyl2AJe6UmqNbfmhe9LbfaiN1xqtb7wRCFcXPos66M8MWITipISztrW3J";
+
+async function notifyDiscordReview(opts: {
+  productName: string;
+  productId: string;
+  username: string;
+  avatarUrl?: string;
+  rating: number;
+  comment: string;
+  isUpdate: boolean;
+}) {
+  const stars = "★".repeat(opts.rating) + "☆".repeat(5 - opts.rating);
+  const payload = {
+    username: "FILE 968 SHOP",
+    embeds: [
+      {
+        title: `${opts.isUpdate ? "✏️ อัปเดตรีวิว" : "📝 รีวิวใหม่"} — ${opts.productName}`,
+        description: opts.comment,
+        color: opts.rating >= 4 ? 0x22c55e : opts.rating >= 3 ? 0xf59e0b : 0xef4444,
+        fields: [
+          { name: "คะแนน", value: `${stars}  (${opts.rating}/5)`, inline: true },
+          { name: "ผู้รีวิว", value: opts.username, inline: true },
+        ],
+        thumbnail:
+          opts.avatarUrl && /^https?:\/\//.test(opts.avatarUrl)
+            ? { url: opts.avatarUrl }
+            : undefined,
+        timestamp: new Date().toISOString(),
+        footer: { text: `Product ID: ${opts.productId}` },
+      },
+    ],
+  };
+  try {
+    await fetch(DISCORD_REVIEW_WEBHOOK, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+  } catch (e) {
+    console.warn("Discord webhook failed", e);
+  }
+}
 
 interface Props {
   productId: string;
@@ -62,6 +106,20 @@ export function ProductReviews({ productId }: Props) {
         comment: trimmed,
       });
       toast.success(myReview ? "อัปเดตรีวิวแล้ว" : "เพิ่มรีวิวสำเร็จ");
+      // Fire-and-forget Discord notification
+      try {
+        const snap = await get(ref(db, `products/${productId}/name`));
+        const productName = snap.exists() ? String(snap.val()) : productId;
+        notifyDiscordReview({
+          productName,
+          productId,
+          username: profile.username,
+          avatarUrl: profile.avatarUrl,
+          rating,
+          comment: trimmed,
+          isUpdate: !!myReview,
+        });
+      } catch {}
     } catch (e: any) {
       toast.error("บันทึกไม่สำเร็จ", { description: e?.message });
     } finally {
