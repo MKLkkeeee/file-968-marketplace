@@ -10,7 +10,7 @@ import { Category, Product, stockCount } from "@/lib/store";
 import { useCart } from "@/contexts/CartContext";
 import { toast } from "sonner";
 import { ArrowLeft, Coins, Package, ShoppingCart } from "lucide-react";
-import { ProductReviews } from "@/components/ProductReviews";
+
 import { FavoriteButton } from "@/components/FavoriteButton";
 
 export default function ProductDetail() {
@@ -118,12 +118,6 @@ export default function ProductDetail() {
           </div>
         </div>
 
-        <section className="mt-12">
-          <h2 className="font-display text-2xl font-bold">รีวิวจากผู้ใช้</h2>
-          <div className="mt-4">
-            <ProductReviews productId={product.id} />
-          </div>
-        </section>
       </div>
     </div>
   );

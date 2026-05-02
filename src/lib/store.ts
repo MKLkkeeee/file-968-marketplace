@@ -213,34 +213,6 @@ export async function markUserUsedCode(codeId: string, uid: string) {
   await set(ref(db, `discountUses/${codeId}/${uid}`), true);
 }
 
-// ============ Reviews ============
-export interface Review {
-  id: string;
-  productId: string;
-  userId: string;
-  username: string;
-  avatarUrl?: string;
-  rating: number; // 1-5
-  comment: string;
-  createdAt: number;
-}
-
-export const submitReview = async (
-  data: Omit<Review, "id" | "createdAt">
-) => {
-  // One review per user per product → use uid as the key (overwrites)
-  const r = ref(db, `reviews/${data.productId}/${data.userId}`);
-  const clean: any = {
-    ...data,
-    id: data.userId,
-    createdAt: Date.now(),
-  };
-  Object.keys(clean).forEach((k) => clean[k] === undefined && delete clean[k]);
-  await set(r, clean);
-};
-
-export const deleteReview = (productId: string, uid: string) =>
-  remove(ref(db, `reviews/${productId}/${uid}`));
 
 // ============ Favorites ============
 export const toggleFavorite = async (uid: string, productId: string) => {
