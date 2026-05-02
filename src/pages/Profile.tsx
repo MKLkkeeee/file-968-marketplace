@@ -52,6 +52,39 @@ export default function Profile() {
   const [transferPwd, setTransferPwd] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [transferring, setTransferring] = useState(false);
+  const [usernameStatus, setUsernameStatus] = useState<"idle" | "checking" | "found" | "notfound" | "self">("idle");
+  const [foundUsername, setFoundUsername] = useState<string>("");
+
+  // ตรวจสอบ username แบบ debounce
+  useEffect(() => {
+    const name = transferTo.trim();
+    if (!name) { setUsernameStatus("idle"); setFoundUsername(""); return; }
+    if (profile && name.toLowerCase() === (profile.username || "").toLowerCase()) {
+      setUsernameStatus("self"); setFoundUsername(""); return;
+    }
+    setUsernameStatus("checking");
+    const t = setTimeout(async () => {
+      try {
+        const snap = await get(dbRef2(db, "users"));
+        if (!snap.exists()) { setUsernameStatus("notfound"); setFoundUsername(""); return; }
+        const users = snap.val() as Record<string, any>;
+        const target = Object.values(users).find(
+          (u: any) => (u?.username || "").toLowerCase() === name.toLowerCase()
+        ) as any;
+        if (target?.username) {
+          setFoundUsername(target.username);
+          setUsernameStatus("found");
+        } else {
+          setFoundUsername("");
+          setUsernameStatus("notfound");
+        }
+      } catch {
+        setUsernameStatus("notfound");
+      }
+    }, 400);
+    return () => clearTimeout(t);
+  }, [transferTo, profile?.username]);
+
 
   const handleOpenTransferConfirm = () => {
     if (!profile || !user) return;
