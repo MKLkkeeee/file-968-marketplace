@@ -184,8 +184,16 @@ export default function Cart() {
                       <h3 className="font-semibold">{it.product.name}</h3>
                       <p className="line-clamp-1 text-xs text-muted-foreground">{it.product.description}</p>
                       <div className="mt-1 flex items-center gap-2">
-                        <Coins className="h-4 w-4 text-warning" />
-                        <span className="font-bold">{it.product.price.toLocaleString()}</span>
+                        {it.product.price === 0 ? (
+                          <span className="rounded-full bg-success/20 px-2 py-0.5 text-xs font-bold uppercase tracking-wider text-success">
+                            ฟรี
+                          </span>
+                        ) : (
+                          <>
+                            <Coins className="h-4 w-4 text-warning" />
+                            <span className="font-bold">{it.product.price.toLocaleString()}</span>
+                          </>
+                        )}
                         <Badge variant="outline" className="text-xs">stock {stk}</Badge>
                       </div>
                       <div className="mt-2 flex items-center gap-2">

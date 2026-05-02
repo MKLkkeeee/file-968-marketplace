@@ -71,11 +71,17 @@ export default function ProductDetail() {
             <h1 className="mt-2 font-display text-4xl font-bold">{product.name}</h1>
 
             <div className="mt-4 flex items-center gap-3">
-              <div className="flex items-center gap-2 text-warning">
-                <Coins className="h-6 w-6" />
-                <span className="font-display text-3xl font-bold">{product.price.toLocaleString()}</span>
-                <span className="text-sm text-muted-foreground">point</span>
-              </div>
+              {product.price === 0 ? (
+                <span className="rounded-full bg-success/20 px-4 py-1.5 font-display text-xl font-bold uppercase tracking-wider text-success">
+                  ฟรี
+                </span>
+              ) : (
+                <div className="flex items-center gap-2 text-warning">
+                  <Coins className="h-6 w-6" />
+                  <span className="font-display text-3xl font-bold">{product.price.toLocaleString()}</span>
+                  <span className="text-sm text-muted-foreground">point</span>
+                </div>
+              )}
               <Badge variant={stk > 0 ? "outline" : "destructive"}>
                 {stk > 0 ? `เหลือ ${stk} ชิ้น` : "หมดสต๊อก"}
               </Badge>
