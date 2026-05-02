@@ -153,22 +153,23 @@ export default function Admin() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        className="container py-10"
+        className="container px-3 sm:px-6 py-6 sm:py-10"
       >
-        <h1 className="font-display text-4xl font-bold">หน้าผู้ดูแลระบบ</h1>
-        <p className="mt-1 text-muted-foreground">จัดการข้อมูลระบบ</p>
+        <h1 className="font-display text-2xl sm:text-4xl font-bold">หน้าผู้ดูแลระบบ</h1>
+        <p className="mt-1 text-sm sm:text-base text-muted-foreground">จัดการข้อมูลระบบ</p>
 
-        <Tabs defaultValue="products" className="mt-8">
-          <TabsList className="flex flex-wrap">
-            <TabsTrigger value="products">สินค้า</TabsTrigger>
-            <TabsTrigger value="categories">หมวดหมู่</TabsTrigger>
-            <TabsTrigger value="discounts">โค้ด</TabsTrigger>
-            <TabsTrigger value="users">ผู้ใช้</TabsTrigger>
-            <TabsTrigger value="orders">คำสั่งซื้อ</TabsTrigger>
-            <TabsTrigger value="topups">เติมเงิน</TabsTrigger>
-            <TabsTrigger value="popup">ป๊อปอัพ</TabsTrigger>
-            
-          </TabsList>
+        <Tabs defaultValue="products" className="mt-5 sm:mt-8">
+          <div className="-mx-3 sm:mx-0 overflow-x-auto scrollbar-hide">
+            <TabsList className="inline-flex w-max min-w-full px-3 sm:px-0 sm:flex sm:flex-wrap">
+              <TabsTrigger value="products">สินค้า</TabsTrigger>
+              <TabsTrigger value="categories">หมวดหมู่</TabsTrigger>
+              <TabsTrigger value="discounts">โค้ด</TabsTrigger>
+              <TabsTrigger value="users">ผู้ใช้</TabsTrigger>
+              <TabsTrigger value="orders">คำสั่งซื้อ</TabsTrigger>
+              <TabsTrigger value="topups">เติมเงิน</TabsTrigger>
+              <TabsTrigger value="popup">ป๊อปอัพ</TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="products">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
