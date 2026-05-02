@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { PasswordStrength } from "@/components/PasswordStrength";
 import { useAuth } from "@/contexts/AuthContext";
 import { auth, db } from "@/lib/firebase";
 import { ref as dbRef, update } from "firebase/database";
@@ -293,6 +294,7 @@ export default function Profile() {
                 placeholder="อย่างน้อย 8 ตัว ผสมตัวอักษร เลข อักขระพิเศษ"
                 className="mt-1"
               />
+              <PasswordStrength password={newPwd} />
             </div>
             <div>
               <Label>ยืนยันรหัสผ่านใหม่</Label>
