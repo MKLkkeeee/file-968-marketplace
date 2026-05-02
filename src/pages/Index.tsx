@@ -9,7 +9,7 @@ import { Category, Product, stockCount } from "@/lib/store";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
 import { toast } from "sonner";
-import { Coins, Eye, Package, Search, ShoppingCart, Sparkles } from "lucide-react";
+import { ChevronLeft, ChevronRight, Coins, Eye, Package, Search, ShoppingCart, Sparkles } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import Landing from "./Landing";
 import { Input } from "@/components/ui/input";
