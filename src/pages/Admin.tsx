@@ -339,11 +339,11 @@ function CategoryManager({ categories }: { categories: Category[] }) {
 function ProductManager({ categories, products }: { categories: Category[]; products: Product[] }) {
   const [open, setOpen] = useState(false);
   const [edit, setEdit] = useState<Product | null>(null);
-  const [form, setForm] = useState({ name: "", description: "", price: 0, image: "", categoryId: "", stockItems: "" });
+  const [form, setForm] = useState({ name: "", description: "", price: 0, image: "", categoryId: "", stockItems: "", isHot: false });
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
 
-  const reset = () => setForm({ name: "", description: "", price: 0, image: "", categoryId: "", stockItems: "" });
+  const reset = () => setForm({ name: "", description: "", price: 0, image: "", categoryId: "", stockItems: "", isHot: false });
 
   const submit = async () => {
     if (!form.name || !form.categoryId) {
