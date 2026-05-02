@@ -50,7 +50,7 @@ export default function Orders() {
     <div className="min-h-screen">
       <Navbar />
 
-      <div className="container max-w-4xl py-10">
+      <div className="container max-w-4xl px-3 sm:px-6 py-6 sm:py-10">
         <h1 className="flex items-center gap-3 font-display text-4xl font-bold">
           <History className="h-8 w-8" />
           ประวัติการซื้อ
