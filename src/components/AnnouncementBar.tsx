@@ -78,6 +78,7 @@ export function AnnouncementBar() {
                   }
                 >
                   <span className="px-8">{row.text}</span>
+                  <span className="px-8" aria-hidden="true">{row.text}</span>
                 </div>
               </div>
             </div>
