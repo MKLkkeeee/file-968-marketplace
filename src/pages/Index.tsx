@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Footer } from "@/components/Footer";
 import { FavoriteButton } from "@/components/FavoriteButton";
+import { LetterReveal, Reveal } from "@/components/Reveal";
 
 export default function Index() {
   const { user, loading } = useAuth();
