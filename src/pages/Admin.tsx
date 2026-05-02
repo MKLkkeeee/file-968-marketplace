@@ -733,45 +733,127 @@ function UserTable({
     `${u.username} ${u.email} ${u.uid}`.toLowerCase().includes(search.toLowerCase())
   );
   const { slice, totalPages, page: p } = usePaged(filtered, page, 10);
+
+  const handleResetPassword = async (email: string, username: string) => {
+    if (!email) {
+      toast.error("ผู้ใช้นี้ไม่มีอีเมล");
+      return;
+    }
+    if (!confirm(`ส่งลิงก์รีเซ็ตรหัสผ่านไปที่อีเมลของ ${username} (${email}) ?`)) return;
+    try {
+      await sendPasswordResetEmail(auth, email);
+      toast.success("ส่งลิงก์รีเซ็ตรหัสผ่านสำเร็จ", {
+        description: `ผู้ใช้ ${username} จะได้รับอีเมลที่ ${email}`,
+      });
+    } catch (e: any) {
+      const code = e?.code || "";
+      const msg =
+        code === "auth/user-not-found"
+          ? "ไม่พบบัญชีนี้ใน Firebase Auth"
+          : code === "auth/invalid-email"
+          ? "อีเมลไม่ถูกต้อง"
+          : code === "auth/too-many-requests"
+          ? "ส่งคำขอถี่เกินไป กรุณารอสักครู่"
+          : e?.message || "เกิดข้อผิดพลาด";
+      toast.error("ส่งลิงก์ไม่สำเร็จ", { description: msg });
+    }
+  };
+
   return (
     <>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Username</TableHead><TableHead>Email</TableHead>
-            <TableHead>Point</TableHead><TableHead>Role</TableHead>
-            <TableHead>ปรับ Point</TableHead><TableHead></TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {slice.map((u) => (
-            <TableRow key={u.uid}>
-              <TableCell>{u.username}</TableCell>
-              <TableCell>{u.email}</TableCell>
-              <TableCell>{u.points?.toLocaleString() ?? 0}</TableCell>
-              <TableCell><Badge variant={u.role === "admin" ? "default" : "outline"}>{u.role}</Badge></TableCell>
-              <TableCell>
-                <div className="flex gap-2">
-                  <Input type="number" placeholder="100" className="w-24"
-                    value={pointInputs[u.uid] || ""}
-                    onChange={(e) => setPointInputs((prev) => ({ ...prev, [u.uid]: e.target.value }))}
-                  />
-                  <Button size="sm" className="bg-gradient-primary text-primary-foreground"
-                    onClick={() => handleAdjustPoint(u.uid, "add")}>เพิ่ม</Button>
-                  <Button size="sm" variant="destructive"
-                    onClick={() => handleAdjustPoint(u.uid, "remove")}>ลบ</Button>
-                </div>
-              </TableCell>
-              <TableCell>
-                <Button size="sm" variant="outline"
-                  onClick={() => setUserRole(u.uid, u.role === "admin" ? "user" : "admin")}>
-                  {u.role === "admin" ? "ลดเป็น user" : "เลื่อนเป็น admin"}
-                </Button>
-              </TableCell>
+      {/* Desktop / Tablet table */}
+      <div className="hidden md:block">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Username</TableHead>
+              <TableHead className="hidden lg:table-cell">Email</TableHead>
+              <TableHead>Point</TableHead>
+              <TableHead>Role</TableHead>
+              <TableHead>ปรับ Point</TableHead>
+              <TableHead></TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {slice.map((u) => (
+              <TableRow key={u.uid}>
+                <TableCell>
+                  <div className="font-medium">{u.username}</div>
+                  <div className="text-xs text-muted-foreground lg:hidden truncate max-w-[180px]">{u.email}</div>
+                </TableCell>
+                <TableCell className="hidden lg:table-cell">{u.email}</TableCell>
+                <TableCell>{u.points?.toLocaleString() ?? 0}</TableCell>
+                <TableCell><Badge variant={u.role === "admin" ? "default" : "outline"}>{u.role}</Badge></TableCell>
+                <TableCell>
+                  <div className="flex flex-wrap gap-2">
+                    <Input type="number" placeholder="100" className="w-20"
+                      value={pointInputs[u.uid] || ""}
+                      onChange={(e) => setPointInputs((prev) => ({ ...prev, [u.uid]: e.target.value }))}
+                    />
+                    <Button size="sm" className="bg-gradient-primary text-primary-foreground"
+                      onClick={() => handleAdjustPoint(u.uid, "add")}>เพิ่ม</Button>
+                    <Button size="sm" variant="destructive"
+                      onClick={() => handleAdjustPoint(u.uid, "remove")}>ลบ</Button>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex flex-col gap-2">
+                    <Button size="sm" variant="outline"
+                      onClick={() => setUserRole(u.uid, u.role === "admin" ? "user" : "admin")}>
+                      {u.role === "admin" ? "ลดเป็น user" : "เลื่อนเป็น admin"}
+                    </Button>
+                    <Button size="sm" variant="secondary"
+                      onClick={() => handleResetPassword(u.email, u.username)}>
+                      รีเซ็ตรหัสผ่าน
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      {/* Mobile cards */}
+      <div className="md:hidden space-y-3">
+        {slice.map((u) => (
+          <div key={u.uid} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 space-y-3">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <div className="font-semibold truncate">{u.username}</div>
+                <div className="text-xs text-muted-foreground truncate">{u.email}</div>
+                <div className="mt-1 text-xs text-muted-foreground/70 truncate">UID: {u.uid}</div>
+              </div>
+              <Badge variant={u.role === "admin" ? "default" : "outline"}>{u.role}</Badge>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Point</span>
+              <span className="font-medium">{u.points?.toLocaleString() ?? 0}</span>
+            </div>
+            <div className="flex gap-2">
+              <Input type="number" placeholder="100" className="flex-1"
+                value={pointInputs[u.uid] || ""}
+                onChange={(e) => setPointInputs((prev) => ({ ...prev, [u.uid]: e.target.value }))}
+              />
+              <Button size="sm" className="bg-gradient-primary text-primary-foreground"
+                onClick={() => handleAdjustPoint(u.uid, "add")}>เพิ่ม</Button>
+              <Button size="sm" variant="destructive"
+                onClick={() => handleAdjustPoint(u.uid, "remove")}>ลบ</Button>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <Button size="sm" variant="outline" className="w-full"
+                onClick={() => setUserRole(u.uid, u.role === "admin" ? "user" : "admin")}>
+                {u.role === "admin" ? "ลดเป็น user" : "ขึ้น admin"}
+              </Button>
+              <Button size="sm" variant="secondary" className="w-full"
+                onClick={() => handleResetPassword(u.email, u.username)}>
+                รีเซ็ตรหัสผ่าน
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
+
       <Paginator page={p} totalPages={totalPages} onChange={setPage} />
     </>
   );
