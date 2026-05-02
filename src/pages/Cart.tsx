@@ -122,7 +122,7 @@ export default function Cart() {
       categoryIds: d.categoryIds,
     });
     toast.success(`ใช้โค้ดส่วนลด ${d.value}% สำเร็จ`, {
-      description: `ประหยัด ${saved.toLocaleString()} Point${(hasProductFilter || hasCategoryFilter) ? " (เฉพาะสินค้าที่เข้าเงื่อนไข)" : ""}`,
+      description: `ประหยัด ${saved.toLocaleString()} ฿${(hasProductFilter || hasCategoryFilter) ? " (เฉพาะสินค้าที่เข้าเงื่อนไข)" : ""}`,
     });
   };
 
@@ -135,7 +135,7 @@ export default function Cart() {
   const checkout = async () => {
     if (!user || !profile) return navigate("/login");
     if (items.length === 0) return;
-    if (profile.points < finalPrice) return toast.error("Point ไม่พอ", { description: "กรุณาเติมเงินก่อน" });
+    if (profile.points < finalPrice) return toast.error("ยอดเงินไม่พอ", { description: "กรุณาเติมเงินก่อน" });
 
     // Validate stock
     for (const it of items) {
@@ -348,7 +348,7 @@ export default function Cart() {
                       </div>
                       {isRestricted && (
                         <p className="text-xs text-warning/80">
-                          * ใช้กับสินค้าที่เข้าเงื่อนไขเท่านั้น ({eligibleSubtotal.toLocaleString()} Point)
+                          * ใช้กับสินค้าที่เข้าเงื่อนไขเท่านั้น ({eligibleSubtotal.toLocaleString()} บาท)
                         </p>
                       )}
                     </>
@@ -361,7 +361,7 @@ export default function Cart() {
 
                 {profile && (
                   <p className="mt-3 text-right text-xs text-muted-foreground">
-                    Point ของคุณ: {profile.points.toLocaleString()}
+                    ยอดเงินของคุณ: {profile.points.toLocaleString()}
                   </p>
                 )}
 

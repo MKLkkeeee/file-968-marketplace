@@ -97,7 +97,7 @@ export default function Topup() {
     if (d.type !== "point") {
       return toast.error("โค้ดนี้ไม่ใช่ Special Code", {
         description:
-          "Special Code ต้องเป็นโค้ดประเภทเพิ่ม Point เท่านั้น",
+          "Special Code ต้องเป็นโค้ดประเภทเพิ่มเงิน เท่านั้น",
       });
     }
 
@@ -342,7 +342,7 @@ export default function Topup() {
         {profile && (
           <Card className="card-elegant mt-6 flex items-center justify-between p-5">
             <div>
-              <p className="text-sm text-muted-foreground">Point ปัจจุบัน</p>
+              <p className="text-sm text-muted-foreground">ยอดเงินปัจจุบัน</p>
               <p className="font-display text-3xl font-bold gradient-text">{profile.points.toLocaleString()}</p>
             </div>
             <Wallet className="h-10 w-10 text-primary" />
@@ -357,7 +357,7 @@ export default function Topup() {
             </div>
             <div>
               <h3 className="font-display text-lg font-semibold">Special Code</h3>
-              <p className="text-xs text-muted-foreground">โค้ดพิเศษสำหรับเพิ่ม Point เท่านั้น</p>
+              <p className="text-xs text-muted-foreground">โค้ดพิเศษสำหรับเพิ่มเงิน เท่านั้น</p>
             </div>
           </div>
           <div className="mt-4 flex gap-2">

@@ -46,7 +46,7 @@ export default function Profile() {
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
-  // Transfer Point states
+  // Transfer บาท states
   const [transferTo, setTransferTo] = useState("");
   const [transferAmount, setTransferAmount] = useState("");
   const [transferPwd, setTransferPwd] = useState("");
@@ -96,8 +96,8 @@ export default function Profile() {
     if (usernameStatus === "checking") return toast.error("กำลังตรวจสอบชื่อผู้ใช้ กรุณารอสักครู่");
     if (usernameStatus !== "found") return toast.error("ไม่พบชื่อผู้ใช้ปลายทาง");
     if (!Number.isFinite(amount) || amount <= 0)
-      return toast.error("จำนวน Point ต้องมากกว่า 0");
-    if (amount > (profile.points || 0)) return toast.error("ยอด Point ไม่เพียงพอ");
+      return toast.error("จำนวนบาทต้องมากกว่า 0");
+    if (amount > (profile.points || 0)) return toast.error("ยอดเงินไม่เพียงพอ");
     if (!transferPwd) return toast.error("กรุณากรอกรหัสผ่านเพื่อยืนยัน");
     setConfirmOpen(true);
   };
@@ -110,7 +110,7 @@ export default function Profile() {
       await reauthenticateWithCredential(auth.currentUser, cred);
       const amount = Math.floor(Number(transferAmount));
       const res = await transferPointsByUsername(user.uid, transferTo.trim(), amount);
-      toast.success(`โอน ${amount.toLocaleString()} Point ให้ ${res.toUsername} สำเร็จ`);
+      toast.success(`โอน ${amount.toLocaleString()} บาท ให้ ${res.toUsername} สำเร็จ`);
       setTransferTo(""); setTransferAmount(""); setTransferPwd("");
       setConfirmOpen(false);
       await refreshProfile();
@@ -119,7 +119,7 @@ export default function Profile() {
       if (code.includes("wrong-password") || code.includes("invalid-credential")) {
         toast.error("รหัสผ่านไม่ถูกต้อง");
       } else {
-        toast.error("โอน Point ไม่สำเร็จ", { description: e?.message });
+        toast.error("โอนเงินไม่สำเร็จ", { description: e?.message });
       }
     } finally {
       setTransferring(false);
@@ -287,7 +287,7 @@ export default function Profile() {
             </div>
 
             <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.02] p-5 backdrop-blur-xl">
-              <p className="text-xs uppercase tracking-[0.2em] text-white/40">ยอด Point ของคุณ</p>
+              <p className="text-xs uppercase tracking-[0.2em] text-white/40">ยอดเงินของคุณ</p>
               <div className="mt-2 flex items-baseline gap-2">
                 <Coins className="h-6 w-6 text-warning" />
                 <span className="font-display text-4xl font-bold gradient-text">
@@ -421,16 +421,16 @@ export default function Profile() {
           </Button>
         </Card>
 
-        {/* Transfer Points */}
+        {/* Transfer Money */}
         <Card className="card-elegant mt-6 p-6">
           <div className="mb-5 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04]">
               <Send className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h3 className="font-display text-xl font-semibold">โอน Point ให้ผู้ใช้อื่น</h3>
+              <h3 className="font-display text-xl font-semibold">โอนเงินให้ผู้ใช้อื่น</h3>
               <p className="text-xs text-white/50">
-                ยอดคงเหลือ: <span className="text-white">{(profile.points || 0).toLocaleString()}</span> Point
+                ยอดคงเหลือ: <span className="text-white">{(profile.points || 0).toLocaleString()}</span> บาท
               </p>
             </div>
           </div>
@@ -479,7 +479,7 @@ export default function Profile() {
               )}
             </div>
             <div>
-              <Label>จำนวน Point</Label>
+              <Label>จำนวนเงิน (บาท)</Label>
               <Input
                 type="number"
                 min={1}
@@ -504,18 +504,18 @@ export default function Profile() {
 
           <Button onClick={handleOpenTransferConfirm} disabled={transferring} className="mt-5">
             <Send className="h-4 w-4" />
-            โอน Point
+            โอนเงิน
           </Button>
         </Card>
 
         <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
           <AlertDialogContent className="w-[calc(100vw-1.5rem)] max-w-md">
             <AlertDialogHeader>
-              <AlertDialogTitle>ยืนยันการโอน Point</AlertDialogTitle>
+              <AlertDialogTitle>ยืนยันการโอนเงิน</AlertDialogTitle>
               <AlertDialogDescription>
                 คุณต้องการโอน{" "}
                 <span className="font-semibold text-foreground">
-                  {Math.floor(Number(transferAmount) || 0).toLocaleString()} Point
+                  {Math.floor(Number(transferAmount) || 0).toLocaleString()} บาท
                 </span>{" "}
                 ให้กับ{" "}
                 <span className="font-semibold text-foreground">{transferTo.trim()}</span>{" "}

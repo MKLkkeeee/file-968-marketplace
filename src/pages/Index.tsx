@@ -119,7 +119,7 @@ export default function Index() {
             <span className="mt-1 block bg-gradient-to-b from-white/80 to-white/20 bg-clip-text text-transparent">SHOP</span>
           </h1>
           <p className="mt-6 max-w-xl text-lg text-white/50">
-            ประสบการณ์ช้อปดิจิทัลระดับพรีเมี่ยม — เติมเงินทันที ใช้ Point ซื้อสินค้าได้เลย รองรับ TrueWallet และพร้อมเพย์
+            ประสบการณ์ช้อปดิจิทัลระดับพรีเมี่ยม — เติมเงินทันที ใช้เงินซื้อสินค้าได้เลย รองรับ TrueWallet และพร้อมเพย์
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Button size="lg" asChild>

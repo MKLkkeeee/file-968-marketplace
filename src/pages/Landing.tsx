@@ -51,7 +51,7 @@ export default function Landing() {
         <p className="mt-8 max-w-md text-center text-base text-white/50 md:text-lg">
           ประสบการณ์ช้อปปิ้งดิจิทัลระดับพรีเมี่ยม
           <br />
-          เติมเงินง่าย ใช้ Point ซื้อสินค้าได้ทันที
+          เติมเงินง่าย ใช้เงินซื้อสินค้าได้ทันที
         </p>
 
         {/* CTA buttons */}
