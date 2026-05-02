@@ -287,3 +287,30 @@ export const isFavorite = async (uid: string, productId: string) => {
   const snap = await get(ref(db, `favorites/${uid}/${productId}`));
   return snap.exists();
 };
+
+// ============ Slip / Gift duplicate prevention ============
+/** sanitize ref ให้ใช้เป็น Firebase key ได้ (ห้ามมี . # $ [ ] /) */
+const sanitizeRefKey = (s: string) =>
+  (s || "").replace(/[.#$\[\]\/]/g, "_").slice(0, 512);
+
+export const isSlipRefUsed = async (
+  refStr: string
+): Promise<{ used: boolean; info?: any }> => {
+  const key = sanitizeRefKey(refStr);
+  if (!key) return { used: false };
+  const snap = await get(ref(db, `usedSlips/${key}`));
+  return snap.exists() ? { used: true, info: snap.val() } : { used: false };
+};
+
+export const markSlipRefUsed = async (
+  refStr: string,
+  data: { uid: string; username: string; amount: number; method: "truewallet" | "bank" }
+) => {
+  const key = sanitizeRefKey(refStr);
+  if (!key) return;
+  await set(ref(db, `usedSlips/${key}`), {
+    ...data,
+    originalRef: refStr,
+    usedAt: Date.now(),
+  });
+};
