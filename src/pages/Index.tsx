@@ -26,6 +26,14 @@ export default function Index() {
   const [activeCat, setActiveCat] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<string>("default");
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const scrollByCard = (dir: 1 | -1) => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const card = el.querySelector<HTMLElement>("[data-product-card]");
+    const step = card ? card.offsetWidth + 20 : el.clientWidth * 0.8;
+    el.scrollBy({ left: dir * step * 2, behavior: "smooth" });
+  };
 
   useEffect(() => {
     const unsubC = onValue(ref(db, "categories"), (snap) => {
