@@ -144,12 +144,13 @@ export default function Index() {
               return (
                 <Link to={`/product/${p.id}`} key={p.id}>
                   <Card className="card-elegant group cursor-pointer overflow-hidden p-0">
-                    <div className="aspect-square overflow-hidden bg-white/[0.02]">
+                    <div className="relative aspect-square overflow-hidden bg-white/[0.02]">
                       {p.image ? (
                         <img src={p.image} alt={p.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
                       ) : (
                         <div className="flex h-full items-center justify-center"><Package className="h-12 w-12 text-white/20" /></div>
                       )}
+                      <FavoriteButton productId={p.id} stopPropagation className="absolute right-2 top-2" />
                     </div>
                     <div className="p-4">
                       <h3 className="line-clamp-1 font-semibold text-white">{p.name}</h3>
