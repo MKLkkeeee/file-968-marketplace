@@ -173,7 +173,7 @@ export default function Admin() {
 
           <TabsContent value="products">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
-              <Card className="card-elegant p-6">
+              <Card className="card-elegant p-3 sm:p-6">
                 <ProductManager categories={categories} products={products} />
               </Card>
             </motion.div>
@@ -181,7 +181,7 @@ export default function Admin() {
 
           <TabsContent value="categories">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
-              <Card className="card-elegant p-6">
+              <Card className="card-elegant p-3 sm:p-6">
                 <CategoryManager categories={categories} />
               </Card>
             </motion.div>
@@ -189,7 +189,7 @@ export default function Admin() {
 
           <TabsContent value="discounts">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
-              <Card className="card-elegant p-6">
+              <Card className="card-elegant p-3 sm:p-6">
                 <DiscountManager discounts={discounts} products={products} categories={categories} />
               </Card>
             </motion.div>
@@ -197,7 +197,7 @@ export default function Admin() {
 
           <TabsContent value="users">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
-              <Card className="card-elegant p-6">
+              <Card className="card-elegant p-3 sm:p-6">
                 <div className="mb-4 relative">
                   <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
                   <Input
@@ -222,7 +222,7 @@ export default function Admin() {
 
           <TabsContent value="orders">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
-              <Card className="card-elegant p-6">
+              <Card className="card-elegant p-3 sm:p-6">
                 <div className="mb-4 relative">
                   <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
                   <Input
@@ -239,7 +239,7 @@ export default function Admin() {
 
           <TabsContent value="topups">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
-              <Card className="card-elegant p-6">
+              <Card className="card-elegant p-3 sm:p-6">
                 <div className="mb-4 relative">
                   <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
                   <Input
@@ -255,7 +255,7 @@ export default function Admin() {
           </TabsContent>
           <TabsContent value="popup">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
-              <Card className="card-elegant p-6">
+              <Card className="card-elegant p-3 sm:p-6">
                 <WelcomePopupManager />
               </Card>
             </motion.div>
