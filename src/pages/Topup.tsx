@@ -110,6 +110,7 @@ export default function Topup() {
       method: "code",
       amount: d.value,
       ref: `SPECIAL:${d.code}`,
+      status: "success",
     });
 
     toast.success(`เติม ${d.value} point สำเร็จ!`);
