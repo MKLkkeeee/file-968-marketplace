@@ -348,10 +348,16 @@ function FavoritesSection() {
                 </div>
                 <div className="p-3">
                   <h4 className="line-clamp-1 text-sm font-semibold text-white">{p.name}</h4>
-                  <div className="mt-1 flex items-center gap-1 text-warning">
-                    <Coins className="h-3.5 w-3.5" />
-                    <span className="text-sm font-bold">{p.price.toLocaleString()}</span>
-                  </div>
+                  {p.price === 0 ? (
+                    <span className="mt-1 inline-block rounded-full bg-success/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-success">
+                      ฟรี
+                    </span>
+                  ) : (
+                    <div className="mt-1 flex items-center gap-1 text-warning">
+                      <Coins className="h-3.5 w-3.5" />
+                      <span className="text-sm font-bold">{p.price.toLocaleString()}</span>
+                    </div>
+                  )}
                 </div>
               </Card>
             </Link>
