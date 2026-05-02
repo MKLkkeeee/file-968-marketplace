@@ -63,7 +63,7 @@ export default function Admin() {
     const amount = Number(pointInputs[uid]);
     
     if (!amount || amount <= 0) {
-      toast.error("กรุณาระบุจำนวน Point");
+      toast.error("กรุณาระบุจำนวนเงิน (บาท)");
       return;
     }
 
@@ -72,7 +72,7 @@ export default function Admin() {
       const current = target?.points ?? 0;
       if (amount > current) {
         toast.error("ลบไม่สำเร็จ", {
-          description: `ผู้ใช้มีเพียง ${current.toLocaleString()} Point ไม่สามารถลบ ${amount.toLocaleString()} ได้`,
+          description: `ผู้ใช้มีเพียง ${current.toLocaleString()} บาท ไม่สามารถลบ ${amount.toLocaleString()} บาทได้`,
         });
         return;
       }
@@ -81,7 +81,7 @@ export default function Admin() {
     try {
       const delta = mode === "add" ? amount : -amount;
       await adjustPoints(uid, delta);
-      toast.success(mode === "add" ? `เพิ่ม ${amount} Point สำเร็จ` : `ลบ ${amount} Point สำเร็จ`);
+      toast.success(mode === "add" ? `เพิ่ม ${amount} บาท สำเร็จ` : `ลบ ${amount} บาท สำเร็จ`);
       setPointInputs((prev) => ({
         ...prev,
         [uid]: "",
@@ -630,7 +630,7 @@ function DiscountManager({
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="discount">ส่วนลด</SelectItem>
-                    <SelectItem value="point">เพิ่ม Point</SelectItem>
+                    <SelectItem value="point">เพิ่มเงิน</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -968,9 +968,9 @@ function UserTable({
             <TableRow>
               <TableHead>Username</TableHead>
               <TableHead className="hidden lg:table-cell">Email</TableHead>
-              <TableHead>Point</TableHead>
+              <TableHead>ยอดเงิน</TableHead>
               <TableHead>Role</TableHead>
-              <TableHead>ปรับ Point</TableHead>
+              <TableHead>ปรับยอดเงิน</TableHead>
               <TableHead></TableHead>
             </TableRow>
           </TableHeader>
@@ -1027,7 +1027,7 @@ function UserTable({
               <Badge variant={u.role === "admin" ? "default" : "outline"}>{u.role}</Badge>
             </div>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Point</span>
+              <span className="text-muted-foreground">ยอดเงิน</span>
               <span className="font-medium">{u.points?.toLocaleString() ?? 0}</span>
             </div>
             <div className="flex gap-2">

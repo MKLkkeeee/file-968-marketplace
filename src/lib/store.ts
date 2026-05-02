@@ -179,7 +179,7 @@ export const transferPointsByUsername = async (
   amount: number
 ) => {
   if (!Number.isFinite(amount) || amount <= 0) {
-    throw new Error("จำนวน Point ต้องมากกว่า 0");
+    throw new Error("จำนวนบาทต้องมากกว่า 0");
   }
   const intAmount = Math.floor(amount);
 
@@ -196,7 +196,7 @@ export const transferPointsByUsername = async (
   // check sender balance
   const fromSnap = await get(ref(db, `users/${fromUid}/points`));
   const fromPoints = fromSnap.exists() ? Number(fromSnap.val()) : 0;
-  if (fromPoints < intAmount) throw new Error("ยอด Point ไม่เพียงพอ");
+  if (fromPoints < intAmount) throw new Error("ยอดเงินไม่เพียงพอ");
 
   const toPoints = Number(target.points || 0);
 
@@ -271,7 +271,7 @@ export const redeemPointCode = async (
   }
 
   if (item.type !== "point") {
-    return { success: false, message: "โค้ดนี้ไม่ใช่ Point Code" };
+    return { success: false, message: "โค้ดนี้ไม่ใช่ โค้ดเติมเงิน" };
   }
 
   if (item.usedBy?.[uid]) {
