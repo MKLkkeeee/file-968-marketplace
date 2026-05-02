@@ -455,7 +455,7 @@ function ProductManager({ categories, products }: { categories: Category[]; prod
                       <TableCell>{cat ? `${cat.icon} ${cat.name}` : "-"}</TableCell>
                       <TableCell>{p.price}</TableCell>
                       <TableCell>
-                        <Badge variant={stk > 0 ? "outline" : "destructive"}>{stk}</Badge>
+                        <Badge variant={stk > 0 ? "outline" : "destructive"}>{stk === Infinity ? "∞" : stk}</Badge>
                       </TableCell>
                       <TableCell>
                         <Button asChild size="icon" variant="ghost" title="ดูรายละเอียด">
