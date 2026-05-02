@@ -702,9 +702,10 @@ function AnnouncementManager({ announcements }: { announcements: Announcement[] 
   const [mode, setMode] = useState<"timed" | "permanent">("timed");
   const [minutes, setMinutes] = useState<number>(60);
   const [active, setActive] = useState(true);
+  const [priority, setPriority] = useState<"high" | "normal">("normal");
 
   const openCreate = () => {
-    setEdit(null); setText(""); setMode("timed"); setMinutes(60); setActive(true);
+    setEdit(null); setText(""); setMode("timed"); setMinutes(60); setActive(true); setPriority("normal");
     setOpen(true);
   };
 
@@ -715,6 +716,7 @@ function AnnouncementManager({ announcements }: { announcements: Announcement[] 
     const remaining = a.expiresAt ? Math.max(1, Math.round((a.expiresAt - Date.now()) / 60000)) : 60;
     setMinutes(remaining);
     setActive(a.active);
+    setPriority(a.priority === "high" ? "high" : "normal");
     setOpen(true);
   };
 
@@ -728,6 +730,7 @@ function AnnouncementManager({ announcements }: { announcements: Announcement[] 
       active,
       permanent: mode === "permanent",
       expiresAt: mode === "permanent" ? null : Date.now() + minutes * 60_000,
+      priority,
     };
 
     if (edit) await updateAnnouncement(edit.id, data);
