@@ -142,11 +142,20 @@ export default function Wheel() {
         reward = "-";
       }
 
-      // Land pointer (top, 0deg) at the middle of slice idx
-      const sliceMid = idx * sliceAngle + sliceAngle / 2;
+      // Conic gradient starts at -sliceAngle/2, so the CENTER of slice i
+      // sits at angle (i * sliceAngle) on the wheel (0deg = top, clockwise).
+      // To bring that center under the top pointer after rotating the wheel
+      // by R degrees clockwise, we need: (sliceMid + R) mod 360 === 0
+      // => R mod 360 === (360 - sliceMid) mod 360
+      const sliceMid = idx * sliceAngle;
       const turns = 6 + Math.floor(Math.random() * 3);
-      const target = turns * 360 + (360 - sliceMid);
-      const newAngle = angle + (target - (angle % 360));
+      // Add a tiny random jitter inside the slice so it doesn't always land dead-center
+      const jitter = (Math.random() - 0.5) * (sliceAngle * 0.6);
+      const currentMod = ((angle % 360) + 360) % 360;
+      const desiredMod = ((360 - sliceMid) % 360 + 360) % 360;
+      let delta = desiredMod - currentMod;
+      if (delta < 0) delta += 360;
+      const newAngle = angle + turns * 360 + delta + jitter;
       setAngle(newAngle);
 
       await new Promise((r) => setTimeout(r, 5200));
