@@ -34,13 +34,13 @@ export const Navbar = () => {
   return (
     <>
     <header className="sticky top-0 z-50 glass">
-      <div className="container flex h-16 items-center justify-between">
-        <Link to="/" className="group flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-xl transition-all group-hover:border-white/25">
-            <img src={boxLogo} alt="logo" className="h-7 w-7 object-contain" />
+      <div className="container px-3 sm:px-6 flex h-16 items-center justify-between gap-2">
+        <Link to="/" className="group flex items-center gap-2 sm:gap-3 min-w-0">
+          <div className="flex h-9 w-9 sm:h-10 sm:w-10 flex-shrink-0 items-center justify-center rounded-xl border border-white/10 bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-xl transition-all group-hover:border-white/25">
+            <img src={boxLogo} alt="logo" className="h-6 w-6 sm:h-7 sm:w-7 object-contain" />
           </div>
-          <div className="font-display text-lg font-bold tracking-tight">
-            FILE 968 <span className="text-white/40">SHOP</span>
+          <div className="font-display text-sm sm:text-lg font-bold tracking-tight truncate">
+            FILE 968 <span className="text-white/40 hidden xs:inline">SHOP</span>
           </div>
         </Link>
 
