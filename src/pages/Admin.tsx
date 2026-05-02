@@ -83,8 +83,7 @@ export default function Admin() {
     const off4 = onValue(ref(db, "users"), (s) => setUsers(s.exists() ? Object.values(s.val()) : []));
     const off5 = onValue(ref(db, "orders"), (s) => setOrders(s.exists() ? Object.values(s.val()) : []));
     const off6 = onValue(ref(db, "topups"), (s) => setTopups(s.exists() ? Object.values(s.val()) : []));
-    const off7 = onValue(ref(db, "announcements"), (s) => setAnnouncements(s.exists() ? Object.values(s.val()) : []));
-    return () => { off1(); off2(); off3(); off4(); off5(); off6(); off7(); };
+    return () => { off1(); off2(); off3(); off4(); off5(); off6(); };
   }, []);
 
   if (!unlocked) {
