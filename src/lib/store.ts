@@ -33,6 +33,12 @@ export interface DiscountCode {
   productIds?: string[];
   /** ถ้ามีค่า = ใช้ได้กับสินค้าในหมวดหมู่ใน list นี้ (สำหรับ type="discount" เท่านั้น) */
   categoryIds?: string[];
+  /** เงื่อนไขผู้ใช้ที่ใช้โค้ดได้ (สำหรับ type="point") — default = "all" */
+  userScope?: "all" | "new" | "specific";
+  /** จำนวนวันสำหรับเงื่อนไข "new" (default 2) */
+  newUserDays?: number;
+  /** uid ของผู้ใช้ที่ใช้ได้ (สำหรับ userScope="specific") */
+  userIds?: string[];
   createdAt: number;
 }
 
