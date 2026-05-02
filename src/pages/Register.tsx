@@ -13,14 +13,26 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const validatePassword = (pwd: string): string | null => {
+    if (pwd.length < 8) return "รหัสผ่านต้องอย่างน้อย 8 ตัวอักษร";
+    if (!/[a-z]/.test(pwd)) return "รหัสผ่านต้องมีตัวพิมพ์เล็ก (a-z) อย่างน้อย 1 ตัว";
+    if (!/[A-Z]/.test(pwd)) return "รหัสผ่านต้องมีตัวพิมพ์ใหญ่ (A-Z) อย่างน้อย 1 ตัว";
+    if (!/[0-9]/.test(pwd)) return "รหัสผ่านต้องมีตัวเลข (0-9) อย่างน้อย 1 ตัว";
+    if (!/[!@#$%^&*()\-_=+[\]{};:'",.<>/?\\|`~]/.test(pwd)) {
+      return "รหัสผ่านต้องมีอักขระพิเศษอย่างน้อย 1 ตัว เช่น @ # $ % - _ !";
+    }
+    return null;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username.trim()) {
       toast.error("กรุณากรอกชื่อผู้ใช้");
       return;
     }
-    if (password.length < 6) {
-      toast.error("รหัสผ่านต้องอย่างน้อย 6 ตัวอักษร");
+    const pwdErr = validatePassword(password);
+    if (pwdErr) {
+      toast.error("รหัสผ่านไม่ปลอดภัย", { description: pwdErr });
       return;
     }
     setLoading(true);
@@ -39,6 +51,15 @@ export default function Register() {
       setLoading(false);
     }
   };
+
+  // ตัวบ่งชี้ความแข็งแรงของรหัสผ่าน (real-time)
+  const checks = [
+    { label: "อย่างน้อย 8 ตัวอักษร", ok: password.length >= 8 },
+    { label: "มีตัวพิมพ์เล็ก (a-z)", ok: /[a-z]/.test(password) },
+    { label: "มีตัวพิมพ์ใหญ่ (A-Z)", ok: /[A-Z]/.test(password) },
+    { label: "มีตัวเลข (0-9)", ok: /[0-9]/.test(password) },
+    { label: "มีอักขระพิเศษ (@ # $ % - _ !)", ok: /[!@#$%^&*()\-_=+[\]{};:'",.<>/?\\|`~]/.test(password) },
+  ];
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#050505] px-4 py-12 text-white">
@@ -91,7 +112,7 @@ export default function Register() {
               />
             </div>
             <div>
-              <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-white/60">รหัสผ่าน (อย่างน้อย 6 ตัว)</label>
+              <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-white/60">รหัสผ่าน</label>
               <input
                 type="password"
                 required
@@ -100,6 +121,21 @@ export default function Register() {
                 placeholder="••••••••"
                 className="w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-white/30 focus:bg-white/[0.06]"
               />
+              {password.length > 0 && (
+                <ul className="mt-2 grid grid-cols-1 gap-1 text-xs sm:grid-cols-2">
+                  {checks.map((c) => (
+                    <li
+                      key={c.label}
+                      className={"flex items-center gap-1.5 " + (c.ok ? "text-success" : "text-white/40")}
+                    >
+                      <span className={"inline-block h-3.5 w-3.5 rounded-full text-center text-[10px] leading-[14px] " + (c.ok ? "bg-success/20" : "bg-white/10")}>
+                        {c.ok ? "✓" : "•"}
+                      </span>
+                      {c.label}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
             <button
               type="submit"
