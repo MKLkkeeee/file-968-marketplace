@@ -11,9 +11,10 @@ import { useCart } from "@/contexts/CartContext";
 import { toast } from "sonner";
 import { Coins, Package, ShoppingCart, Sparkles } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
+import Landing from "./Landing";
 
 export default function Index() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const { add } = useCart();
   const navigate = useNavigate();
   const [categories, setCategories] = useState<Category[]>([]);
@@ -39,6 +40,16 @@ export default function Index() {
     add(p);
     toast.success(`เพิ่ม "${p.name}" ลงตะกร้าแล้ว`);
   };
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#050505]">
+        <div className="h-10 w-10 animate-spin rounded-full border-2 border-white/20 border-t-white" />
+      </div>
+    );
+  }
+
+  if (!user) return <Landing />;
 
   return (
     <div className="min-h-screen">

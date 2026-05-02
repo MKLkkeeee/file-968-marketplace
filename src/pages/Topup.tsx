@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
-import { adjustPoints, findDiscountByCode, isReceiverNameMatch, recordTopup, updateDiscount, verifyBankSlip, verifyTruewalletGift } from "@/lib/store";
 import { SHOP_TRUEWALLET_PHONE, SHOP_PROMPTPAY, BANK_RECEIVER_NAME } from "@/lib/firebase";
 import { toast } from "sonner";
 import { Building2, Copy, Gift, Loader2, Upload, Wallet } from "lucide-react";
