@@ -16,7 +16,7 @@ import {
   updatePassword,
 } from "firebase/auth";
 import { toast } from "sonner";
-import { Camera, Coins, History, KeyRound, Loader2, Mail, Shield, User as UserIcon, Wallet } from "lucide-react";
+import { Camera, Coins, Heart, History, KeyRound, Loader2, Mail, Package, Shield, ShoppingCart, User as UserIcon, Wallet } from "lucide-react";
 import { motion } from "framer-motion";
 import { fileToResizedDataUrl } from "@/lib/imageUtils";
 
@@ -240,6 +240,8 @@ export default function Profile() {
             บันทึกรหัสผ่านใหม่
           </Button>
         </Card>
+
+        <FavoritesSection />
       </motion.div>
       <Footer />
     </div>
