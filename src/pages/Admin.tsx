@@ -30,7 +30,9 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { UserProfile } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { Lock, Megaphone, Pencil, Plus, Shield, Trash2 } from "lucide-react";
+import { Lock, Megaphone, Pencil, Plus, Shield, Trash2, X } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { sendRestockWebhook } from "@/lib/discord";
 import { motion } from "framer-motion";
 import { Paginator, usePaged } from "@/components/Paginator";
@@ -186,7 +188,7 @@ export default function Admin() {
           <TabsContent value="discounts">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
               <Card className="card-elegant p-6">
-                <DiscountManager discounts={discounts} />
+                <DiscountManager discounts={discounts} products={products} categories={categories} />
               </Card>
             </motion.div>
           </TabsContent>
