@@ -16,6 +16,7 @@ import Orders from "./pages/Orders.tsx";
 import ProductDetail from "./pages/ProductDetail.tsx";
 import Profile from "./pages/Profile.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import Wheel from "./pages/Wheel.tsx";
 import { WelcomePopup } from "@/components/WelcomePopup";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,7 @@ const App = () => (
               <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
               <Route path="/topup" element={<ProtectedRoute><Topup /></ProtectedRoute>} />
+              <Route path="/wheel" element={<Wheel />} />
               <Route path="/admins" element={<ProtectedRoute adminOnly><Admin /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
