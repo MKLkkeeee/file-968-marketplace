@@ -455,6 +455,8 @@ function ProductManager({ categories, products }: { categories: Category[]; prod
 function DiscountManager({ discounts }: { discounts: DiscountCode[] }) {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ code: "", type: "discount" as "discount" | "point", value: 10, maxUses: 100, active: true });
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
 
   const submit = async () => {
     if (!form.code.trim()) {
@@ -498,27 +500,47 @@ function DiscountManager({ discounts }: { discounts: DiscountCode[] }) {
           </DialogContent>
         </Dialog>
       </div>
-      <Table>
-        <TableHeader><TableRow>
-          <TableHead>โค้ด</TableHead><TableHead>ประเภท</TableHead><TableHead>ค่า</TableHead><TableHead>การใช้งาน</TableHead><TableHead>สถานะ</TableHead><TableHead></TableHead>
-        </TableRow></TableHeader>
-        <TableBody>
-          {discounts.map((d) => (
-            <TableRow key={d.id}>
-              <TableCell className="font-mono font-bold">{d.code}</TableCell>
-              <TableCell><Badge variant="outline">{d.type}</Badge></TableCell>
-              <TableCell>{d.value}</TableCell>
-              <TableCell>{d.usedCount}/{d.maxUses}</TableCell>
-              <TableCell><Switch checked={d.active} onCheckedChange={(v) => updateDiscount(d.id, { active: v })} /></TableCell>
-              <TableCell>
-                <Button size="icon" variant="ghost" onClick={() => deleteDiscount(d.id)}>
-                  <Trash2 className="h-4 w-4 text-destructive" />
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      <div className="mb-4 relative">
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+        <Input
+          placeholder="ค้นหาโค้ด / ประเภท..."
+          value={search}
+          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+          className="pl-9"
+        />
+      </div>
+      {(() => {
+        const filtered = discounts.filter((d) =>
+          `${d.code} ${d.type}`.toLowerCase().includes(search.toLowerCase())
+        );
+        const { slice, totalPages, page: pg } = usePaged(filtered, page, 10);
+        return (
+          <>
+            <Table>
+              <TableHeader><TableRow>
+                <TableHead>โค้ด</TableHead><TableHead>ประเภท</TableHead><TableHead>ค่า</TableHead><TableHead>การใช้งาน</TableHead><TableHead>สถานะ</TableHead><TableHead></TableHead>
+              </TableRow></TableHeader>
+              <TableBody>
+                {slice.map((d) => (
+                  <TableRow key={d.id}>
+                    <TableCell className="font-mono font-bold">{d.code}</TableCell>
+                    <TableCell><Badge variant="outline">{d.type}</Badge></TableCell>
+                    <TableCell>{d.value}</TableCell>
+                    <TableCell>{d.usedCount}/{d.maxUses}</TableCell>
+                    <TableCell><Switch checked={d.active} onCheckedChange={(v) => updateDiscount(d.id, { active: v })} /></TableCell>
+                    <TableCell>
+                      <Button size="icon" variant="ghost" onClick={() => deleteDiscount(d.id)}>
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+            <Paginator page={pg} totalPages={totalPages} onChange={setPage} />
+          </>
+        );
+      })()}
     </>
   );
 }
