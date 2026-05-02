@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,9 +6,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
-import { SHOP_TRUEWALLET_PHONE, SHOP_PROMPTPAY, BANK_RECEIVER_NAME } from "@/lib/firebase";
+import { SHOP_TRUEWALLET_PHONE, SHOP_PROMPTPAY, BANK_RECEIVER_NAME, db } from "@/lib/firebase";
+import { onValue, ref as dbRef } from "firebase/database";
+import { Paginator, usePaged } from "@/components/Paginator";
+import { Topup as TopupType } from "@/lib/store";
 import { toast } from "sonner";
-import { Building2, Copy, Gift, Loader2, Upload, Wallet } from "lucide-react";
+import { Building2, Copy, Gift, History, Loader2, Upload, Wallet, Banknote, KeyRound } from "lucide-react";
 import { Html5Qrcode } from "html5-qrcode";
 import {
   adjustPoints,
@@ -25,6 +28,22 @@ import {
 export default function Topup() {
   const { user, profile, refreshProfile } = useAuth();
   const [tab, setTab] = useState("truewallet");
+  const [historyPage, setHistoryPage] = useState(1);
+  const [history, setHistory] = useState<TopupType[]>([]);
+
+  useEffect(() => {
+    if (!user) return;
+    const off = onValue(dbRef(db, "topups"), (snap) => {
+      const all: TopupType[] = snap.exists() ? Object.values(snap.val()) : [];
+      const mine = all
+        .filter((t) => t.userId === user.uid)
+        .sort((a, b) => b.createdAt - a.createdAt);
+      setHistory(mine);
+    });
+    return () => off();
+  }, [user]);
+
+  const paged = usePaged(history, historyPage, 10);
 
   // TrueWallet
   const [phone, setPhone] = useState(SHOP_TRUEWALLET_PHONE);
@@ -320,6 +339,50 @@ export default function Topup() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Topup history */}
+        <Card className="card-elegant mt-8 p-6">
+          <div className="mb-4 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04]">
+              <History className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h3 className="font-display text-xl font-semibold">ประวัติการเติมเงิน</h3>
+              <p className="text-xs text-white/50">รายการเติมเงินทั้งหมดของคุณ</p>
+            </div>
+          </div>
+
+          {history.length === 0 ? (
+            <p className="py-8 text-center text-sm text-white/40">ยังไม่มีรายการเติมเงิน</p>
+          ) : (
+            <>
+              <div className="space-y-2">
+                {paged.slice.map((t) => {
+                  const Icon = t.method === "truewallet" ? Wallet : t.method === "bank" ? Banknote : KeyRound;
+                  const label = t.method === "truewallet" ? "TrueMoney" : t.method === "bank" ? "ธนาคาร" : "Special Code";
+                  return (
+                    <div key={t.id} className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04]">
+                          <Icon className="h-4 w-4 text-white/80" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold">{label}</p>
+                          <p className="truncate text-xs text-white/40" title={t.ref}>{t.ref || "-"}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-display text-lg font-bold text-success">+{t.amount.toLocaleString()}</p>
+                        <p className="text-[11px] text-white/40">{new Date(t.createdAt).toLocaleString("th-TH")}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <Paginator page={paged.page} totalPages={paged.totalPages} onChange={setHistoryPage} />
+            </>
+          )}
+        </Card>
       </div>
     </div>
   );
