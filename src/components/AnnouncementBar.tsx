@@ -44,8 +44,8 @@ export function AnnouncementBar() {
     <div className="flex flex-col">
       {rows.map((row, idx) => {
         const isHigh = row.kind === "high";
-        // Speed: ~40px per second, min 14s, max 60s — keeps reading speed comfortable
-        const duration = Math.min(60, Math.max(14, Math.round(row.text.length * 0.18)));
+        // Speed: faster — ~90px/sec
+        const duration = Math.min(30, Math.max(8, Math.round(row.text.length * 0.08)));
 
         return (
           <div
@@ -74,15 +74,7 @@ export function AnnouncementBar() {
               </div>
 
               {/* Marquee with edge fade mask */}
-              <div
-                className="relative flex-1 overflow-hidden"
-                style={{
-                  WebkitMaskImage:
-                    "linear-gradient(to right, transparent 0, #000 32px, #000 calc(100% - 32px), transparent 100%)",
-                  maskImage:
-                    "linear-gradient(to right, transparent 0, #000 32px, #000 calc(100% - 32px), transparent 100%)",
-                }}
-              >
+              <div className="relative flex-1 overflow-hidden">
                 <div
                   className={
                     "marquee-track flex whitespace-nowrap text-sm " +
