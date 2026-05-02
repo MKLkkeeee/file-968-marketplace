@@ -48,6 +48,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(u);
       if (u) {
         const profileRef = ref(db, `users/${u.uid}`);
+        // Mark online + register onDisconnect to flip offline + record lastSeen
+        try {
+          await update(profileRef, { online: true, lastSeenAt: Date.now() });
+          onDisconnect(profileRef).update({ online: false, lastSeenAt: serverTimestamp() as any });
+        } catch {}
         const unsubProfile = onValue(profileRef, (snap) => {
           if (snap.exists()) setProfile(snap.val() as UserProfile);
         });
