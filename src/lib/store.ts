@@ -29,6 +29,10 @@ export interface DiscountCode {
   usedCount: number;
   usedBy?: Record<string, boolean>;
   active: boolean;
+  /** ถ้ามีค่า = ใช้ได้กับเฉพาะสินค้าใน list นี้ (สำหรับ type="discount" เท่านั้น) */
+  productIds?: string[];
+  /** ถ้ามีค่า = ใช้ได้กับสินค้าในหมวดหมู่ใน list นี้ (สำหรับ type="discount" เท่านั้น) */
+  categoryIds?: string[];
   createdAt: number;
 }
 
