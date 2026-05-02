@@ -63,6 +63,17 @@ export default function Admin() {
       toast.error("กรุณาระบุจำนวน Point");
       return;
     }
+
+    if (mode === "remove") {
+      const target = users.find((u) => u.uid === uid);
+      const current = target?.points ?? 0;
+      if (amount > current) {
+        toast.error("ลบไม่สำเร็จ", {
+          description: `ผู้ใช้มีเพียง ${current.toLocaleString()} Point ไม่สามารถลบ ${amount.toLocaleString()} ได้`,
+        });
+        return;
+      }
+    }
     
     try {
       const delta = mode === "add" ? amount : -amount;
