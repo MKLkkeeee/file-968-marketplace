@@ -1,5 +1,8 @@
-import { useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRef, useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { onValue, ref as dbRef2 } from "firebase/database";
+import { Product } from "@/lib/store";
+import { FavoriteButton } from "@/components/FavoriteButton";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Card } from "@/components/ui/card";
@@ -248,11 +251,6 @@ export default function Profile() {
   );
 }
 
-import { useEffect } from "react";
-import { onValue, ref as dbRef2 } from "firebase/database";
-import { Link } from "react-router-dom";
-import { Product } from "@/lib/store";
-import { FavoriteButton } from "@/components/FavoriteButton";
 
 function FavoritesSection() {
   const { user } = useAuth();
