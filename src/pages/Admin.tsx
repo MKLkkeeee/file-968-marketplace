@@ -442,41 +442,82 @@ function ProductManager({ categories, products }: { categories: Category[]; prod
         const { slice, totalPages, page: pg } = usePaged(filtered, page, 10);
         return (
           <>
-            <Table>
-              <TableHeader><TableRow>
-                <TableHead></TableHead><TableHead>ชื่อ</TableHead><TableHead>หมวด</TableHead><TableHead>ราคา</TableHead><TableHead>Stock</TableHead><TableHead></TableHead>
-              </TableRow></TableHeader>
-              <TableBody>
-                {slice.map((p) => {
-                  const cat = categories.find((c) => c.id === p.categoryId);
-                  const stk = stockCount(p.stockItems);
-                  return (
-                    <TableRow key={p.id}>
-                      <TableCell>{p.image && <img src={p.image} className="h-10 w-10 rounded object-cover" />}</TableCell>
-                      <TableCell className="font-medium">{p.name}</TableCell>
-                      <TableCell>{cat ? `${cat.icon} ${cat.name}` : "-"}</TableCell>
-                      <TableCell>{p.price}</TableCell>
-                      <TableCell>
-                        <Badge variant={stk > 0 ? "outline" : "destructive"}>{stk === Infinity ? "∞" : stk}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Button asChild size="icon" variant="ghost" title="ดูรายละเอียด">
-                          <a href={`/product/${p.id}`} target="_blank" rel="noreferrer">
-                            <Eye className="h-4 w-4" />
-                          </a>
+            {/* Desktop table */}
+            <div className="hidden md:block">
+              <Table>
+                <TableHeader><TableRow>
+                  <TableHead></TableHead><TableHead>ชื่อ</TableHead><TableHead>หมวด</TableHead><TableHead>ราคา</TableHead><TableHead>Stock</TableHead><TableHead></TableHead>
+                </TableRow></TableHeader>
+                <TableBody>
+                  {slice.map((p) => {
+                    const cat = categories.find((c) => c.id === p.categoryId);
+                    const stk = stockCount(p.stockItems);
+                    return (
+                      <TableRow key={p.id}>
+                        <TableCell>{p.image && <img src={p.image} className="h-10 w-10 rounded object-cover" />}</TableCell>
+                        <TableCell className="font-medium">{p.name}</TableCell>
+                        <TableCell>{cat ? `${cat.icon} ${cat.name}` : "-"}</TableCell>
+                        <TableCell>{p.price}</TableCell>
+                        <TableCell>
+                          <Badge variant={stk > 0 ? "outline" : "destructive"}>{stk === Infinity ? "∞" : stk}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Button asChild size="icon" variant="ghost" title="ดูรายละเอียด">
+                            <a href={`/product/${p.id}`} target="_blank" rel="noreferrer">
+                              <Eye className="h-4 w-4" />
+                            </a>
+                          </Button>
+                          <Button size="icon" variant="ghost" onClick={() => { setEdit(p); setForm({ name: p.name, description: p.description, price: p.price, image: p.image, categoryId: p.categoryId, stockItems: p.stockItems || "" }); setOpen(true); }}>
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button size="icon" variant="ghost" onClick={() => deleteProduct(p.id)}>
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Mobile cards */}
+            <div className="md:hidden space-y-3">
+              {slice.map((p) => {
+                const cat = categories.find((c) => c.id === p.categoryId);
+                const stk = stockCount(p.stockItems);
+                return (
+                  <div key={p.id} className="rounded-2xl border border-white/10 bg-white/[0.03] p-3 flex gap-3">
+                    {p.image ? (
+                      <img src={p.image} className="h-16 w-16 rounded-lg object-cover flex-shrink-0" />
+                    ) : (
+                      <div className="h-16 w-16 rounded-lg bg-white/5 flex-shrink-0" />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium truncate">{p.name}</div>
+                      <div className="text-xs text-muted-foreground truncate">{cat ? `${cat.icon} ${cat.name}` : "-"}</div>
+                      <div className="mt-1 flex items-center gap-2 text-sm">
+                        <span className="font-semibold">{p.price}</span>
+                        <Badge variant={stk > 0 ? "outline" : "destructive"} className="text-xs">{stk === Infinity ? "∞" : stk}</Badge>
+                      </div>
+                      <div className="mt-2 flex gap-1">
+                        <Button asChild size="icon" variant="ghost" className="h-8 w-8">
+                          <a href={`/product/${p.id}`} target="_blank" rel="noreferrer"><Eye className="h-4 w-4" /></a>
                         </Button>
-                        <Button size="icon" variant="ghost" onClick={() => { setEdit(p); setForm({ name: p.name, description: p.description, price: p.price, image: p.image, categoryId: p.categoryId, stockItems: p.stockItems || "" }); setOpen(true); }}>
+                        <Button size="icon" variant="ghost" className="h-8 w-8"
+                          onClick={() => { setEdit(p); setForm({ name: p.name, description: p.description, price: p.price, image: p.image, categoryId: p.categoryId, stockItems: p.stockItems || "" }); setOpen(true); }}>
                           <Pencil className="h-4 w-4" />
                         </Button>
-                        <Button size="icon" variant="ghost" onClick={() => deleteProduct(p.id)}>
+                        <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => deleteProduct(p.id)}>
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
             <Paginator page={pg} totalPages={totalPages} onChange={setPage} />
           </>
         );
