@@ -168,65 +168,111 @@ export default function Index() {
           ))}
         </div>
 
-        {filtered.length === 0 ? (
+        {filteredAll.length === 0 ? (
           <Card className="card-elegant flex flex-col items-center gap-3 p-16 text-center">
             <Package className="h-12 w-12 text-white/30" />
             <p className="text-white/50">ยังไม่มีสินค้าในหมวดนี้</p>
           </Card>
         ) : (
-          <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4">
-            {filtered.map((p) => {
-              const stk = stockCount(p.stockItems);
-              return (
-                <Link to={`/product/${p.id}`} key={p.id}>
-                  <Card className="card-elegant group cursor-pointer overflow-hidden p-0">
-                    <div className="relative aspect-square overflow-hidden bg-white/[0.02]">
-                      {p.image ? (
-                        <img src={p.image} alt={p.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                      ) : (
-                        <div className="flex h-full items-center justify-center"><Package className="h-12 w-12 text-white/20" /></div>
-                      )}
-                      <FavoriteButton productId={p.id} stopPropagation className="absolute right-2 top-2" />
-                    </div>
-                    <div className="p-4">
-                      <h3 className="line-clamp-1 font-semibold text-white">{p.name}</h3>
-                      <p className="line-clamp-2 mt-1 text-xs text-white/50">{p.description || "-"}</p>
-                      <div className="mt-3 flex items-center justify-between">
-                        <div className="flex items-center gap-1 text-warning">
-                          <Coins className="h-4 w-4" />
-                          <span className="font-bold">{p.price.toLocaleString()}</span>
+          <div className="relative">
+            {/* Prev */}
+            <button
+              type="button"
+              onClick={() => scrollByCard(-1)}
+              aria-label="เลื่อนซ้าย"
+              className="absolute left-0 top-1/2 z-10 hidden -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-black/70 p-3 text-white shadow-[0_8px_30px_rgba(0,0,0,0.6)] backdrop-blur-md transition hover:bg-black md:flex"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            {/* Next */}
+            <button
+              type="button"
+              onClick={() => scrollByCard(1)}
+              aria-label="เลื่อนขวา"
+              className="absolute right-0 top-1/2 z-10 hidden -translate-y-1/2 translate-x-1/2 items-center justify-center rounded-full border border-white/15 bg-black/70 p-3 text-white shadow-[0_8px_30px_rgba(0,0,0,0.6)] backdrop-blur-md transition hover:bg-black md:flex"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+
+            <div
+              ref={scrollerRef}
+              className="scrollbar-hide flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth pb-4"
+              style={{ scrollbarWidth: "none" }}
+            >
+              {filteredAll.map((p) => {
+                const stk = stockCount(p.stockItems);
+                return (
+                  <Link
+                    to={`/product/${p.id}`}
+                    key={p.id}
+                    data-product-card
+                    className="w-[70%] flex-shrink-0 snap-start sm:w-[45%] md:w-[31%] lg:w-[23%]"
+                  >
+                    <Card className="card-elegant group h-full cursor-pointer overflow-hidden p-0">
+                      <div className="relative aspect-square overflow-hidden bg-white/[0.02]">
+                        {p.image ? (
+                          <img src={p.image} alt={p.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                        ) : (
+                          <div className="flex h-full items-center justify-center"><Package className="h-12 w-12 text-white/20" /></div>
+                        )}
+                        <FavoriteButton productId={p.id} stopPropagation className="absolute right-2 top-2" />
+                      </div>
+                      <div className="p-4">
+                        <h3 className="line-clamp-1 font-semibold text-white">{p.name}</h3>
+                        <p className="line-clamp-2 mt-1 text-xs text-white/50">{p.description || "-"}</p>
+                        <div className="mt-3 flex items-center justify-between">
+                          <div className="flex items-center gap-1 text-warning">
+                            <Coins className="h-4 w-4" />
+                            <span className="font-bold">{p.price.toLocaleString()}</span>
+                          </div>
+                          <Badge variant={stk > 0 ? "outline" : "destructive"} className="text-xs">
+                            {stk > 0 ? `stock ${stk}` : "หมด"}
+                          </Badge>
                         </div>
-                        <Badge variant={stk > 0 ? "outline" : "destructive"} className="text-xs">
-                          {stk > 0 ? `stock ${stk}` : "หมด"}
-                        </Badge>
+                        <div className="mt-3 grid grid-cols-2 gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); navigate(`/product/${p.id}`); }}
+                          >
+                            <Eye className="h-4 w-4" /> ดูรายละเอียด
+                          </Button>
+                          <Button
+                            size="sm"
+                            disabled={stk <= 0}
+                            onClick={(e) => handleAdd(e, p)}
+                          >
+                            <ShoppingCart className="h-4 w-4" /> ใส่ตะกร้า
+                          </Button>
+                        </div>
                       </div>
-                      <div className="mt-3 grid grid-cols-2 gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); navigate(`/product/${p.id}`); }}
-                        >
-                          <Eye className="h-4 w-4" /> ดูรายละเอียด
-                        </Button>
-                        <Button
-                          size="sm"
-                          disabled={stk <= 0}
-                          onClick={(e) => handleAdd(e, p)}
-                        >
-                          <ShoppingCart className="h-4 w-4" /> ใส่ตะกร้า
-                        </Button>
-                      </div>
-                    </div>
-                  </Card>
-                </Link>
-              );
-            })}
+                    </Card>
+                  </Link>
+                );
+              })}
+            </div>
+
+            {/* Mobile controls */}
+            <div className="mt-3 flex items-center justify-center gap-3 md:hidden">
+              <button
+                type="button"
+                onClick={() => scrollByCard(-1)}
+                aria-label="เลื่อนซ้าย"
+                className="flex items-center justify-center rounded-full border border-white/15 bg-white/[0.05] p-2 text-white"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              <span className="text-xs text-white/40">{filteredAll.length} รายการ</span>
+              <button
+                type="button"
+                onClick={() => scrollByCard(1)}
+                aria-label="เลื่อนขวา"
+                className="flex items-center justify-center rounded-full border border-white/15 bg-white/[0.05] p-2 text-white"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+            </div>
           </div>
-        )}
-        {filteredAll.length > 6 && (
-          <p className="mt-6 text-center text-xs text-white/40">
-            แสดง 6 จาก {filteredAll.length} รายการ — ใช้ช่องค้นหาเพื่อหารายการเพิ่มเติม
-          </p>
         )}
       </section>
       <Footer />
