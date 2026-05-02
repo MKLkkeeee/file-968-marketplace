@@ -415,7 +415,7 @@ function ProductManager({ categories, products }: { categories: Category[]; prod
                   onChange={(e) => setForm({ ...form, isHot: e.target.checked })}
                   className="h-4 w-4 accent-primary"
                 />
-                <span className="text-sm font-medium">🔥 ตั้งเป็นสินค้า HOT</span>
+                <span className="text-sm font-medium">ตั้งเป็นสินค้า HOT</span>
                 <span className="text-xs text-muted-foreground ml-auto">แสดงป้าย "HOT" มุมขวาบนของสินค้า</span>
               </label>
               <div>

@@ -61,7 +61,7 @@ export default function ProductDetail() {
               )}
               {product.isHot && (
                 <div className="absolute right-3 top-3 select-none rounded-full bg-gradient-to-r from-red-500 to-orange-500 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-white shadow-lg shadow-red-500/40 animate-pulse">
-                  🔥 HOT
+                  HOT
                 </div>
               )}
             </div>
