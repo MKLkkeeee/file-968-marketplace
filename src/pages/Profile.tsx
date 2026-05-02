@@ -93,6 +93,8 @@ export default function Profile() {
     if (!toName) return toast.error("กรุณากรอกชื่อผู้ใช้ปลายทาง");
     if (toName.toLowerCase() === (profile.username || "").toLowerCase())
       return toast.error("ไม่สามารถโอนให้ตัวเองได้");
+    if (usernameStatus === "checking") return toast.error("กำลังตรวจสอบชื่อผู้ใช้ กรุณารอสักครู่");
+    if (usernameStatus !== "found") return toast.error("ไม่พบชื่อผู้ใช้ปลายทาง");
     if (!Number.isFinite(amount) || amount <= 0)
       return toast.error("จำนวน Point ต้องมากกว่า 0");
     if (amount > (profile.points || 0)) return toast.error("ยอด Point ไม่เพียงพอ");
