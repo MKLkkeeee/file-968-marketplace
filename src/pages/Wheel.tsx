@@ -72,6 +72,9 @@ export default function Wheel() {
   const [pointerTicking, setPointerTicking] = useState(false);
   const [result, setResult] = useState<{ slice: WheelSlice; reward: string } | null>(null);
   const [showResult, setShowResult] = useState(false);
+  const [lastSummary, setLastSummary] = useState<{
+    cost: number; gainedPoints: number; sliceLabel: string; type: WheelSlice["type"]; at: number;
+  } | null>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
