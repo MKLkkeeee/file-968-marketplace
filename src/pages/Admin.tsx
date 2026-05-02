@@ -313,6 +313,8 @@ function ProductManager({ categories, products }: { categories: Category[]; prod
   const [open, setOpen] = useState(false);
   const [edit, setEdit] = useState<Product | null>(null);
   const [form, setForm] = useState({ name: "", description: "", price: 0, image: "", categoryId: "", stockItems: "" });
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
 
   const reset = () => setForm({ name: "", description: "", price: 0, image: "", categoryId: "", stockItems: "" });
 
@@ -396,36 +398,56 @@ function ProductManager({ categories, products }: { categories: Category[]; prod
           </DialogContent>
         </Dialog>
       </div>
-      <Table>
-        <TableHeader><TableRow>
-          <TableHead></TableHead><TableHead>ชื่อ</TableHead><TableHead>หมวด</TableHead><TableHead>ราคา</TableHead><TableHead>Stock</TableHead><TableHead></TableHead>
-        </TableRow></TableHeader>
-        <TableBody>
-          {products.map((p) => {
-            const cat = categories.find((c) => c.id === p.categoryId);
-            const stk = stockCount(p.stockItems);
-            return (
-              <TableRow key={p.id}>
-                <TableCell>{p.image && <img src={p.image} className="h-10 w-10 rounded object-cover" />}</TableCell>
-                <TableCell className="font-medium">{p.name}</TableCell>
-                <TableCell>{cat ? `${cat.icon} ${cat.name}` : "-"}</TableCell>
-                <TableCell>{p.price}</TableCell>
-                <TableCell>
-                  <Badge variant={stk > 0 ? "outline" : "destructive"}>{stk}</Badge>
-                </TableCell>
-                <TableCell>
-                  <Button size="icon" variant="ghost" onClick={() => { setEdit(p); setForm({ name: p.name, description: p.description, price: p.price, image: p.image, categoryId: p.categoryId, stockItems: p.stockItems || "" }); setOpen(true); }}>
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button size="icon" variant="ghost" onClick={() => deleteProduct(p.id)}>
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+      <div className="mb-4 relative">
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+        <Input
+          placeholder="ค้นหาสินค้า..."
+          value={search}
+          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+          className="pl-9"
+        />
+      </div>
+      {(() => {
+        const filtered = products.filter((p) =>
+          `${p.name} ${p.description}`.toLowerCase().includes(search.toLowerCase())
+        );
+        const { slice, totalPages, page: pg } = usePaged(filtered, page, 10);
+        return (
+          <>
+            <Table>
+              <TableHeader><TableRow>
+                <TableHead></TableHead><TableHead>ชื่อ</TableHead><TableHead>หมวด</TableHead><TableHead>ราคา</TableHead><TableHead>Stock</TableHead><TableHead></TableHead>
+              </TableRow></TableHeader>
+              <TableBody>
+                {slice.map((p) => {
+                  const cat = categories.find((c) => c.id === p.categoryId);
+                  const stk = stockCount(p.stockItems);
+                  return (
+                    <TableRow key={p.id}>
+                      <TableCell>{p.image && <img src={p.image} className="h-10 w-10 rounded object-cover" />}</TableCell>
+                      <TableCell className="font-medium">{p.name}</TableCell>
+                      <TableCell>{cat ? `${cat.icon} ${cat.name}` : "-"}</TableCell>
+                      <TableCell>{p.price}</TableCell>
+                      <TableCell>
+                        <Badge variant={stk > 0 ? "outline" : "destructive"}>{stk}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Button size="icon" variant="ghost" onClick={() => { setEdit(p); setForm({ name: p.name, description: p.description, price: p.price, image: p.image, categoryId: p.categoryId, stockItems: p.stockItems || "" }); setOpen(true); }}>
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button size="icon" variant="ghost" onClick={() => deleteProduct(p.id)}>
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+            <Paginator page={pg} totalPages={totalPages} onChange={setPage} />
+          </>
+        );
+      })()}
     </>
   );
 }
