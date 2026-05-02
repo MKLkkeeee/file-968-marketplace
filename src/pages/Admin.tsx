@@ -297,7 +297,7 @@ function CategoryManager({ categories }: { categories: Category[] }) {
               <Plus className="h-4 w-4" />เพิ่มหมวดหมู่
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="w-[calc(100vw-1.5rem)] max-w-md max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle>{edit ? "แก้ไข" : "เพิ่ม"}หมวดหมู่</DialogTitle></DialogHeader>
             <div className="space-y-3">
               <div><Label>ไอคอน</Label><Input value={icon} onChange={(e) => setIcon(e.target.value)} /></div>
@@ -390,7 +390,7 @@ function ProductManager({ categories, products }: { categories: Category[]; prod
               <Plus className="h-4 w-4" />เพิ่มสินค้า
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-lg">
+          <DialogContent className="w-[calc(100vw-1.5rem)] max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle>{edit ? "แก้ไข" : "เพิ่ม"}สินค้า</DialogTitle></DialogHeader>
             <div className="space-y-3">
               <div><Label>ชื่อสินค้า</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
@@ -592,7 +592,7 @@ function DiscountManager({
           <DialogTrigger asChild>
             <Button className="bg-gradient-primary text-primary-foreground"><Plus className="h-4 w-4" />เพิ่มโค้ด</Button>
           </DialogTrigger>
-          <DialogContent className="max-h-[85vh] overflow-y-auto">
+          <DialogContent className="w-[calc(100vw-1.5rem)] max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle>เพิ่มโค้ดใหม่</DialogTitle></DialogHeader>
             <div className="space-y-3">
               <div><Label>โค้ด</Label><Input value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })} /></div>
