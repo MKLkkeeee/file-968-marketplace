@@ -91,47 +91,49 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (identifier: string, password: string) => {
     let email = identifier.trim();
-    let targetUid: string | null = null;
+
+    // If user typed a username instead of email, look it up.
+    // This requires /users to be publicly readable in Firebase rules.
     if (!email.includes("@")) {
-      const snap = await get(ref(db, "users"));
-      if (!snap.exists()) throw new Error("ไม่พบบัญชีผู้ใช้");
-      const users = snap.val() as Record<string, UserProfile>;
-      const match = Object.values(users).find(
-        (u) => (u.username || "").toLowerCase() === email.toLowerCase()
-      );
-      if (!match) throw new Error("ไม่พบชื่อผู้ใช้นี้");
-      email = match.email;
-      targetUid = match.uid;
+      try {
+        const snap = await get(ref(db, "users"));
+        if (!snap.exists()) throw new Error("ไม่พบบัญชีผู้ใช้");
+        const users = snap.val() as Record<string, UserProfile>;
+        const match = Object.values(users).find(
+          (u) => (u.username || "").toLowerCase() === email.toLowerCase()
+        );
+        if (!match) throw new Error("ไม่พบชื่อผู้ใช้นี้");
+        email = match.email;
+      } catch (e: any) {
+        const msg = String(e?.message || e?.code || "");
+        if (msg.toLowerCase().includes("permission")) {
+          throw new Error("กรุณาเข้าสู่ระบบด้วยอีเมล (ระบบไม่อนุญาตให้ค้นหาด้วยชื่อผู้ใช้)");
+        }
+        throw e;
+      }
     }
+
     try {
       const cred = await signInWithEmailAndPassword(auth, email, password);
-      await update(ref(db, `users/${cred.user.uid}`), {
-        lastLoginAt: Date.now(),
-        lastLoginStatus: "success",
-        lastLoginError: null,
-      });
-    } catch (err: any) {
-      // Best-effort: record failed attempt if we know the uid
-      if (!targetUid) {
-        try {
-          const snap = await get(ref(db, "users"));
-          if (snap.exists()) {
-            const users = snap.val() as Record<string, UserProfile>;
-            const match = Object.values(users).find(
-              (u) => (u.email || "").toLowerCase() === email.toLowerCase()
-            );
-            if (match) targetUid = match.uid;
-          }
-        } catch {}
+      try {
+        await update(ref(db, `users/${cred.user.uid}`), {
+          lastLoginAt: Date.now(),
+          lastLoginStatus: "success",
+          lastLoginError: null,
+        });
+      } catch {
+        // ignore — profile node may not be writable yet
       }
-      if (targetUid) {
-        try {
-          await update(ref(db, `users/${targetUid}`), {
-            lastLoginAt: Date.now(),
-            lastLoginStatus: "failed",
-            lastLoginError: err?.code || err?.message || "unknown",
-          });
-        } catch {}
+    } catch (err: any) {
+      const code = err?.code || "";
+      if (code === "auth/invalid-credential" || code === "auth/wrong-password" || code === "auth/user-not-found") {
+        throw new Error("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
+      }
+      if (code === "auth/too-many-requests") {
+        throw new Error("พยายามเข้าสู่ระบบบ่อยเกินไป กรุณารอสักครู่");
+      }
+      if (code === "auth/network-request-failed") {
+        throw new Error("เครือข่ายมีปัญหา กรุณาลองใหม่");
       }
       throw err;
     }
