@@ -746,7 +746,12 @@ function AnnouncementManager({ announcements }: { announcements: Announcement[] 
     toast.success("ลบแล้ว");
   };
 
-  const sorted = [...announcements].sort((a, b) => b.createdAt - a.createdAt);
+  const sorted = [...announcements].sort((a, b) => {
+    const pa = a.priority === "high" ? 1 : 0;
+    const pb = b.priority === "high" ? 1 : 0;
+    if (pa !== pb) return pb - pa;
+    return b.createdAt - a.createdAt;
+  });
 
   return (
     <div>
