@@ -32,6 +32,7 @@ export const Navbar = () => {
   const [logoutOpen, setLogoutOpen] = useState(false);
 
   return (
+    <>
     <header className="sticky top-0 z-50 glass">
       <div className="container flex h-16 items-center justify-between">
         <Link to="/" className="group flex items-center gap-3">
