@@ -45,16 +45,6 @@ export const Navbar = () => {
         </Link>
 
         <nav className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={() => navigate("/cart")} className="relative">
-            <ShoppingCart className="h-4 w-4" />
-            <span className="hidden sm:inline">ตะกร้า</span>
-            {count > 0 && (
-              <Badge className="absolute -right-1 -top-1 h-5 min-w-5 justify-center rounded-full bg-white p-0 px-1 text-xs text-black border-transparent">
-                {count}
-              </Badge>
-            )}
-          </Button>
-
           {user && profile ? (
             <>
               <div className="hidden md:flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-1.5 text-sm backdrop-blur-md">
@@ -65,6 +55,15 @@ export const Navbar = () => {
               <Button variant="ghost" size="sm" onClick={() => navigate("/topup")}>
                 <Wallet className="h-4 w-4" />
                 <span className="hidden sm:inline">เติมเงิน</span>
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => navigate("/cart")} className="relative">
+                <ShoppingCart className="h-4 w-4" />
+                <span className="hidden sm:inline">ตะกร้า</span>
+                {count > 0 && (
+                  <Badge className="absolute -right-1 -top-1 h-5 min-w-5 justify-center rounded-full bg-white p-0 px-1 text-xs text-black border-transparent">
+                    {count}
+                  </Badge>
+                )}
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -111,6 +110,15 @@ export const Navbar = () => {
             </>
           ) : (
             <>
+              <Button variant="ghost" size="sm" onClick={() => navigate("/cart")} className="relative">
+                <ShoppingCart className="h-4 w-4" />
+                <span className="hidden sm:inline">ตะกร้า</span>
+                {count > 0 && (
+                  <Badge className="absolute -right-1 -top-1 h-5 min-w-5 justify-center rounded-full bg-white p-0 px-1 text-xs text-black border-transparent">
+                    {count}
+                  </Badge>
+                )}
+              </Button>
               <Button variant="ghost" size="sm" onClick={() => navigate("/login")}>เข้าสู่ระบบ</Button>
               <Button variant="default" size="sm" onClick={() => navigate("/register")} className="bg-gradient-primary">
                 สมัครสมาชิก
