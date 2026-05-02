@@ -131,9 +131,6 @@ export default function Index() {
             <Button size="lg" variant="outline" onClick={() => navigate("/orders")}>
               ประวัติการสั่งซื้อ
             </Button>
-            <Button size="lg" variant="outline" onClick={() => navigate("/wheel")}>
-              วงล้อนำโชค
-            </Button>
           </div>
         </div>
       </section>
