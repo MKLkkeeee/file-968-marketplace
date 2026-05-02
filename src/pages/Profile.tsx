@@ -229,7 +229,7 @@ export default function Profile() {
         <p className="mt-1 text-white/50">จัดการบัญชีและความปลอดภัย</p>
 
         {/* Profile summary */}
-        <Card className="card-elegant mt-8 p-6">
+        <Card className="card-elegant tilt-hover mt-8 p-6">
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-4">
               <div className="relative">
@@ -308,7 +308,7 @@ export default function Profile() {
         </Card>
 
         {/* Last login info */}
-        <Card className="card-elegant mt-6 p-6">
+        <Card className="card-elegant tilt-hover mt-6 p-6">
           <div className="mb-4 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04]">
               <Clock className="h-5 w-5 text-white" />
@@ -354,7 +354,7 @@ export default function Profile() {
         </Card>
 
         {/* Change password */}
-        <Card className="card-elegant mt-6 p-6">
+        <Card className="card-elegant tilt-hover mt-6 p-6">
           <div className="mb-5 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04]">
               <KeyRound className="h-5 w-5 text-white" />
@@ -422,7 +422,7 @@ export default function Profile() {
         </Card>
 
         {/* Transfer Money */}
-        <Card className="card-elegant mt-6 p-6">
+        <Card className="card-elegant tilt-hover mt-6 p-6">
           <div className="mb-5 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04]">
               <Send className="h-5 w-5 text-white" />
@@ -569,7 +569,7 @@ function FavoritesSection() {
   const items = favIds.map((id) => products[id]).filter(Boolean) as Product[];
 
   return (
-    <Card className="card-elegant mt-6 p-6">
+    <Card className="card-elegant tilt-hover mt-6 p-6">
       <div className="mb-5 flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04]">
           <Heart className="h-5 w-5 text-rose-400" />
@@ -589,7 +589,7 @@ function FavoritesSection() {
         <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
           {items.map((p) => (
             <Link to={`/product/${p.id}`} key={p.id}>
-              <Card className="card-elegant group cursor-pointer overflow-hidden p-0">
+              <Card className="card-elegant tilt-hover group cursor-pointer overflow-hidden p-0">
                 <div className="relative aspect-square overflow-hidden bg-white/[0.02]">
                   {p.image ? (
                     <img src={p.image} alt={p.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />

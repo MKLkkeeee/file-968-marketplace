@@ -221,14 +221,14 @@ export default function Cart() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <div className="container max-w-5xl px-3 sm:px-6 py-6 sm:py-10">
+      <div className="cine-in container max-w-5xl px-3 sm:px-6 py-6 sm:py-10">
         <h1 className="font-display text-4xl font-bold flex items-center gap-3">
           <ShoppingBag className="h-8 w-8" /> ตะกร้าสินค้า
         </h1>
         <p className="mt-1 text-muted-foreground">{items.length} รายการในตะกร้า</p>
 
         {items.length === 0 ? (
-          <Card className="card-elegant mt-8 flex flex-col items-center gap-4 p-16 text-center">
+          <Card className="card-elegant tilt-hover mt-8 flex flex-col items-center gap-4 p-16 text-center">
             <Package className="h-16 w-16 text-muted-foreground" />
             <p className="text-muted-foreground">ยังไม่มีสินค้าในตะกร้า</p>
             <Button onClick={() => navigate("/")} className="bg-gradient-primary text-primary-foreground">
@@ -253,7 +253,7 @@ export default function Cart() {
               {visibleItems.map((it) => {
                 const stk = stockCount(it.product.stockItems);
                 return (
-                  <Card key={it.product.id} className="card-elegant flex gap-4 p-4">
+                  <Card key={it.product.id} className="card-elegant tilt-hover flex gap-4 p-4">
                     <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-lg bg-secondary/30">
                       {it.product.image ? (
                         <img src={it.product.image} alt={it.product.name} className="h-full w-full object-cover" />
@@ -312,7 +312,7 @@ export default function Cart() {
             </div>
 
             <div>
-              <Card className="card-elegant sticky top-20 p-5">
+              <Card className="card-elegant tilt-hover sticky top-20 p-5">
                 <h3 className="font-display text-lg font-semibold">สรุปคำสั่งซื้อ</h3>
 
                 <div className="mt-4 flex items-center gap-2">

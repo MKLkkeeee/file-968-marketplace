@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Footer } from "@/components/Footer";
 import { FavoriteButton } from "@/components/FavoriteButton";
+import { LetterReveal, Reveal } from "@/components/Reveal";
 
 export default function Index() {
   const { user, loading } = useAuth();
@@ -107,39 +108,50 @@ export default function Index() {
       {/* Hero */}
       <section className="relative overflow-hidden border-b border-white/[0.06]">
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -left-40 top-0 h-[500px] w-[500px] rounded-full bg-[radial-gradient(circle,rgba(168,85,247,0.15),transparent_70%)] blur-3xl" />
-          <div className="absolute -right-40 bottom-0 h-[500px] w-[500px] rounded-full bg-[radial-gradient(circle,rgba(56,189,248,0.12),transparent_70%)] blur-3xl" />
+          <div className="orb-drift-1 absolute -left-40 top-0 h-[500px] w-[500px] rounded-full bg-[radial-gradient(circle,rgba(168,85,247,0.15),transparent_70%)] blur-3xl" />
+          <div className="orb-drift-2 absolute -right-40 bottom-0 h-[500px] w-[500px] rounded-full bg-[radial-gradient(circle,rgba(56,189,248,0.12),transparent_70%)] blur-3xl" />
+          <div className="absolute inset-0 cine-grid opacity-50" />
         </div>
         <div className="container relative py-20 md:py-28">
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-1.5 text-xs font-medium tracking-[0.2em] text-white/60 backdrop-blur-md">
-            <Sparkles className="h-3 w-3" /> ONLINE
-          </div>
-          <h1 className="mt-6 font-display text-5xl md:text-7xl font-extrabold leading-[0.95] tracking-tight">
-            <span className="block bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent">FILE 968</span>
-            <span className="mt-1 block bg-gradient-to-b from-white/80 to-white/20 bg-clip-text text-transparent">SHOP</span>
+          <Reveal>
+            <div className="cine-sheen inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-1.5 text-xs font-medium tracking-[0.2em] text-white/60 backdrop-blur-md">
+              <Sparkles className="h-3 w-3" /> ONLINE
+            </div>
+          </Reveal>
+          <h1 className="mt-6 font-display text-5xl md:text-7xl font-extrabold leading-[0.95] tracking-tight [perspective:1000px]">
+            <span className="block bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent">
+              <LetterReveal text="FILE 968" perLetter={42} />
+            </span>
+            <span className="mt-1 block bg-gradient-to-b from-white/80 to-white/20 bg-clip-text text-transparent">
+              <LetterReveal text="SHOP" perLetter={55} delayStart={380} />
+            </span>
           </h1>
-          <p className="mt-6 max-w-xl text-lg text-white/50">
-            ประสบการณ์ช้อปดิจิทัลระดับพรีเมี่ยม — เติมเงินทันที ใช้เงินซื้อสินค้าได้เลย รองรับ TrueWallet และพร้อมเพย์
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Button size="lg" asChild>
-              <a href="https://discord.gg/xPcm7SghYT" target="_blank" rel="noopener noreferrer">
-                ติดต่อแอดมิน
-              </a>
-            </Button>
-            <Button size="lg" variant="outline" onClick={() => navigate("/topup")}>
-              เติมเงิน
-            </Button>
-            <Button size="lg" variant="outline" onClick={() => navigate("/orders")}>
-              ประวัติการสั่งซื้อ
-            </Button>
-          </div>
+          <Reveal delay={800}>
+            <p className="mt-6 max-w-xl text-lg text-white/50">
+              ประสบการณ์ช้อปดิจิทัลระดับพรีเมี่ยม — เติมเงินทันที ใช้เงินซื้อสินค้าได้เลย รองรับ TrueWallet และพร้อมเพย์
+            </p>
+          </Reveal>
+          <Reveal delay={1000}>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Button size="lg" asChild className="cine-sheen">
+                <a href="https://discord.gg/xPcm7SghYT" target="_blank" rel="noopener noreferrer">
+                  ติดต่อแอดมิน
+                </a>
+              </Button>
+              <Button size="lg" variant="outline" onClick={() => navigate("/topup")}>
+                เติมเงิน
+              </Button>
+              <Button size="lg" variant="outline" onClick={() => navigate("/orders")}>
+                ประวัติการสั่งซื้อ
+              </Button>
+            </div>
+          </Reveal>
         </div>
       </section>
 
       {/* Categories */}
       <section className="container py-12">
-        <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <Reveal className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <h2 className="font-display text-3xl font-bold">สินค้าทั้งหมด</h2>
           <div className="flex w-full flex-col gap-2 sm:flex-row md:w-auto md:max-w-xl">
             <div className="relative w-full sm:flex-1">
@@ -165,8 +177,8 @@ export default function Index() {
               </SelectContent>
             </Select>
           </div>
-        </div>
-        <div className="mb-8 flex flex-wrap gap-2">
+        </Reveal>
+        <Reveal delay={100} className="mb-8 flex flex-wrap gap-2">
           <button
             onClick={() => setActiveCat("all")}
             className={`rounded-full border px-5 py-2 text-sm font-medium transition-all duration-300 ${
@@ -200,7 +212,7 @@ export default function Index() {
               {c.icon} {c.name}
             </button>
           ))}
-        </div>
+        </Reveal>
 
         {filteredAll.length === 0 ? (
           <Card className="card-elegant flex flex-col items-center gap-3 p-16 text-center">
@@ -233,16 +245,17 @@ export default function Index() {
               className="scrollbar-hide flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth pb-4"
               style={{ scrollbarWidth: "none" }}
             >
-              {filteredAll.map((p) => {
+              {filteredAll.map((p, idx) => {
                 const stk = stockCount(p.stockItems);
                 return (
                   <Link
                     to={`/product/${p.id}`}
                     key={p.id}
                     data-product-card
-                    className="w-[70%] flex-shrink-0 snap-start sm:w-[45%] md:w-[31%] lg:w-[23%]"
+                    className="cine-in stagger w-[70%] flex-shrink-0 snap-start sm:w-[45%] md:w-[31%] lg:w-[23%]"
+                    style={{ ['--i' as any]: Math.min(idx, 8) }}
                   >
-                    <Card className="card-elegant group h-full cursor-pointer overflow-hidden p-0">
+                    <Card className="card-elegant tilt-hover group h-full cursor-pointer overflow-hidden p-0">
                       <div className="relative aspect-square overflow-hidden bg-white/[0.02]">
                         {p.image ? (
                           <img src={p.image} alt={p.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />

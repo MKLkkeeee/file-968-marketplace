@@ -59,7 +59,7 @@ export default function Orders() {
     <div className="min-h-screen">
       <Navbar />
 
-      <div className="container max-w-4xl px-3 sm:px-6 py-6 sm:py-10">
+      <div className="cine-in container max-w-4xl px-3 sm:px-6 py-6 sm:py-10">
         <h1 className="flex items-center gap-3 font-display text-4xl font-bold">
           <History className="h-8 w-8" />
           ประวัติการซื้อ
@@ -70,7 +70,7 @@ export default function Orders() {
         </p>
 
         {orders.length === 0 ? (
-          <Card className="card-elegant mt-8 flex flex-col items-center gap-3 p-16 text-center">
+          <Card className="card-elegant tilt-hover mt-8 flex flex-col items-center gap-3 p-16 text-center">
             <Package className="h-12 w-12 text-muted-foreground" />
             <p className="text-muted-foreground">
               ยังไม่มีคำสั่งซื้อ
@@ -80,7 +80,7 @@ export default function Orders() {
           <>
             <div className="mt-8 space-y-4">
               {currentOrders.map((o) => (
-                <Card key={o.id} className="card-elegant p-5">
+                <Card key={o.id} className="card-elegant tilt-hover p-5">
                   <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
                     <div>
                       <p className="text-xs text-muted-foreground">

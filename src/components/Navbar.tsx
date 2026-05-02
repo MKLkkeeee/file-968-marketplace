@@ -33,11 +33,11 @@ export const Navbar = () => {
 
   return (
     <>
-    <header className="sticky top-0 z-50 glass">
+    <header className="sticky top-0 z-50 glass cine-fade-in">
       <div className="container px-3 sm:px-6 flex h-16 items-center justify-between gap-2">
         <Link to="/" className="group flex items-center gap-2 sm:gap-3 min-w-0">
-          <div className="flex h-9 w-9 sm:h-10 sm:w-10 flex-shrink-0 items-center justify-center rounded-xl border border-white/10 bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-xl transition-all group-hover:border-white/25">
-            <img src={boxLogo} alt="logo" className="h-6 w-6 sm:h-7 sm:w-7 object-contain" />
+          <div className="flex h-9 w-9 sm:h-10 sm:w-10 flex-shrink-0 items-center justify-center rounded-xl border border-white/10 bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-xl transition-all duration-500 group-hover:border-white/30 group-hover:rotate-[8deg] group-hover:scale-105">
+            <img src={boxLogo} alt="logo" className="h-6 w-6 sm:h-7 sm:w-7 object-contain transition-transform duration-700 group-hover:scale-110" />
           </div>
           <div className="font-display text-sm sm:text-lg font-bold tracking-tight truncate">
             FILE 968 <span className="text-white/40 hidden xs:inline">SHOP</span>
@@ -47,7 +47,7 @@ export const Navbar = () => {
         <nav className="flex items-center gap-1.5 sm:gap-2.5">
           {user && profile ? (
             <>
-              <div className="hidden md:flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-1.5 text-sm backdrop-blur-md">
+              <div className="cine-sheen hidden md:flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-1.5 text-sm backdrop-blur-md transition-all duration-500 hover:border-white/25 hover:bg-white/[0.08]">
                 <Coins className="h-4 w-4 text-warning" />
                 <span className="font-semibold text-white">฿{profile.points.toLocaleString()}</span>
                 <span className="text-white/50 text-xs uppercase tracking-wider">point</span>

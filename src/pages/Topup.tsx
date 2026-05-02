@@ -335,12 +335,12 @@ export default function Topup() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <div className="container max-w-2xl px-3 sm:px-6 py-6 sm:py-12">
+      <div className="cine-in container max-w-2xl px-3 sm:px-6 py-6 sm:py-12">
         <h1 className="font-display text-4xl font-bold">เติมเงินเข้า Wallet</h1>
         <p className="mt-2 text-muted-foreground">เลือกวิธีการเติมเงินที่ต้องการ</p>
 
         {profile && (
-          <Card className="card-elegant mt-6 flex items-center justify-between p-5">
+          <Card className="card-elegant tilt-hover mt-6 flex items-center justify-between p-5">
             <div>
               <p className="text-sm text-muted-foreground">ยอดเงินปัจจุบัน</p>
               <p className="font-display text-3xl font-bold gradient-text">฿{profile.points.toLocaleString()}</p>
@@ -350,7 +350,7 @@ export default function Topup() {
         )}
 
         {/* Special Code (point) */}
-        <Card className="card-elegant mt-6 p-6">
+        <Card className="card-elegant tilt-hover mt-6 p-6">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-primary">
               <Gift className="h-5 w-5 text-primary-foreground" />
@@ -384,7 +384,7 @@ export default function Topup() {
           </TabsList>
 
           <TabsContent value="truewallet">
-            <Card className="card-elegant p-6">
+            <Card className="card-elegant tilt-hover p-6">
               <h3 className="font-display text-xl font-semibold">เติมผ่านซองอั่งเปา TrueMoney</h3>
               <p className="mb-4 mt-1 text-sm text-muted-foreground">วางลิงก์ซองด้านล่าง</p>
 
@@ -407,7 +407,7 @@ export default function Topup() {
           </Card>
           </TabsContent>
           <TabsContent value="bank">
-            <Card className="card-elegant p-6">
+            <Card className="card-elegant tilt-hover p-6">
               <h3 className="font-display text-xl font-semibold">โอนเงินผ่านพร้อมเพย์</h3>
               <p className="mt-1 text-sm text-muted-foreground">
                 สแกนคิวอาโค๊ด แล้วอัพโหลดสลิป ในช่องด้านล่าง
@@ -474,7 +474,7 @@ export default function Topup() {
         </Tabs>
 
         {/* Topup history */}
-        <Card className="card-elegant mt-8 p-6">
+        <Card className="card-elegant tilt-hover mt-8 p-6">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04]">
