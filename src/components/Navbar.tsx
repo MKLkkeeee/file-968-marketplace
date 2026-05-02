@@ -67,6 +67,9 @@ export const Navbar = () => {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate("/profile")}>
+                    <UserIcon className="h-4 w-4" />โปรไฟล์
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate("/topup")}>
                     <Wallet className="h-4 w-4" />เติมเงิน
                   </DropdownMenuItem>

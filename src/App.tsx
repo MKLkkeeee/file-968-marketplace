@@ -14,6 +14,7 @@ import Admin from "./pages/Admin.tsx";
 import Cart from "./pages/Cart.tsx";
 import Orders from "./pages/Orders.tsx";
 import ProductDetail from "./pages/ProductDetail.tsx";
+import Profile from "./pages/Profile.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
               <Route path="/product/:id" element={<ProductDetail />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
               <Route path="/topup" element={<ProtectedRoute><Topup /></ProtectedRoute>} />
               <Route path="/admins" element={<ProtectedRoute adminOnly><Admin /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
