@@ -26,6 +26,7 @@ export default function Index() {
   const [activeCat, setActiveCat] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<string>("default");
+  const [hotOnly, setHotOnly] = useState(false);
   const scrollerRef = useRef<HTMLDivElement>(null);
   const scrollByCard = (dir: 1 | -1) => {
     const el = scrollerRef.current;
@@ -63,10 +64,11 @@ export default function Index() {
   }, []);
 
   const byCat = activeCat === "all" ? products : products.filter((p) => p.categoryId === activeCat);
+  const byHot = hotOnly ? byCat.filter((p) => p.isHot) : byCat;
   const q = search.trim().toLowerCase();
   const searched = q
-    ? byCat.filter((p) => `${p.name} ${p.description}`.toLowerCase().includes(q))
-    : byCat;
+    ? byHot.filter((p) => `${p.name} ${p.description}`.toLowerCase().includes(q))
+    : byHot;
   const sorted = [...searched].sort((a, b) => {
     switch (sortBy) {
       case "price-asc": return a.price - b.price;
@@ -174,6 +176,16 @@ export default function Index() {
             }`}
           >
             ทั้งหมด
+          </button>
+          <button
+            onClick={() => setHotOnly((v) => !v)}
+            className={`rounded-full border px-5 py-2 text-sm font-medium transition-all duration-300 ${
+              hotOnly
+                ? "border-transparent bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-[0_8px_30px_rgba(239,68,68,0.35)]"
+                : "border-red-500/30 bg-red-500/[0.06] text-red-300 hover:border-red-500/50 hover:bg-red-500/[0.12] hover:text-red-200"
+            }`}
+          >
+            🔥 HOT
           </button>
           {categories.map((c) => (
             <button
