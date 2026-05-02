@@ -1,10 +1,11 @@
-interface OrderWebhookItem {
+export interface OrderWebhookItem {
   name: string;
   category: string;
   price: number;
   quantity: number;
 }
 
+// สำหรับตอนแอดมินเติมของ
 export const sendRestockWebhook = async (
   productName: string,
   oldStock: number,
@@ -16,8 +17,8 @@ export const sendRestockWebhook = async (
   const payload: any = {
     embeds: [
       {
-        title: "สินค้าอัปเดตสต๊อก",
-        description: `สต๊อกเพิ่มขึ้น จาก ${oldStock} -> ${newStock}\n\nชื่อสินค้า\n${productName}\n\nหมวดหมู่\n${category}`,
+        title: "อัปเดตสต๊อก",
+        description: `สต๊อกเพิ่มขึ้น จาก ${oldStock} -> ${newStock}\n\n**ชื่อสินค้า**\n${productName}\n\n**หมวดหมู่ / ประเภท**\n\`${category}\``,
         color: 5763719
       }
     ]
@@ -40,13 +41,14 @@ export const sendRestockWebhook = async (
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(response.status, errorText);
+      console.error("Restock Webhook Error:", response.status, errorText);
     }
   } catch (error) {
-    console.error(error);
+    console.error("Fetch Error:", error);
   }
 };
 
+// สำหรับตอนลูกค้ากดซื้อของ
 export const sendOrderWebhook = async (
   username: string,
   items: OrderWebhookItem[],
@@ -54,8 +56,8 @@ export const sendOrderWebhook = async (
   webhookUrl: string
 ) => {
   const itemFields = items.map(item => ({
-    name: item.name,
-    value: `หมวดหมู่: ${item.category}\nราคา: ${item.price}\nจำนวน: ${item.quantity}`,
+    name: `${item.name || "ไม่ระบุชื่อสินค้า"}`,
+    value: `หมวดหมู่: \`${item.category || "ไม่ระบุ"}\`\nราคา: ${item.price} Point\nจำนวน: ${item.quantity} ชิ้น`,
     inline: false
   }));
 
@@ -65,8 +67,8 @@ export const sendOrderWebhook = async (
         title: "รายการสั่งซื้อใหม่",
         color: 3066993,
         fields: [
-          { name: "ผู้ซื้อ", value: username, inline: true },
-          { name: "ยอดรวม", value: String(totalPrice), inline: true },
+          { name: "ผู้ซื้อ", value: username || "ไม่ระบุ", inline: true },
+          { name: "ยอดรวม", value: `${totalPrice} Point`, inline: true },
           { name: "เวลา", value: new Date().toLocaleString("th-TH"), inline: true },
           ...itemFields
         ]
@@ -75,14 +77,19 @@ export const sendOrderWebhook = async (
   };
 
   try {
-    await fetch(webhookUrl, {
+    const response = await fetch(webhookUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(payload)
     });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Order Webhook Error:", response.status, errorText);
+    }
   } catch (error) {
-    console.error(error);
+    console.error("Fetch Error:", error);
   }
 };
