@@ -34,7 +34,10 @@ async function notifyDiscordReview(opts: {
           { name: "คะแนน", value: `${stars}  (${opts.rating}/5)`, inline: true },
           { name: "ผู้รีวิว", value: opts.username, inline: true },
         ],
-        thumbnail: opts.avatarUrl ? { url: opts.avatarUrl } : undefined,
+        thumbnail:
+          opts.avatarUrl && /^https?:\/\//.test(opts.avatarUrl)
+            ? { url: opts.avatarUrl }
+            : undefined,
         timestamp: new Date().toISOString(),
         footer: { text: `Product ID: ${opts.productId}` },
       },
