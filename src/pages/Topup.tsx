@@ -31,6 +31,8 @@ export default function Topup() {
   const [historyPage, setHistoryPage] = useState(1);
   const [historyFilter, setHistoryFilter] = useState<"all" | "success" | "failed">("all");
   const [history, setHistory] = useState<TopupType[]>([]);
+  const [lastUpdated, setLastUpdated] = useState<number>(Date.now());
+  const prevTopIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -38,8 +40,14 @@ export default function Topup() {
       const all: TopupType[] = snap.exists() ? Object.values(snap.val()) : [];
       const mine = all
         .filter((t) => t.userId === user.uid)
-        .sort((a, b) => b.createdAt - a.createdAt);
+        .sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0));
       setHistory(mine);
+      setLastUpdated(Date.now());
+      const newTopId = mine[0]?.id ?? null;
+      if (prevTopIdRef.current && newTopId && newTopId !== prevTopIdRef.current) {
+        setHistoryPage(1);
+      }
+      prevTopIdRef.current = newTopId;
     });
     return () => off();
   }, [user]);
@@ -47,9 +55,10 @@ export default function Topup() {
   useEffect(() => { setHistoryPage(1); }, [historyFilter]);
 
   const filteredHistory = useMemo(() => {
-    if (historyFilter === "all") return history;
-    // Treat legacy entries (no status) as "success"
-    return history.filter((t) => (t.status ?? "success") === historyFilter);
+    const base = historyFilter === "all"
+      ? history
+      : history.filter((t) => (t.status ?? "success") === historyFilter);
+    return [...base].sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0));
   }, [history, historyFilter]);
 
   const paged = usePaged(filteredHistory, historyPage, 10);
@@ -381,13 +390,22 @@ export default function Topup() {
 
         {/* Topup history */}
         <Card className="card-elegant mt-8 p-6">
-          <div className="mb-4 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04]">
-              <History className="h-5 w-5 text-white" />
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04]">
+                <History className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <h3 className="font-display text-xl font-semibold">ประวัติการเติมเงิน</h3>
+                <p className="text-xs text-white/50">เรียงจากล่าสุด • อัปเดตอัตโนมัติ</p>
+              </div>
             </div>
-            <div>
-              <h3 className="font-display text-xl font-semibold">ประวัติการเติมเงิน</h3>
-              <p className="text-xs text-white/50">รายการเติมเงินทั้งหมดของคุณ</p>
+            <div className="flex items-center gap-2 text-[11px] text-white/40">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
+              </span>
+              อัปเดต {new Date(lastUpdated).toLocaleTimeString("th-TH")}
             </div>
           </div>
 
