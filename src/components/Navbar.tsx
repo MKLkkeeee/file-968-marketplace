@@ -119,5 +119,33 @@ export const Navbar = () => {
         </nav>
       </div>
     </header>
+
+    <AlertDialog open={logoutOpen} onOpenChange={setLogoutOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle className="flex items-center gap-2">
+            <LogOut className="h-5 w-5 text-destructive" />
+            ออกจากระบบ
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            คุณแน่ใจใช่ไหมว่าต้องการออกจากระบบ?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={async () => {
+              await logout();
+              setLogoutOpen(false);
+              navigate("/");
+            }}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          >
+            ยืนยันออกจากระบบ
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 };
