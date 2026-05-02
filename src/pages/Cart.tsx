@@ -354,7 +354,7 @@ export default function Cart() {
                         ชำระเงิน
                       </Button>
                     </AlertDialogTrigger>
-                    <AlertDialogContent>
+                    <AlertDialogContent className="w-[calc(100vw-1.5rem)] max-w-md">
                       <AlertDialogHeader>
                         <AlertDialogTitle className="flex items-center gap-2">
                           <ShoppingBag className="h-5 w-5" />

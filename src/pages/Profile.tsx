@@ -442,7 +442,7 @@ export default function Profile() {
         </Card>
 
         <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-          <AlertDialogContent>
+          <AlertDialogContent className="w-[calc(100vw-1.5rem)] max-w-md">
             <AlertDialogHeader>
               <AlertDialogTitle>ยืนยันการโอน Point</AlertDialogTitle>
               <AlertDialogDescription>
