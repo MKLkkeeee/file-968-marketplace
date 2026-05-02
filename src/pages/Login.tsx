@@ -112,7 +112,19 @@ export default function Login() {
               />
             </div>
             <div>
-              <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-white/60">รหัสผ่าน</label>
+              <div className="mb-2 flex items-center justify-between">
+                <label className="block text-xs font-medium uppercase tracking-wider text-white/60">รหัสผ่าน</label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setForgotEmail(email.includes("@") ? email : "");
+                    setForgotOpen(true);
+                  }}
+                  className="text-xs font-medium text-white/60 transition hover:text-white hover:underline"
+                >
+                  ลืมรหัสผ่าน?
+                </button>
+              </div>
               <input
                 type="password"
                 required
