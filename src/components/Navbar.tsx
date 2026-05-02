@@ -21,12 +21,12 @@ export const Navbar = () => {
   return (
     <header className="sticky top-0 z-50 glass">
       <div className="container flex h-16 items-center justify-between">
-        <Link to="/" className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-primary shadow-elegant">
-            <Package className="h-5 w-5 text-primary-foreground" />
+        <Link to="/" className="group flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-xl transition-all group-hover:border-white/25">
+            <Package className="h-5 w-5 text-white" />
           </div>
-          <div className="font-display text-xl font-bold tracking-tight">
-            FILE <span className="gradient-text">968</span> SHOP
+          <div className="font-display text-lg font-bold tracking-tight">
+            FILE 968 <span className="text-white/40">SHOP</span>
           </div>
         </Link>
 
@@ -35,7 +35,7 @@ export const Navbar = () => {
             <ShoppingCart className="h-4 w-4" />
             <span className="hidden sm:inline">ตะกร้า</span>
             {count > 0 && (
-              <Badge className="absolute -right-1 -top-1 h-5 min-w-5 justify-center rounded-full bg-gradient-primary p-0 px-1 text-xs text-primary-foreground">
+              <Badge className="absolute -right-1 -top-1 h-5 min-w-5 justify-center rounded-full bg-white p-0 px-1 text-xs text-black border-transparent">
                 {count}
               </Badge>
             )}
