@@ -483,3 +483,137 @@ function DiscountManager({ discounts }: { discounts: DiscountCode[] }) {
     </>
   );
 }
+
+function UserTable({
+  users, search, page, setPage, pointInputs, setPointInputs, handleAddPoint,
+}: {
+  users: UserProfile[]; search: string; page: number; setPage: (n: number) => void;
+  pointInputs: Record<string, string>;
+  setPointInputs: React.Dispatch<React.SetStateAction<Record<string, string>>>;
+  handleAddPoint: (uid: string) => void;
+}) {
+  const filtered = users.filter((u) =>
+    `${u.username} ${u.email} ${u.uid}`.toLowerCase().includes(search.toLowerCase())
+  );
+  const { slice, totalPages, page: p } = usePaged(filtered, page, 10);
+  return (
+    <>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Username</TableHead><TableHead>Email</TableHead>
+            <TableHead>Point</TableHead><TableHead>Role</TableHead>
+            <TableHead>เพิ่ม Point</TableHead><TableHead></TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {slice.map((u) => (
+            <TableRow key={u.uid}>
+              <TableCell>{u.username}</TableCell>
+              <TableCell>{u.email}</TableCell>
+              <TableCell>{u.points?.toLocaleString() ?? 0}</TableCell>
+              <TableCell><Badge variant={u.role === "admin" ? "default" : "outline"}>{u.role}</Badge></TableCell>
+              <TableCell>
+                <div className="flex gap-2">
+                  <Input type="number" placeholder="100" className="w-24"
+                    value={pointInputs[u.uid] || ""}
+                    onChange={(e) => setPointInputs((prev) => ({ ...prev, [u.uid]: e.target.value }))}
+                  />
+                  <Button size="sm" className="bg-gradient-primary text-primary-foreground"
+                    onClick={() => handleAddPoint(u.uid)}>เพิ่ม</Button>
+                </div>
+              </TableCell>
+              <TableCell>
+                <Button size="sm" variant="outline"
+                  onClick={() => setUserRole(u.uid, u.role === "admin" ? "user" : "admin")}>
+                  {u.role === "admin" ? "ลดเป็น user" : "เลื่อนเป็น admin"}
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+      <Paginator page={p} totalPages={totalPages} onChange={setPage} />
+    </>
+  );
+}
+
+function OrderTable({ orders, search, page, setPage }: {
+  orders: Order[]; search: string; page: number; setPage: (n: number) => void;
+}) {
+  const q = search.toLowerCase();
+  const filtered = orders
+    .filter((o) => {
+      if (!q) return true;
+      const items = (o.items || []).map((i: any) => i.productName).join(" ");
+      return `${o.username} ${o.discountCode} ${items}`.toLowerCase().includes(q);
+    })
+    .sort((a, b) => b.createdAt - a.createdAt);
+  const { slice, totalPages, page: p } = usePaged(filtered, page, 10);
+  return (
+    <>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>เวลา</TableHead><TableHead>ผู้ซื้อ</TableHead>
+            <TableHead>สินค้า</TableHead><TableHead>โค้ด</TableHead>
+            <TableHead>จ่ายจริง</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {slice.map((o) => (
+            <TableRow key={o.id}>
+              <TableCell className="text-xs">{new Date(o.createdAt).toLocaleString("th-TH")}</TableCell>
+              <TableCell>{o.username}</TableCell>
+              <TableCell className="text-xs">
+                {Object.entries(
+                  (o.items || []).reduce((acc: any, item: any) => {
+                    acc[item.productName] = (acc[item.productName] || 0) + 1;
+                    return acc;
+                  }, {})
+                ).map(([name, qty]: any) => (<div key={name}>{name} x{qty}</div>))}
+              </TableCell>
+              <TableCell>{o.discountCode || "-"}</TableCell>
+              <TableCell className="font-semibold gradient-text">{o.finalPrice}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+      <Paginator page={p} totalPages={totalPages} onChange={setPage} />
+    </>
+  );
+}
+
+function TopupTable({ topups, search, page, setPage }: {
+  topups: Topup[]; search: string; page: number; setPage: (n: number) => void;
+}) {
+  const q = search.toLowerCase();
+  const filtered = topups
+    .filter((t) => !q || `${t.username} ${t.ref} ${t.method}`.toLowerCase().includes(q))
+    .sort((a, b) => b.createdAt - a.createdAt);
+  const { slice, totalPages, page: p } = usePaged(filtered, page, 10);
+  return (
+    <>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>เวลา</TableHead><TableHead>ผู้ใช้</TableHead>
+            <TableHead>วิธี</TableHead><TableHead>จำนวน</TableHead><TableHead>Ref</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {slice.map((t) => (
+            <TableRow key={t.id}>
+              <TableCell className="text-xs">{new Date(t.createdAt).toLocaleString("th-TH")}</TableCell>
+              <TableCell>{t.username}</TableCell>
+              <TableCell><Badge variant="outline">{t.method}</Badge></TableCell>
+              <TableCell className="font-semibold">{t.amount}</TableCell>
+              <TableCell className="max-w-[200px] truncate text-xs">{t.ref}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+      <Paginator page={p} totalPages={totalPages} onChange={setPage} />
+    </>
+  );
+}
