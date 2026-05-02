@@ -154,6 +154,7 @@ export default function Admin() {
             <TabsTrigger value="orders">คำสั่งซื้อ</TabsTrigger>
             <TabsTrigger value="topups">เติมเงิน</TabsTrigger>
             <TabsTrigger value="popup">ป๊อปอัพ</TabsTrigger>
+            <TabsTrigger value="wheel">วงล้อ</TabsTrigger>
           </TabsList>
 
           <TabsContent value="products">
