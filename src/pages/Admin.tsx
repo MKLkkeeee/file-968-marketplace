@@ -852,6 +852,9 @@ function AnnouncementManager({ announcements }: { announcements: Announcement[] 
                     <Badge variant="outline" className="text-[10px]">
                       {a.permanent ? "ถาวร" : `เหลือ ${remainingMin} นาที`}
                     </Badge>
+                    {a.priority === "high" && (
+                      <Badge variant="destructive" className="text-[10px]">ด่วน</Badge>
+                    )}
                   </div>
                   <p className="mt-2 line-clamp-2 text-sm">{a.text}</p>
                   <p className="mt-1 text-[11px] text-white/40">
