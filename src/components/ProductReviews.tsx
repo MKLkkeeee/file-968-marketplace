@@ -106,6 +106,20 @@ export function ProductReviews({ productId }: Props) {
         comment: trimmed,
       });
       toast.success(myReview ? "อัปเดตรีวิวแล้ว" : "เพิ่มรีวิวสำเร็จ");
+      // Fire-and-forget Discord notification
+      try {
+        const snap = await get(ref(db, `products/${productId}/name`));
+        const productName = snap.exists() ? String(snap.val()) : productId;
+        notifyDiscordReview({
+          productName,
+          productId,
+          username: profile.username,
+          avatarUrl: profile.avatarUrl,
+          rating,
+          comment: trimmed,
+          isUpdate: !!myReview,
+        });
+      } catch {}
     } catch (e: any) {
       toast.error("บันทึกไม่สำเร็จ", { description: e?.message });
     } finally {
