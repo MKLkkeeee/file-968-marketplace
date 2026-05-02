@@ -41,6 +41,16 @@ export default function Index() {
     toast.success(`เพิ่ม "${p.name}" ลงตะกร้าแล้ว`);
   };
 
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#050505]">
+        <div className="h-10 w-10 animate-spin rounded-full border-2 border-white/20 border-t-white" />
+      </div>
+    );
+  }
+
+  if (!user) return <Landing />;
+
   return (
     <div className="min-h-screen">
       <Navbar />
