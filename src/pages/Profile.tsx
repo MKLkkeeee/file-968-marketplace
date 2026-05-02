@@ -421,7 +421,7 @@ export default function Profile() {
           </Button>
         </Card>
 
-        {/* Transfer บาทs */}
+        {/* Transfer Money */}
         <Card className="card-elegant mt-6 p-6">
           <div className="mb-5 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04]">
