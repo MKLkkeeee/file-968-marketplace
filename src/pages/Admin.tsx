@@ -56,7 +56,7 @@ export default function Admin() {
   const [topupPage, setTopupPage] = useState(1);
   const [pointInputs, setPointInputs] = useState<Record<string, string>>({});
 
-  const handleAddPoint = async (uid: string) => {
+  const handleAdjustPoint = async (uid: string, mode: "add" | "remove") => {
     const amount = Number(pointInputs[uid]);
     
     if (!amount || amount <= 0) {
@@ -65,14 +65,15 @@ export default function Admin() {
     }
     
     try {
-      await adjustPoints(uid, amount);
-      toast.success(`เพิ่ม ${amount} Point สำเร็จ`);
+      const delta = mode === "add" ? amount : -amount;
+      await adjustPoints(uid, delta);
+      toast.success(mode === "add" ? `เพิ่ม ${amount} Point สำเร็จ` : `ลบ ${amount} Point สำเร็จ`);
       setPointInputs((prev) => ({
         ...prev,
         [uid]: "",
       }));
     } catch {
-      toast.error("เพิ่ม Point ไม่สำเร็จ");
+      toast.error("ดำเนินการไม่สำเร็จ");
     }
   };
 
