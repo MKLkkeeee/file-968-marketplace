@@ -316,13 +316,20 @@ export default function Cart() {
                     <span>{subtotal.toLocaleString()}</span>
                   </div>
                   {discountInfo && (
-                    <div className="flex justify-between text-success">
-                      <span className="flex items-center gap-1">
-                        <Tag className="h-3 w-3" />
-                        ส่วนลด {discountInfo.pct}% ({discountInfo.code})
-                      </span>
-                      <span className="font-semibold">-{(subtotal - finalPrice).toLocaleString()}</span>
-                    </div>
+                    <>
+                      <div className="flex justify-between text-success">
+                        <span className="flex items-center gap-1">
+                          <Tag className="h-3 w-3" />
+                          ส่วนลด {discountInfo.pct}% ({discountInfo.code})
+                        </span>
+                        <span className="font-semibold">-{discountAmount.toLocaleString()}</span>
+                      </div>
+                      {isRestricted && (
+                        <p className="text-xs text-warning/80">
+                          * ใช้กับสินค้าที่เข้าเงื่อนไขเท่านั้น ({eligibleSubtotal.toLocaleString()} Point)
+                        </p>
+                      )}
+                    </>
                   )}
                   <div className="flex items-center justify-between border-t border-border pt-3">
                     <span className="font-semibold">ยอดสุทธิ</span>
