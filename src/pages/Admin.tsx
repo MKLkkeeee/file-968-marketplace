@@ -21,11 +21,11 @@ import { onValue, ref } from "firebase/database";
 import { adjustPoints } from "@/lib/store";
 import { db, ADMIN_SECRET } from "@/lib/firebase";
 import {
-  Category, DiscountCode, Product, Topup, Order, Announcement, stockCount,
+  Category, DiscountCode, Product, Topup, Order, WelcomePopupConfig, stockCount,
   createCategory, createDiscount, createProduct, deleteCategory,
   deleteDiscount, deleteProduct, setUserRole, updateCategory,
   updateDiscount, updateProduct,
-  createAnnouncement, updateAnnouncement, deleteAnnouncement,
+  getWelcomePopup, saveWelcomePopup,
 } from "@/lib/store";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserProfile } from "@/contexts/AuthContext";
