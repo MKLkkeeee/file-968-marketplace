@@ -67,17 +67,33 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const register = async (email: string, password: string, username: string) => {
-    const cred = await createUserWithEmailAndPassword(auth, email, password);
-    await updateProfile(cred.user, { displayName: username });
+    const trimmedUsername = username.trim();
+    if (!trimmedUsername) {
+      throw new Error("กรุณากรอกชื่อผู้ใช้");
+    }
 
-    // Check if there's any user. If not — make this one admin.
+    // เช็คว่า username ซ้ำหรือไม่ (case-insensitive)
     const usersSnap = await get(ref(db, "users"));
-    const isFirstUser = !usersSnap.exists();
+    const existingUsers = usersSnap.exists()
+      ? (Object.values(usersSnap.val()) as UserProfile[])
+      : [];
+    const usernameTaken = existingUsers.some(
+      (u) => (u.username || "").toLowerCase() === trimmedUsername.toLowerCase()
+    );
+    if (usernameTaken) {
+      throw new Error("ชื่อผู้ใช้นี้ถูกใช้งานแล้ว กรุณาเลือกชื่ออื่น");
+    }
+
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    await updateProfile(cred.user, { displayName: trimmedUsername });
+
+    // คนแรกเป็น admin
+    const isFirstUser = existingUsers.length === 0;
 
     const newProfile: UserProfile = {
       uid: cred.user.uid,
       email,
-      username,
+      username: trimmedUsername,
       points: 0,
       role: isFirstUser ? "admin" : "user",
       createdAt: Date.now(),
