@@ -416,7 +416,7 @@ function ProductManager({ categories, products }: { categories: Category[]; prod
                   className="font-mono text-sm"
                 />
                 <p className="mt-1 text-xs text-muted-foreground">
-                  จำนวนปัจจุบัน: {stockCount(form.stockItems)}
+                  จำนวนปัจจุบัน: {stockCount(form.stockItems) === Infinity ? "∞ (ไม่จำกัด)" : stockCount(form.stockItems)}
                 </p>
               </div>
             </div>
