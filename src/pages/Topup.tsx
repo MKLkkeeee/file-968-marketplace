@@ -335,7 +335,7 @@ export default function Topup() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <div className="container max-w-2xl px-3 sm:px-6 py-6 sm:py-12">
+      <div className="cine-in container max-w-2xl px-3 sm:px-6 py-6 sm:py-12">
         <h1 className="font-display text-4xl font-bold">เติมเงินเข้า Wallet</h1>
         <p className="mt-2 text-muted-foreground">เลือกวิธีการเติมเงินที่ต้องการ</p>
 

@@ -46,7 +46,7 @@ export default function ProductDetail() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <div className="container max-w-5xl py-10">
+      <div className="cine-in container max-w-5xl py-10">
         <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="mb-6">
           <ArrowLeft className="h-4 w-4" /> กลับ
         </Button>
