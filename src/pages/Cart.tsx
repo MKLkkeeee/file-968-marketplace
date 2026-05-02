@@ -49,17 +49,28 @@ export default function Cart() {
 
   const applyDiscount = async () => {
     const code = discountCode.trim();
-    if (!code) return;
+    if (!code) return toast.error("กรุณากรอกโค้ด");
+    if (discountInfo) return toast.error("ใช้โค้ดอยู่แล้ว", { description: "ลบโค้ดเดิมก่อนใช้โค้ดใหม่" });
     const d = await findDiscountByCode(code);
     if (!d) return toast.error("ไม่พบโค้ดนี้");
+    if (!d.active) return toast.error("โค้ดนี้ถูกปิดใช้งาน");
     if (d.type !== "discount") {
       return toast.error("โค้ดนี้ใช้ที่หน้าเติมเงิน (Special Code)", {
         description: "โค้ดส่วนลดในตะกร้าต้องเป็นประเภท ส่วนลด % เท่านั้น",
       });
     }
     if (d.usedCount >= d.maxUses) return toast.error("โค้ดถูกใช้ครบจำนวนแล้ว");
+    if (user && d.usedBy?.[user.uid]) return toast.error("คุณใช้โค้ดนี้ไปแล้ว");
     setDiscountInfo({ pct: d.value, code: d.code, id: d.id });
-    toast.success(`ใช้โค้ดส่วนลด ${d.value}% สำเร็จ`);
+    toast.success(`ใช้โค้ดส่วนลด ${d.value}% สำเร็จ`, {
+      description: `ประหยัด ${(subtotal - Math.round(subtotal * (1 - d.value / 100))).toLocaleString()} Point`,
+    });
+  };
+
+  const removeDiscount = () => {
+    setDiscountInfo(null);
+    setDiscountCode("");
+    toast.info("ลบโค้ดส่วนลดแล้ว");
   };
 
   const checkout = async () => {
@@ -104,7 +115,12 @@ export default function Cart() {
 
       if (discountInfo) {
         const d = await findDiscountByCode(discountInfo.code);
-        if (d) await updateDiscount(d.id, { usedCount: d.usedCount + 1 });
+        if (d) {
+          await updateDiscount(d.id, {
+            usedCount: d.usedCount + 1,
+            usedBy: { ...(d.usedBy || {}), [user.uid]: true },
+          });
+        }
       }
 
       // ส่งแจ้งเตือนการสั่งซื้อไปยัง Discord Webhook
@@ -223,9 +239,16 @@ export default function Cart() {
                   <Input
                     placeholder="โค้ดส่วนลด"
                     value={discountCode}
-                    onChange={(e) => setDiscountCode(e.target.value)}
+                    onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
+                    onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); applyDiscount(); } }}
+                    disabled={!!discountInfo}
+                    maxLength={32}
                   />
-                  <Button variant="outline" size="sm" onClick={applyDiscount}>ใช้</Button>
+                  {discountInfo ? (
+                    <Button variant="destructive" size="sm" onClick={removeDiscount}>ลบ</Button>
+                  ) : (
+                    <Button variant="outline" size="sm" onClick={applyDiscount}>ใช้</Button>
+                  )}
                 </div>
 
                 <div className="mt-5 space-y-2 text-sm">
@@ -235,8 +258,11 @@ export default function Cart() {
                   </div>
                   {discountInfo && (
                     <div className="flex justify-between text-success">
-                      <span>ส่วนลด {discountInfo.pct}% ({discountInfo.code})</span>
-                      <span>-{(subtotal - finalPrice).toLocaleString()}</span>
+                      <span className="flex items-center gap-1">
+                        <Tag className="h-3 w-3" />
+                        ส่วนลด {discountInfo.pct}% ({discountInfo.code})
+                      </span>
+                      <span className="font-semibold">-{(subtotal - finalPrice).toLocaleString()}</span>
                     </div>
                   )}
                   <div className="flex items-center justify-between border-t border-border pt-3">
