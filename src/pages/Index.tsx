@@ -120,11 +120,16 @@ export default function Index() {
             ประสบการณ์ช้อปดิจิทัลระดับพรีเมี่ยม — เติมเงินทันที ใช้ Point ซื้อสินค้าได้เลย รองรับ TrueWallet และพร้อมเพย์
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Button size="lg" onClick={() => navigate("/topup")}>
-              เติมเงินเลย
+            <Button size="lg" asChild>
+              <a href="https://discord.gg/xPcm7Sg" target="_blank" rel="noopener noreferrer">
+                ติดต่อแอดมิน
+              </a>
+            </Button>
+            <Button size="lg" variant="outline" onClick={() => navigate("/topup")}>
+              เติมเงิน
             </Button>
             <Button size="lg" variant="outline" onClick={() => navigate("/orders")}>
-              ประวัติการซื้อ
+              ประวัติการสั่งซื้อ
             </Button>
           </div>
         </div>
