@@ -118,12 +118,6 @@ export default function ProductDetail() {
           </div>
         </div>
 
-        <section className="mt-12">
-          <h2 className="font-display text-2xl font-bold">รีวิวจากผู้ใช้</h2>
-          <div className="mt-4">
-            <ProductReviews productId={product.id} />
-          </div>
-        </section>
       </div>
     </div>
   );
