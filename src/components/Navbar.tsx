@@ -43,10 +43,10 @@ export const Navbar = () => {
 
           {user && profile ? (
             <>
-              <div className="hidden md:flex items-center gap-2 rounded-full bg-secondary/60 px-4 py-1.5 text-sm">
+              <div className="hidden md:flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-1.5 text-sm backdrop-blur-md">
                 <Coins className="h-4 w-4 text-warning" />
-                <span className="font-semibold">{profile.points.toLocaleString()}</span>
-                <span className="text-muted-foreground">point</span>
+                <span className="font-semibold text-white">{profile.points.toLocaleString()}</span>
+                <span className="text-white/50 text-xs uppercase tracking-wider">point</span>
               </div>
               <Button variant="ghost" size="sm" onClick={() => navigate("/topup")}>
                 <Wallet className="h-4 w-4" />
