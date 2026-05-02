@@ -110,7 +110,7 @@ export default function Index() {
         </div>
         <div className="container relative py-20 md:py-28">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-1.5 text-xs font-medium tracking-[0.2em] text-white/60 backdrop-blur-md">
-            <Sparkles className="h-3 w-3" /> PREMIUM DIGITAL STORE
+            <Sparkles className="h-3 w-3" /> ONLINE
           </div>
           <h1 className="mt-6 font-display text-5xl md:text-7xl font-extrabold leading-[0.95] tracking-tight">
             <span className="block bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent">FILE 968</span>
