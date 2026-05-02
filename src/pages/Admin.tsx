@@ -18,8 +18,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { onValue, ref } from "firebase/database";
+import { sendPasswordResetEmail } from "firebase/auth";
 import { adjustPoints } from "@/lib/store";
-import { db, ADMIN_SECRET } from "@/lib/firebase";
+import { db, ADMIN_SECRET, auth } from "@/lib/firebase";
 import {
   Category, DiscountCode, Product, Topup, Order, WelcomePopupConfig, stockCount,
   createCategory, createDiscount, createProduct, deleteCategory,
