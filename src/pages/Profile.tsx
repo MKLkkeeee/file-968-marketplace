@@ -443,8 +443,40 @@ export default function Profile() {
                 onChange={(e) => setTransferTo(e.target.value)}
                 placeholder="username"
                 maxLength={50}
-                className="mt-1"
+                className={
+                  "mt-1 transition-colors " +
+                  (usernameStatus === "found"
+                    ? "border-success focus-visible:ring-success/40"
+                    : usernameStatus === "notfound" || usernameStatus === "self"
+                    ? "border-destructive focus-visible:ring-destructive/40"
+                    : "")
+                }
               />
+              {transferTo.trim() && (
+                <p
+                  className={
+                    "mt-1.5 flex items-center gap-1.5 text-xs " +
+                    (usernameStatus === "found"
+                      ? "text-success"
+                      : usernameStatus === "checking"
+                      ? "text-white/50"
+                      : "text-destructive")
+                  }
+                >
+                  {usernameStatus === "checking" && (
+                    <><Loader2 className="h-3 w-3 animate-spin" /> กำลังตรวจสอบ...</>
+                  )}
+                  {usernameStatus === "found" && (
+                    <><CheckCircle2 className="h-3 w-3" /> พบผู้ใช้: {foundUsername}</>
+                  )}
+                  {usernameStatus === "notfound" && (
+                    <><XCircle className="h-3 w-3" /> ไม่พบชื่อผู้ใช้นี้</>
+                  )}
+                  {usernameStatus === "self" && (
+                    <><XCircle className="h-3 w-3" /> ไม่สามารถโอนให้ตัวเองได้</>
+                  )}
+                </p>
+              )}
             </div>
             <div>
               <Label>จำนวน Point</Label>
