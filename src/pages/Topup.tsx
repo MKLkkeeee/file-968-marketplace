@@ -142,11 +142,21 @@ export default function Topup() {
           method: "truewallet",
           amount,
           ref: giftLink,
+          status: "success",
         });
         toast.success(`เติมเงินสำเร็จ +${amount} บาท`);
         setPhone(""); setGiftLink("");
         await refreshProfile();
       } else {
+        await recordTopup({
+          userId: user.uid,
+          username: profile.username,
+          method: "truewallet",
+          amount: 0,
+          ref: giftLink,
+          status: "failed",
+          error: typeof data.message === "string" ? data.message : "verify failed",
+        });
         toast.error("เติมเงินไม่สำเร็จ", { description: data.message });
       }
     } catch (e: any) {
