@@ -177,7 +177,13 @@ export default function Index() {
             })}
           </div>
         )}
+        {filteredAll.length > 6 && (
+          <p className="mt-6 text-center text-xs text-white/40">
+            แสดง 6 จาก {filteredAll.length} รายการ — ใช้ช่องค้นหาเพื่อหารายการเพิ่มเติม
+          </p>
+        )}
       </section>
+      <Footer />
     </div>
   );
 }
