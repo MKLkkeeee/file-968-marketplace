@@ -488,12 +488,13 @@ function DiscountManager({
   discounts: DiscountCode[]; products: Product[]; categories: Category[];
 }) {
   const [open, setOpen] = useState(false);
+  type Scope = "all" | "categories" | "products";
   const [form, setForm] = useState<{
     code: string; type: "discount" | "point"; value: number; maxUses: number; active: boolean;
-    productIds: string[]; categoryIds: string[];
+    scope: Scope; productIds: string[]; categoryIds: string[];
   }>({
     code: "", type: "discount", value: 10, maxUses: 100, active: true,
-    productIds: [], categoryIds: [],
+    scope: "all", productIds: [], categoryIds: [],
   });
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -503,19 +504,27 @@ function DiscountManager({
       toast.error("กรุณาระบุโค้ด");
       return;
     }
+    if (form.type === "discount") {
+      if (form.scope === "categories" && form.categoryIds.length === 0) {
+        return toast.error("กรุณาเลือกอย่างน้อย 1 หมวดหมู่");
+      }
+      if (form.scope === "products" && form.productIds.length === 0) {
+        return toast.error("กรุณาเลือกอย่างน้อย 1 สินค้า");
+      }
+    }
     const payload: any = {
       code: form.code, type: form.type, value: form.value,
       maxUses: form.maxUses, active: form.active,
     };
-    // เก็บเฉพาะกรณีโค้ดส่วนลด และมีการเลือก
     if (form.type === "discount") {
-      if (form.productIds.length > 0) payload.productIds = form.productIds;
-      if (form.categoryIds.length > 0) payload.categoryIds = form.categoryIds;
+      if (form.scope === "categories") payload.categoryIds = form.categoryIds;
+      else if (form.scope === "products") payload.productIds = form.productIds;
+      // scope === "all" → ไม่ต้องส่ง productIds/categoryIds (= ทุกสินค้า)
     }
     await createDiscount(payload);
     toast.success("บันทึกข้อมูลสำเร็จ");
     setOpen(false); 
-    setForm({ code: "", type: "discount", value: 10, maxUses: 100, active: true, productIds: [], categoryIds: [] });
+    setForm({ code: "", type: "discount", value: 10, maxUses: 100, active: true, scope: "all", productIds: [], categoryIds: [] });
   };
 
   const toggleProduct = (id: string) => {
@@ -563,68 +572,102 @@ function DiscountManager({
                   <div>
                     <Label className="text-sm">เงื่อนไขการใช้งาน</Label>
                     <p className="mt-0.5 text-xs text-white/50">
-                      เว้นว่างไว้ทั้งสอง = ใช้ได้กับทุกสินค้า · เลือกได้หลายรายการ
+                      เลือกขอบเขตที่โค้ดนี้สามารถใช้งานได้
                     </p>
                   </div>
 
-                  <div>
-                    <div className="mb-1.5 flex items-center justify-between">
-                      <Label className="text-xs text-white/70">หมวดหมู่ที่ใช้ได้ ({form.categoryIds.length})</Label>
-                      {form.categoryIds.length > 0 && (
-                        <Button type="button" variant="ghost" size="sm" className="h-6 text-xs"
-                          onClick={() => setForm((f) => ({ ...f, categoryIds: [] }))}>
-                          <X className="h-3 w-3" /> ล้าง
-                        </Button>
-                      )}
-                    </div>
-                    <ScrollArea className="h-28 rounded-md border border-white/10 p-2">
-                      {categories.length === 0 ? (
-                        <p className="py-3 text-center text-xs text-white/40">ยังไม่มีหมวดหมู่</p>
-                      ) : (
-                        <div className="space-y-1.5">
-                          {categories.map((c) => (
-                            <label key={c.id} className="flex cursor-pointer items-center gap-2 rounded px-1.5 py-1 hover:bg-white/5">
-                              <Checkbox
-                                checked={form.categoryIds.includes(c.id)}
-                                onCheckedChange={() => toggleCategory(c.id)}
-                              />
-                              <span className="text-sm">{c.icon} {c.name}</span>
-                            </label>
-                          ))}
+                  <div className="grid gap-2">
+                    {([
+                      { v: "all", label: "ใช้ได้กับทุกสินค้า", desc: "ลดราคาให้ทุกรายการในตะกร้า" },
+                      { v: "categories", label: "เฉพาะหมวดหมู่", desc: "เลือกได้หลายหมวดหมู่" },
+                      { v: "products", label: "เฉพาะสินค้า", desc: "เลือกสินค้ารายตัว" },
+                    ] as { v: Scope; label: string; desc: string }[]).map((opt) => (
+                      <label
+                        key={opt.v}
+                        className={
+                          "flex cursor-pointer items-start gap-2.5 rounded-lg border p-2.5 transition-colors " +
+                          (form.scope === opt.v
+                            ? "border-primary/60 bg-primary/10"
+                            : "border-white/10 hover:bg-white/5")
+                        }
+                      >
+                        <input
+                          type="radio"
+                          name="discount-scope"
+                          checked={form.scope === opt.v}
+                          onChange={() => setForm({ ...form, scope: opt.v })}
+                          className="mt-1 accent-primary"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium">{opt.label}</p>
+                          <p className="text-xs text-white/50">{opt.desc}</p>
                         </div>
-                      )}
-                    </ScrollArea>
+                      </label>
+                    ))}
                   </div>
 
-                  <div>
-                    <div className="mb-1.5 flex items-center justify-between">
-                      <Label className="text-xs text-white/70">สินค้าที่ใช้ได้ ({form.productIds.length})</Label>
-                      {form.productIds.length > 0 && (
-                        <Button type="button" variant="ghost" size="sm" className="h-6 text-xs"
-                          onClick={() => setForm((f) => ({ ...f, productIds: [] }))}>
-                          <X className="h-3 w-3" /> ล้าง
-                        </Button>
-                      )}
+                  {form.scope === "categories" && (
+                    <div>
+                      <div className="mb-1.5 flex items-center justify-between">
+                        <Label className="text-xs text-white/70">เลือกหมวดหมู่ ({form.categoryIds.length})</Label>
+                        {form.categoryIds.length > 0 && (
+                          <Button type="button" variant="ghost" size="sm" className="h-6 text-xs"
+                            onClick={() => setForm((f) => ({ ...f, categoryIds: [] }))}>
+                            <X className="h-3 w-3" /> ล้าง
+                          </Button>
+                        )}
+                      </div>
+                      <ScrollArea className="h-32 rounded-md border border-white/10 p-2">
+                        {categories.length === 0 ? (
+                          <p className="py-3 text-center text-xs text-white/40">ยังไม่มีหมวดหมู่</p>
+                        ) : (
+                          <div className="space-y-1.5">
+                            {categories.map((c) => (
+                              <label key={c.id} className="flex cursor-pointer items-center gap-2 rounded px-1.5 py-1 hover:bg-white/5">
+                                <Checkbox
+                                  checked={form.categoryIds.includes(c.id)}
+                                  onCheckedChange={() => toggleCategory(c.id)}
+                                />
+                                <span className="text-sm">{c.icon} {c.name}</span>
+                              </label>
+                            ))}
+                          </div>
+                        )}
+                      </ScrollArea>
                     </div>
-                    <ScrollArea className="h-40 rounded-md border border-white/10 p-2">
-                      {products.length === 0 ? (
-                        <p className="py-3 text-center text-xs text-white/40">ยังไม่มีสินค้า</p>
-                      ) : (
-                        <div className="space-y-1.5">
-                          {products.map((p) => (
-                            <label key={p.id} className="flex cursor-pointer items-center gap-2 rounded px-1.5 py-1 hover:bg-white/5">
-                              <Checkbox
-                                checked={form.productIds.includes(p.id)}
-                                onCheckedChange={() => toggleProduct(p.id)}
-                              />
-                              <span className="line-clamp-1 text-sm">{p.name}</span>
-                              <span className="ml-auto shrink-0 text-xs text-white/40">{p.price}</span>
-                            </label>
-                          ))}
-                        </div>
-                      )}
-                    </ScrollArea>
-                  </div>
+                  )}
+
+                  {form.scope === "products" && (
+                    <div>
+                      <div className="mb-1.5 flex items-center justify-between">
+                        <Label className="text-xs text-white/70">เลือกสินค้า ({form.productIds.length})</Label>
+                        {form.productIds.length > 0 && (
+                          <Button type="button" variant="ghost" size="sm" className="h-6 text-xs"
+                            onClick={() => setForm((f) => ({ ...f, productIds: [] }))}>
+                            <X className="h-3 w-3" /> ล้าง
+                          </Button>
+                        )}
+                      </div>
+                      <ScrollArea className="h-44 rounded-md border border-white/10 p-2">
+                        {products.length === 0 ? (
+                          <p className="py-3 text-center text-xs text-white/40">ยังไม่มีสินค้า</p>
+                        ) : (
+                          <div className="space-y-1.5">
+                            {products.map((p) => (
+                              <label key={p.id} className="flex cursor-pointer items-center gap-2 rounded px-1.5 py-1 hover:bg-white/5">
+                                <Checkbox
+                                  checked={form.productIds.includes(p.id)}
+                                  onCheckedChange={() => toggleProduct(p.id)}
+                                />
+                                <span className="line-clamp-1 text-sm">{p.name}</span>
+                                <span className="ml-auto shrink-0 text-xs text-white/40">{p.price}</span>
+                              </label>
+                            ))}
+                          </div>
+                        )}
+                      </ScrollArea>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
