@@ -28,6 +28,7 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <CartProvider>
+            <AnnouncementBar />
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
