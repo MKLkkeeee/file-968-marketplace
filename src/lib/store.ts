@@ -33,6 +33,12 @@ export interface DiscountCode {
   productIds?: string[];
   /** ถ้ามีค่า = ใช้ได้กับสินค้าในหมวดหมู่ใน list นี้ (สำหรับ type="discount" เท่านั้น) */
   categoryIds?: string[];
+  /** เงื่อนไขผู้ใช้ที่ใช้โค้ดได้ (สำหรับ type="point") — default = "all" */
+  userScope?: "all" | "new" | "specific";
+  /** จำนวนวันสำหรับเงื่อนไข "new" (default 2) */
+  newUserDays?: number;
+  /** uid ของผู้ใช้ที่ใช้ได้ (สำหรับ userScope="specific") */
+  userIds?: string[];
   createdAt: number;
 }
 
@@ -272,6 +278,22 @@ export const redeemPointCode = async (
 
   if (item.usedCount >= item.maxUses) {
     return { success: false, message: "โค้ดถูกใช้ครบแล้ว" };
+  }
+
+  // ตรวจเงื่อนไขผู้ใช้
+  const scope = item.userScope || "all";
+  if (scope === "new") {
+    const days = item.newUserDays ?? 2;
+    const userSnap = await get(ref(db, `users/${uid}/createdAt`));
+    const createdAt = userSnap.exists() ? Number(userSnap.val()) : 0;
+    const ageMs = Date.now() - createdAt;
+    if (ageMs > days * 24 * 60 * 60 * 1000) {
+      return { success: false, message: `โค้ดนี้สำหรับผู้ใช้ใหม่เท่านั้น (ไม่เกิน ${days} วัน)` };
+    }
+  } else if (scope === "specific") {
+    if (!(item.userIds || []).includes(uid)) {
+      return { success: false, message: "คุณไม่มีสิทธิ์ใช้โค้ดนี้" };
+    }
   }
 
   await adjustPoints(uid, item.value);

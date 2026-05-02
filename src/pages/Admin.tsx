@@ -190,7 +190,7 @@ export default function Admin() {
           <TabsContent value="discounts">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
               <Card className="card-elegant p-3 sm:p-6">
-                <DiscountManager discounts={discounts} products={products} categories={categories} />
+                <DiscountManager discounts={discounts} products={products} categories={categories} users={users} />
               </Card>
             </motion.div>
           </TabsContent>
@@ -527,21 +527,25 @@ function ProductManager({ categories, products }: { categories: Category[]; prod
 }
 
 function DiscountManager({
-  discounts, products, categories,
+  discounts, products, categories, users,
 }: {
-  discounts: DiscountCode[]; products: Product[]; categories: Category[];
+  discounts: DiscountCode[]; products: Product[]; categories: Category[]; users: UserProfile[];
 }) {
   const [open, setOpen] = useState(false);
   type Scope = "all" | "categories" | "products";
+  type UserScope = "all" | "new" | "specific";
   const [form, setForm] = useState<{
     code: string; type: "discount" | "point"; value: number; maxUses: number; active: boolean;
     scope: Scope; productIds: string[]; categoryIds: string[];
+    userScope: UserScope; newUserDays: number; userIds: string[];
   }>({
     code: "", type: "discount", value: 10, maxUses: 100, active: true,
     scope: "all", productIds: [], categoryIds: [],
+    userScope: "all", newUserDays: 2, userIds: [],
   });
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [userSearch, setUserSearch] = useState("");
 
   const submit = async () => {
     if (!form.code.trim()) {
@@ -556,6 +560,9 @@ function DiscountManager({
         return toast.error("กรุณาเลือกอย่างน้อย 1 สินค้า");
       }
     }
+    if (form.type === "point" && form.userScope === "specific" && form.userIds.length === 0) {
+      return toast.error("กรุณาเลือกอย่างน้อย 1 ผู้ใช้");
+    }
     const payload: any = {
       code: form.code, type: form.type, value: form.value,
       maxUses: form.maxUses, active: form.active,
@@ -565,10 +572,15 @@ function DiscountManager({
       else if (form.scope === "products") payload.productIds = form.productIds;
       // scope === "all" → ไม่ต้องส่ง productIds/categoryIds (= ทุกสินค้า)
     }
+    if (form.type === "point") {
+      payload.userScope = form.userScope;
+      if (form.userScope === "new") payload.newUserDays = form.newUserDays;
+      if (form.userScope === "specific") payload.userIds = form.userIds;
+    }
     await createDiscount(payload);
     toast.success("บันทึกข้อมูลสำเร็จ");
     setOpen(false); 
-    setForm({ code: "", type: "discount", value: 10, maxUses: 100, active: true, scope: "all", productIds: [], categoryIds: [] });
+    setForm({ code: "", type: "discount", value: 10, maxUses: 100, active: true, scope: "all", productIds: [], categoryIds: [], userScope: "all", newUserDays: 2, userIds: [] });
   };
 
   const toggleProduct = (id: string) => {
@@ -581,6 +593,12 @@ function DiscountManager({
     setForm((f) => ({
       ...f,
       categoryIds: f.categoryIds.includes(id) ? f.categoryIds.filter((x) => x !== id) : [...f.categoryIds, id],
+    }));
+  };
+  const toggleUser = (id: string) => {
+    setForm((f) => ({
+      ...f,
+      userIds: f.userIds.includes(id) ? f.userIds.filter((x) => x !== id) : [...f.userIds, id],
     }));
   };
 
@@ -707,6 +725,106 @@ function DiscountManager({
                                 <span className="ml-auto shrink-0 text-xs text-white/40">{p.price}</span>
                               </label>
                             ))}
+                          </div>
+                        )}
+                      </ScrollArea>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {form.type === "point" && (
+                <div className="space-y-3 rounded-lg border border-white/10 bg-white/[0.02] p-3">
+                  <div>
+                    <Label className="text-sm">เงื่อนไขผู้ใช้</Label>
+                    <p className="mt-0.5 text-xs text-white/50">
+                      เลือกว่าใครใช้โค้ดนี้ได้บ้าง
+                    </p>
+                  </div>
+
+                  <div className="grid gap-2">
+                    {([
+                      { v: "all", label: "ใช้ได้ทุกคน", desc: "ผู้ใช้ทุกคนสามารถใช้โค้ดนี้ได้" },
+                      { v: "new", label: "ผู้ใช้ใหม่เท่านั้น", desc: "บัญชีที่สร้างไม่เกินจำนวนวันที่กำหนด" },
+                      { v: "specific", label: "เฉพาะผู้ใช้ที่เลือก", desc: "ใช้ได้เฉพาะผู้ใช้ที่ระบุ" },
+                    ] as { v: UserScope; label: string; desc: string }[]).map((opt) => (
+                      <label
+                        key={opt.v}
+                        className={
+                          "flex cursor-pointer items-start gap-2.5 rounded-lg border p-2.5 transition-colors " +
+                          (form.userScope === opt.v
+                            ? "border-primary/60 bg-primary/10"
+                            : "border-white/10 hover:bg-white/5")
+                        }
+                      >
+                        <input
+                          type="radio"
+                          name="point-userscope"
+                          checked={form.userScope === opt.v}
+                          onChange={() => setForm({ ...form, userScope: opt.v })}
+                          className="mt-1 accent-primary"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium">{opt.label}</p>
+                          <p className="text-xs text-white/50">{opt.desc}</p>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+
+                  {form.userScope === "new" && (
+                    <div>
+                      <Label className="text-xs text-white/70">จำนวนวัน (อายุบัญชีไม่เกิน)</Label>
+                      <Input
+                        type="number"
+                        min={1}
+                        value={form.newUserDays}
+                        onChange={(e) => setForm({ ...form, newUserDays: Math.max(1, Number(e.target.value) || 1) })}
+                      />
+                    </div>
+                  )}
+
+                  {form.userScope === "specific" && (
+                    <div>
+                      <div className="mb-1.5 flex items-center justify-between">
+                        <Label className="text-xs text-white/70">เลือกผู้ใช้ ({form.userIds.length})</Label>
+                        {form.userIds.length > 0 && (
+                          <Button type="button" variant="ghost" size="sm" className="h-6 text-xs"
+                            onClick={() => setForm((f) => ({ ...f, userIds: [] }))}>
+                            <X className="h-3 w-3" /> ล้าง
+                          </Button>
+                        )}
+                      </div>
+                      <Input
+                        placeholder="ค้นหา username / email..."
+                        value={userSearch}
+                        onChange={(e) => setUserSearch(e.target.value)}
+                        className="mb-2 h-8 text-sm"
+                      />
+                      <ScrollArea className="h-44 rounded-md border border-white/10 p-2">
+                        {users.length === 0 ? (
+                          <p className="py-3 text-center text-xs text-white/40">ยังไม่มีผู้ใช้</p>
+                        ) : (
+                          <div className="space-y-1.5">
+                            {users
+                              .filter((u) => {
+                                const q = userSearch.trim().toLowerCase();
+                                if (!q) return true;
+                                return (
+                                  (u.username || "").toLowerCase().includes(q) ||
+                                  (u.email || "").toLowerCase().includes(q)
+                                );
+                              })
+                              .map((u) => (
+                                <label key={u.uid} className="flex cursor-pointer items-center gap-2 rounded px-1.5 py-1 hover:bg-white/5">
+                                  <Checkbox
+                                    checked={form.userIds.includes(u.uid)}
+                                    onCheckedChange={() => toggleUser(u.uid)}
+                                  />
+                                  <span className="line-clamp-1 text-sm">{u.username}</span>
+                                  <span className="ml-auto shrink-0 text-xs text-white/40 line-clamp-1 max-w-[40%]">{u.email}</span>
+                                </label>
+                              ))}
                           </div>
                         )}
                       </ScrollArea>
