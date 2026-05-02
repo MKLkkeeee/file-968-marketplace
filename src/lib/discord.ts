@@ -57,7 +57,7 @@ export const sendOrderWebhook = async (
 ) => {
   const itemFields = items.map(item => ({
     name: `${item.name || "ไม่ระบุชื่อสินค้า"}`,
-    value: `หมวดหมู่: \`${item.category || "ไม่ระบุ"}\`\nราคา: ${item.price} Point\nจำนวน: ${item.quantity} ชิ้น`,
+    value: `nราคา: ${item.price} Point\nจำนวน: ${item.quantity} ชิ้น`,
     inline: false
   }));
 
