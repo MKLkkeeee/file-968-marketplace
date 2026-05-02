@@ -467,7 +467,7 @@ function ProductManager({ categories, products }: { categories: Category[]; prod
                               <Eye className="h-4 w-4" />
                             </a>
                           </Button>
-                          <Button size="icon" variant="ghost" onClick={() => { setEdit(p); setForm({ name: p.name, description: p.description, price: p.price, image: p.image, categoryId: p.categoryId, ||); setOpen(true); }}>
+                          <Button size="icon" variant="ghost" onClick={() => { setEdit(p); setForm({ name: p.name, description: p.description, price: p.price, image: p.image, categoryId: p.categoryId, stockItems: p.stockItems || "", isHot: !!p.isHot }); setOpen(true); }}>
                             <Pencil className="h-4 w-4" />
                           </Button>
                           <Button size="icon" variant="ghost" onClick={() => deleteProduct(p.id)}>
