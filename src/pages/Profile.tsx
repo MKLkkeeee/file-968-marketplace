@@ -193,6 +193,52 @@ export default function Profile() {
           </div>
         </Card>
 
+        {/* Last login info */}
+        <Card className="card-elegant mt-6 p-6">
+          <div className="mb-4 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04]">
+              <Clock className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h3 className="font-display text-xl font-semibold">การเข้าสู่ระบบล่าสุด</h3>
+              <p className="text-xs text-white/50">บันทึกเวลาและสถานะการเข้าใช้งานของคุณ</p>
+            </div>
+          </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
+              <p className="text-xs uppercase tracking-wider text-white/40">สถานะ</p>
+              <div className="mt-2 flex items-center gap-2">
+                {profile.lastLoginStatus === "failed" ? (
+                  <><XCircle className="h-4 w-4 text-destructive" /><span className="font-semibold text-destructive">ล้มเหลว</span></>
+                ) : (
+                  <><CheckCircle2 className="h-4 w-4 text-success" /><span className="font-semibold text-success">สำเร็จ</span></>
+                )}
+              </div>
+              {profile.lastLoginError && profile.lastLoginStatus === "failed" && (
+                <p className="mt-1 text-xs text-white/40">{profile.lastLoginError}</p>
+              )}
+            </div>
+            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
+              <p className="text-xs uppercase tracking-wider text-white/40">เวลาเข้าสู่ระบบล่าสุด</p>
+              <p className="mt-2 text-sm font-medium">
+                {profile.lastLoginAt ? new Date(profile.lastLoginAt).toLocaleString("th-TH") : "—"}
+              </p>
+            </div>
+            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
+              <p className="text-xs uppercase tracking-wider text-white/40">สถานะปัจจุบัน</p>
+              <div className="mt-2 flex items-center gap-2">
+                <span className={`h-2 w-2 rounded-full ${profile.online ? "bg-success animate-pulse" : "bg-white/30"}`} />
+                <span className="text-sm font-medium">{profile.online ? "ออนไลน์" : "ออฟไลน์"}</span>
+              </div>
+              {!profile.online && profile.lastSeenAt && (
+                <p className="mt-1 text-xs text-white/40">
+                  ใช้งานล่าสุด: {new Date(profile.lastSeenAt).toLocaleString("th-TH")}
+                </p>
+              )}
+            </div>
+          </div>
+        </Card>
+
         {/* Change password */}
         <Card className="card-elegant mt-6 p-6">
           <div className="mb-5 flex items-center gap-3">
