@@ -735,27 +735,53 @@ function DiscountManager({
         const { slice, totalPages, page: pg } = usePaged(filtered, page, 10);
         return (
           <>
-            <Table>
-              <TableHeader><TableRow>
-                <TableHead>โค้ด</TableHead><TableHead>ประเภท</TableHead><TableHead>ค่า</TableHead><TableHead>การใช้งาน</TableHead><TableHead>สถานะ</TableHead><TableHead></TableHead>
-              </TableRow></TableHeader>
-              <TableBody>
-                {slice.map((d) => (
-                  <TableRow key={d.id}>
-                    <TableCell className="font-mono font-bold">{d.code}</TableCell>
-                    <TableCell><Badge variant="outline">{d.type}</Badge></TableCell>
-                    <TableCell>{d.value}</TableCell>
-                    <TableCell>{d.usedCount}/{d.maxUses}</TableCell>
-                    <TableCell><Switch checked={d.active} onCheckedChange={(v) => updateDiscount(d.id, { active: v })} /></TableCell>
-                    <TableCell>
-                      <Button size="icon" variant="ghost" onClick={() => deleteDiscount(d.id)}>
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <div className="hidden md:block">
+              <Table>
+                <TableHeader><TableRow>
+                  <TableHead>โค้ด</TableHead><TableHead>ประเภท</TableHead><TableHead>ค่า</TableHead><TableHead>การใช้งาน</TableHead><TableHead>สถานะ</TableHead><TableHead></TableHead>
+                </TableRow></TableHeader>
+                <TableBody>
+                  {slice.map((d) => (
+                    <TableRow key={d.id}>
+                      <TableCell className="font-mono font-bold">{d.code}</TableCell>
+                      <TableCell><Badge variant="outline">{d.type}</Badge></TableCell>
+                      <TableCell>{d.value}</TableCell>
+                      <TableCell>{d.usedCount}/{d.maxUses}</TableCell>
+                      <TableCell><Switch checked={d.active} onCheckedChange={(v) => updateDiscount(d.id, { active: v })} /></TableCell>
+                      <TableCell>
+                        <Button size="icon" variant="ghost" onClick={() => deleteDiscount(d.id)}>
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            <div className="md:hidden space-y-3">
+              {slice.map((d) => (
+                <div key={d.id} className="rounded-2xl border border-white/10 bg-white/[0.03] p-3 space-y-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="font-mono font-bold truncate">{d.code}</div>
+                      <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                        <Badge variant="outline" className="text-xs">{d.type}</Badge>
+                        <span className="text-xs text-muted-foreground">ค่า {d.value}</span>
+                        <span className="text-xs text-muted-foreground">• {d.usedCount}/{d.maxUses}</span>
+                      </div>
+                    </div>
+                    <Switch checked={d.active} onCheckedChange={(v) => updateDiscount(d.id, { active: v })} />
+                  </div>
+                  <div className="flex justify-end">
+                    <Button size="sm" variant="ghost" onClick={() => deleteDiscount(d.id)}>
+                      <Trash2 className="h-4 w-4 text-destructive" /> ลบ
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
             <Paginator page={pg} totalPages={totalPages} onChange={setPage} />
           </>
         );
