@@ -30,6 +30,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { UserProfile } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Lock, Pencil, Plus, Shield, Trash2 } from "lucide-react";
+import { sendRestockWebhook } from "@/lib/discord";
+import { motion } from "framer-motion";
 
 export default function Admin() {
   const { profile } = useAuth();
@@ -47,17 +49,15 @@ export default function Admin() {
 
   const handleAddPoint = async (uid: string) => {
     const amount = Number(pointInputs[uid]);
-  
+    
     if (!amount || amount <= 0) {
-      toast.error("ใส่จำนวน Point");
+      toast.error("กรุณาระบุจำนวน Point");
       return;
     }
-  
+    
     try {
       await adjustPoints(uid, amount);
-  
       toast.success(`เพิ่ม ${amount} Point สำเร็จ`);
-  
       setPointInputs((prev) => ({
         ...prev,
         [uid]: "",
@@ -81,7 +81,12 @@ export default function Admin() {
     return (
       <div className="min-h-screen">
         <Navbar />
-        <div className="container flex min-h-[calc(100vh-4rem)] max-w-md items-center">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          className="container flex min-h-[calc(100vh-4rem)] max-w-md items-center"
+        >
           <Card className="card-elegant w-full p-8">
             <div className="mb-6 flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-primary">
@@ -99,7 +104,7 @@ export default function Admin() {
                 onClick={() => {
                   if (secret === ADMIN_SECRET) {
                     setUnlocked(true);
-                    toast.success("ปลดล็อกหน้าแอดมินสำเร็จ");
+                    toast.success("ปลดล็อกสำเร็จ");
                   } else toast.error("รหัสไม่ถูกต้อง");
                 }}
               >
@@ -108,11 +113,11 @@ export default function Admin() {
             </div>
             {!profile || profile.role !== "admin" ? (
               <p className="mt-4 text-xs text-muted-foreground">
-                * บัญชีคุณต้องมีสิทธิ์ admin ด้วย (ผู้ใช้คนแรกที่สมัครจะเป็น admin อัตโนมัติ)
+                บัญชีคุณต้องมีสิทธิ์ admin
               </p>
             ) : null}
           </Card>
-        </div>
+        </motion.div>
       </div>
     );
   }
@@ -120,9 +125,14 @@ export default function Admin() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <div className="container py-10">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        className="container py-10"
+      >
         <h1 className="font-display text-4xl font-bold">หน้าผู้ดูแลระบบ</h1>
-        <p className="mt-1 text-muted-foreground">จัดการสินค้า หมวดหมู่ โค้ด และผู้ใช้งาน</p>
+        <p className="mt-1 text-muted-foreground">จัดการข้อมูลระบบ</p>
 
         <Tabs defaultValue="products" className="mt-8">
           <TabsList className="flex flex-wrap">
@@ -134,215 +144,219 @@ export default function Admin() {
             <TabsTrigger value="topups">เติมเงิน</TabsTrigger>
           </TabsList>
 
-          {/* ============ Products ============ */}
           <TabsContent value="products">
-            <Card className="card-elegant p-6">
-              <ProductManager categories={categories} products={products} />
-            </Card>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
+              <Card className="card-elegant p-6">
+                <ProductManager categories={categories} products={products} />
+              </Card>
+            </motion.div>
           </TabsContent>
 
-          {/* ============ Categories ============ */}
           <TabsContent value="categories">
-            <Card className="card-elegant p-6">
-              <CategoryManager categories={categories} />
-            </Card>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
+              <Card className="card-elegant p-6">
+                <CategoryManager categories={categories} />
+              </Card>
+            </motion.div>
           </TabsContent>
 
-          {/* ============ Discounts ============ */}
           <TabsContent value="discounts">
-            <Card className="card-elegant p-6">
-              <DiscountManager discounts={discounts} />
-            </Card>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
+              <Card className="card-elegant p-6">
+                <DiscountManager discounts={discounts} />
+              </Card>
+            </motion.div>
           </TabsContent>
 
-          {/* ============ Users ============ */}
           <TabsContent value="users">
-            <Card className="card-elegant p-6">
-              <div className="mb-4">
-                <Input
-                  placeholder="ค้นหา username / email / uid"
-                  value={userSearch}
-                  onChange={(e) => setUserSearch(e.target.value)}
-                />
-              </div>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
+              <Card className="card-elegant p-6">
+                <div className="mb-4">
+                  <Input
+                    placeholder="ค้นหา username / email / uid"
+                    value={userSearch}
+                    onChange={(e) => setUserSearch(e.target.value)}
+                  />
+                </div>
 
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Username</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Point</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>เพิ่ม Point</TableHead>
-                    <TableHead></TableHead>
-                  </TableRow>
-                </TableHeader>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Username</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Point</TableHead>
+                      <TableHead>Role</TableHead>
+                      <TableHead>เพิ่ม Point</TableHead>
+                      <TableHead></TableHead>
+                    </TableRow>
+                  </TableHeader>
 
-                <TableBody>
-                  {users
-                    .filter((u) =>
-                      `${u.username} ${u.email} ${u.uid}`
-                        .toLowerCase()
-                        .includes(userSearch.toLowerCase())
-                    )
-                    .map((u) => (
-                      <TableRow key={u.uid}>
-                        <TableCell>{u.username}</TableCell>
-                        <TableCell>{u.email}</TableCell>
-                        <TableCell>{u.points?.toLocaleString() ?? 0}</TableCell>
+                  <TableBody>
+                    {users
+                      .filter((u) =>
+                        `${u.username} ${u.email} ${u.uid}`
+                          .toLowerCase()
+                          .includes(userSearch.toLowerCase())
+                      )
+                      .map((u) => (
+                        <TableRow key={u.uid}>
+                          <TableCell>{u.username}</TableCell>
+                          <TableCell>{u.email}</TableCell>
+                          <TableCell>{u.points?.toLocaleString() ?? 0}</TableCell>
 
-                        <TableCell>
-                          <Badge variant={u.role === "admin" ? "default" : "outline"}>
-                            {u.role}
-                          </Badge>
-                        </TableCell>
+                          <TableCell>
+                            <Badge variant={u.role === "admin" ? "default" : "outline"}>
+                              {u.role}
+                            </Badge>
+                          </TableCell>
 
-                        <TableCell>
-                          <div className="flex gap-2">
-                            <Input
-                              type="number"
-                              placeholder="100"
-                              className="w-24"
-                              value={pointInputs[u.uid] || ""}
-                              onChange={(e) =>
-                                setPointInputs((prev) => ({
-                                  ...prev,
-                                  [u.uid]: e.target.value,
-                                }))
-                              }
-                            />
+                          <TableCell>
+                            <div className="flex gap-2">
+                              <Input
+                                type="number"
+                                placeholder="100"
+                                className="w-24"
+                                value={pointInputs[u.uid] || ""}
+                                onChange={(e) =>
+                                  setPointInputs((prev) => ({
+                                    ...prev,
+                                    [u.uid]: e.target.value,
+                                  }))
+                                }
+                              />
 
+                              <Button
+                                size="sm"
+                                className="bg-gradient-primary text-primary-foreground"
+                                onClick={() => handleAddPoint(u.uid)}
+                              >
+                                เพิ่ม
+                              </Button>
+                            </div>
+                          </TableCell>
+
+                          <TableCell>
                             <Button
                               size="sm"
-                              className="bg-gradient-primary text-primary-foreground"
-                              onClick={() => handleAddPoint(u.uid)}
+                              variant="outline"
+                              onClick={() =>
+                                setUserRole(
+                                  u.uid,
+                                  u.role === "admin" ? "user" : "admin"
+                                )
+                              }
                             >
-                              เพิ่ม
+                              {u.role === "admin"
+                                ? "ลดเป็น user"
+                                : "เลื่อนเป็น admin"}
                             </Button>
-                          </div>
-                        </TableCell>
-
-                        <TableCell>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() =>
-                              setUserRole(
-                                u.uid,
-                                u.role === "admin" ? "user" : "admin"
-                              )
-                            }
-                          >
-                            {u.role === "admin"
-                              ? "ลดเป็น user"
-                              : "เลื่อนเป็น admin"}
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
-              </Table>
-            </Card>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              </Card>
+            </motion.div>
           </TabsContent>
 
-          {/* ============ Orders ============ */}
           <TabsContent value="orders">
-            <Card className="card-elegant p-6">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>เวลา</TableHead>
-                    <TableHead>ผู้ซื้อ</TableHead>
-                    <TableHead>สินค้า</TableHead>
-                    <TableHead>โค้ด</TableHead>
-                    <TableHead>จ่ายจริง</TableHead>
-                  </TableRow>
-                </TableHeader>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
+              <Card className="card-elegant p-6">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>เวลา</TableHead>
+                      <TableHead>ผู้ซื้อ</TableHead>
+                      <TableHead>สินค้า</TableHead>
+                      <TableHead>โค้ด</TableHead>
+                      <TableHead>จ่ายจริง</TableHead>
+                    </TableRow>
+                  </TableHeader>
 
-                <TableBody>
-                  {orders
-                    .sort((a, b) => b.createdAt - a.createdAt)
-                    .map((o) => (
-                      <TableRow key={o.id}>
-                        <TableCell className="text-xs">
-                          {new Date(o.createdAt).toLocaleString("th-TH")}
-                        </TableCell>
+                  <TableBody>
+                    {orders
+                      .sort((a, b) => b.createdAt - a.createdAt)
+                      .map((o) => (
+                        <TableRow key={o.id}>
+                          <TableCell className="text-xs">
+                            {new Date(o.createdAt).toLocaleString("th-TH")}
+                          </TableCell>
 
-                        <TableCell>{o.username}</TableCell>
+                          <TableCell>{o.username}</TableCell>
 
-                        <TableCell className="text-xs">
-                          {Object.entries(
-                            (o.items || []).reduce((acc: any, item: any) => {
-                              acc[item.productName] =
-                                (acc[item.productName] || 0) + 1;
-                              return acc;
-                            }, {})
-                          ).map(([name, qty]: any) => (
-                            <div key={name}>
-                              {name} x{qty}
-                            </div>
-                          ))}
-                        </TableCell>
+                          <TableCell className="text-xs">
+                            {Object.entries(
+                              (o.items || []).reduce((acc: any, item: any) => {
+                                acc[item.productName] =
+                                  (acc[item.productName] || 0) + 1;
+                                return acc;
+                              }, {})
+                            ).map(([name, qty]: any) => (
+                              <div key={name}>
+                                {name} x{qty}
+                              </div>
+                            ))}
+                          </TableCell>
 
-                        <TableCell>{o.discountCode || "-"}</TableCell>
+                          <TableCell>{o.discountCode || "-"}</TableCell>
 
-                        <TableCell className="font-semibold gradient-text">
-                          {o.finalPrice}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
-              </Table>
-            </Card>
+                          <TableCell className="font-semibold gradient-text">
+                            {o.finalPrice}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              </Card>
+            </motion.div>
           </TabsContent>
 
-          {/* ============ Topups ============ */}
           <TabsContent value="topups">
-            <Card className="card-elegant p-6">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>เวลา</TableHead>
-                    <TableHead>ผู้ใช้</TableHead>
-                    <TableHead>วิธี</TableHead>
-                    <TableHead>จำนวน</TableHead>
-                    <TableHead>Ref</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {topups.sort((a, b) => b.createdAt - a.createdAt).map((t) => (
-                    <TableRow key={t.id}>
-                      <TableCell className="text-xs">{new Date(t.createdAt).toLocaleString("th-TH")}</TableCell>
-                      <TableCell>{t.username}</TableCell>
-                      <TableCell><Badge variant="outline">{t.method}</Badge></TableCell>
-                      <TableCell className="font-semibold">{t.amount}</TableCell>
-                      <TableCell className="max-w-[200px] truncate text-xs">{t.ref}</TableCell>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
+              <Card className="card-elegant p-6">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>เวลา</TableHead>
+                      <TableHead>ผู้ใช้</TableHead>
+                      <TableHead>วิธี</TableHead>
+                      <TableHead>จำนวน</TableHead>
+                      <TableHead>Ref</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Card>
+                  </TableHeader>
+                  <TableBody>
+                    {topups.sort((a, b) => b.createdAt - a.createdAt).map((t) => (
+                      <TableRow key={t.id}>
+                        <TableCell className="text-xs">{new Date(t.createdAt).toLocaleString("th-TH")}</TableCell>
+                        <TableCell>{t.username}</TableCell>
+                        <TableCell><Badge variant="outline">{t.method}</Badge></TableCell>
+                        <TableCell className="font-semibold">{t.amount}</TableCell>
+                        <TableCell className="max-w-[200px] truncate text-xs">{t.ref}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Card>
+            </motion.div>
           </TabsContent>
         </Tabs>
-      </div>
+      </motion.div>
     </div>
   );
 }
-
-// ====================== Sub managers ======================
 
 function CategoryManager({ categories }: { categories: Category[] }) {
   const [open, setOpen] = useState(false);
   const [edit, setEdit] = useState<Category | null>(null);
   const [name, setName] = useState("");
-  const [icon, setIcon] = useState("📁");
+  const [icon, setIcon] = useState("");
 
   const submit = async () => {
     if (!name.trim()) return;
     if (edit) await updateCategory(edit.id, { name, icon });
     else await createCategory({ name, icon });
-    toast.success("บันทึกแล้ว");
-    setOpen(false); setName(""); setIcon("📁"); setEdit(null);
+    toast.success("บันทึกข้อมูลสำเร็จ");
+    setOpen(false); setName(""); setIcon(""); setEdit(null);
   };
 
   return (
@@ -351,14 +365,14 @@ function CategoryManager({ categories }: { categories: Category[] }) {
         <h3 className="font-display text-xl font-semibold">หมวดหมู่ ({categories.length})</h3>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button onClick={() => { setEdit(null); setName(""); setIcon("📁"); }} className="bg-gradient-primary text-primary-foreground">
+            <Button onClick={() => { setEdit(null); setName(""); setIcon(""); }} className="bg-gradient-primary text-primary-foreground">
               <Plus className="h-4 w-4" />เพิ่มหมวดหมู่
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader><DialogTitle>{edit ? "แก้ไข" : "เพิ่ม"}หมวดหมู่</DialogTitle></DialogHeader>
             <div className="space-y-3">
-              <div><Label>ไอคอน (emoji)</Label><Input value={icon} onChange={(e) => setIcon(e.target.value)} /></div>
+              <div><Label>ไอคอน</Label><Input value={icon} onChange={(e) => setIcon(e.target.value)} /></div>
               <div><Label>ชื่อ</Label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
             </div>
             <DialogFooter><Button onClick={submit} className="bg-gradient-primary text-primary-foreground">บันทึก</Button></DialogFooter>
@@ -392,11 +406,38 @@ function ProductManager({ categories, products }: { categories: Category[]; prod
   const reset = () => setForm({ name: "", description: "", price: 0, image: "", categoryId: "", stockItems: "" });
 
   const submit = async () => {
-    if (!form.name || !form.categoryId) return toast.error("กรอกชื่อและหมวดหมู่");
-    if (edit) await updateProduct(edit.id, form);
-    else await createProduct(form);
-    toast.success("บันทึกแล้ว");
-    setOpen(false); reset(); setEdit(null);
+    if (!form.name || !form.categoryId) {
+      toast.error("กรุณากรอกชื่อและหมวดหมู่");
+      return;
+    }
+
+    const oldStock = edit ? stockCount(edit.stockItems || "") : 0;
+    const newStock = stockCount(form.stockItems || "");
+    const cat = categories.find(c => c.id === form.categoryId);
+    const categoryName = cat ? cat.name : form.categoryId;
+
+    if (edit) {
+      await updateProduct(edit.id, form);
+    } else {
+      await createProduct(form);
+    }
+
+    if (newStock > oldStock) {
+      const webhookUrl = "https://discord.com/api/webhooks/1499925619058675782/bIqRUbnJqaVtmU1-Fh0q1dcSc3zOd-VpHDO_fPVAT5cK_tHYdS2RYbwaXiPDbZIiHhLz";
+      await sendRestockWebhook(
+        form.name,
+        oldStock,
+        newStock,
+        categoryName,
+        form.image || "",
+        webhookUrl
+      );
+    }
+
+    toast.success("บันทึกข้อมูลสำเร็จ");
+    setOpen(false); 
+    reset(); 
+    setEdit(null);
   };
 
   return (
@@ -413,9 +454,9 @@ function ProductManager({ categories, products }: { categories: Category[]; prod
             <DialogHeader><DialogTitle>{edit ? "แก้ไข" : "เพิ่ม"}สินค้า</DialogTitle></DialogHeader>
             <div className="space-y-3">
               <div><Label>ชื่อสินค้า</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
-              <div><Label>รายละเอียดสินค้า</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="ข้อมูลสินค้า รายละเอียดที่ลูกค้าจะเห็น" /></div>
+              <div><Label>รายละเอียดสินค้า</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>
               <div className="grid grid-cols-2 gap-3">
-                <div><Label>ราคา (point)</Label><Input type="number" value={form.price} onChange={(e) => setForm({ ...form, price: Number(e.target.value) })} /></div>
+                <div><Label>ราคา</Label><Input type="number" value={form.price} onChange={(e) => setForm({ ...form, price: Number(e.target.value) })} /></div>
                 <div>
                   <Label>หมวดหมู่</Label>
                   <Select value={form.categoryId} onValueChange={(v) => setForm({ ...form, categoryId: v })}>
@@ -426,19 +467,17 @@ function ProductManager({ categories, products }: { categories: Category[]; prod
                   </Select>
                 </div>
               </div>
-              <div><Label>URL รูปภาพ</Label><Input value={form.image} onChange={(e) => setForm({ ...form, image: e.target.value })} placeholder="https://..." /></div>
+              <div><Label>URL รูปภาพ</Label><Input value={form.image} onChange={(e) => setForm({ ...form, image: e.target.value })} /></div>
               <div>
-                <Label>Stock (1 บรรทัด = 1 ชิ้น)</Label>
+                <Label>สต๊อกสินค้า</Label>
                 <Textarea
                   value={form.stockItems}
                   onChange={(e) => setForm({ ...form, stockItems: e.target.value })}
-                  placeholder={"เช่น:\nlicense-key-001\nhttps://drive.google.com/file/xxx\nuser:pass:server"}
                   rows={6}
                   className="font-mono text-sm"
                 />
                 <p className="mt-1 text-xs text-muted-foreground">
-                  จำนวน stock = จำนวนบรรทัดที่ไม่ว่าง — เมื่อมีคนซื้อ ระบบจะส่งบรรทัดบนสุดให้ลูกค้าและตัดออก
-                  ({stockCount(form.stockItems)} ชิ้น)
+                  จำนวนปัจจุบัน: {stockCount(form.stockItems)}
                 </p>
               </div>
             </div>
@@ -485,16 +524,20 @@ function DiscountManager({ discounts }: { discounts: DiscountCode[] }) {
   const [form, setForm] = useState({ code: "", type: "discount" as "discount" | "point", value: 10, maxUses: 100, active: true });
 
   const submit = async () => {
-    if (!form.code.trim()) return toast.error("ใส่โค้ด");
+    if (!form.code.trim()) {
+      toast.error("กรุณาระบุโค้ด");
+      return;
+    }
     await createDiscount(form);
-    toast.success("สร้างโค้ดแล้ว");
-    setOpen(false); setForm({ code: "", type: "discount", value: 10, maxUses: 100, active: true });
+    toast.success("บันทึกข้อมูลสำเร็จ");
+    setOpen(false); 
+    setForm({ code: "", type: "discount", value: 10, maxUses: 100, active: true });
   };
 
   return (
     <>
       <div className="mb-4 flex items-center justify-between">
-        <h3 className="font-display text-xl font-semibold">โค้ดส่วนลด / โค้ดเติม Point</h3>
+        <h3 className="font-display text-xl font-semibold">จัดการโค้ด</h3>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button className="bg-gradient-primary text-primary-foreground"><Plus className="h-4 w-4" />เพิ่มโค้ด</Button>
@@ -502,20 +545,20 @@ function DiscountManager({ discounts }: { discounts: DiscountCode[] }) {
           <DialogContent>
             <DialogHeader><DialogTitle>เพิ่มโค้ดใหม่</DialogTitle></DialogHeader>
             <div className="space-y-3">
-              <div><Label>โค้ด</Label><Input value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })} placeholder="SUMMER25" /></div>
+              <div><Label>โค้ด</Label><Input value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })} /></div>
               <div>
                 <Label>ประเภท</Label>
                 <Select value={form.type} onValueChange={(v: any) => setForm({ ...form, type: v })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="discount">ส่วนลด (%)</SelectItem>
+                    <SelectItem value="discount">ส่วนลด</SelectItem>
                     <SelectItem value="point">เพิ่ม Point</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <div><Label>{form.type === "discount" ? "ลด (%)" : "Point"}</Label><Input type="number" value={form.value} onChange={(e) => setForm({ ...form, value: Number(e.target.value) })} /></div>
-                <div><Label>จำกัดใช้</Label><Input type="number" value={form.maxUses} onChange={(e) => setForm({ ...form, maxUses: Number(e.target.value) })} /></div>
+                <div><Label>จำนวน</Label><Input type="number" value={form.value} onChange={(e) => setForm({ ...form, value: Number(e.target.value) })} /></div>
+                <div><Label>จำกัดสิทธิ์</Label><Input type="number" value={form.maxUses} onChange={(e) => setForm({ ...form, maxUses: Number(e.target.value) })} /></div>
               </div>
             </div>
             <DialogFooter><Button onClick={submit} className="bg-gradient-primary text-primary-foreground">บันทึก</Button></DialogFooter>
@@ -524,14 +567,14 @@ function DiscountManager({ discounts }: { discounts: DiscountCode[] }) {
       </div>
       <Table>
         <TableHeader><TableRow>
-          <TableHead>โค้ด</TableHead><TableHead>ประเภท</TableHead><TableHead>ค่า</TableHead><TableHead>ใช้แล้ว/จำกัด</TableHead><TableHead>เปิด</TableHead><TableHead></TableHead>
+          <TableHead>โค้ด</TableHead><TableHead>ประเภท</TableHead><TableHead>ค่า</TableHead><TableHead>การใช้งาน</TableHead><TableHead>สถานะ</TableHead><TableHead></TableHead>
         </TableRow></TableHeader>
         <TableBody>
           {discounts.map((d) => (
             <TableRow key={d.id}>
               <TableCell className="font-mono font-bold">{d.code}</TableCell>
-              <TableCell><Badge variant="outline">{d.type === "discount" ? "ส่วนลด %" : "เพิ่ม Point"}</Badge></TableCell>
-              <TableCell>{d.value}{d.type === "discount" ? "%" : ""}</TableCell>
+              <TableCell><Badge variant="outline">{d.type}</Badge></TableCell>
+              <TableCell>{d.value}</TableCell>
               <TableCell>{d.usedCount}/{d.maxUses}</TableCell>
               <TableCell><Switch checked={d.active} onCheckedChange={(v) => updateDiscount(d.id, { active: v })} /></TableCell>
               <TableCell>
