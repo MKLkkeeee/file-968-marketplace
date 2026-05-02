@@ -2,8 +2,18 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, Mail } from "lucide-react";
 import boxLogo from "@/assets/box-logo.png";
+import { sendPasswordResetEmail } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 export default function Login() {
   const { login } = useAuth();
@@ -11,6 +21,41 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [forgotOpen, setForgotOpen] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotLoading, setForgotLoading] = useState(false);
+
+  const handleForgot = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const target = forgotEmail.trim();
+    if (!target || !target.includes("@")) {
+      toast.error("กรุณากรอกอีเมลให้ถูกต้อง");
+      return;
+    }
+    setForgotLoading(true);
+    try {
+      await sendPasswordResetEmail(auth, target, {
+        url: `${window.location.origin}/login`,
+        handleCodeInApp: false,
+      });
+      toast.success("ส่งลิงก์รีเซ็ตรหัสผ่านแล้ว", {
+        description: `กรุณาเช็คอีเมล ${target} (รวมถึงโฟลเดอร์ Spam)`,
+      });
+      setForgotOpen(false);
+      setForgotEmail("");
+    } catch (err: any) {
+      const code = err?.code || "";
+      const msg =
+        code === "auth/user-not-found"
+          ? "ไม่พบบัญชีผู้ใช้ที่ใช้อีเมลนี้"
+          : code === "auth/invalid-email"
+          ? "รูปแบบอีเมลไม่ถูกต้อง"
+          : err?.message || "ไม่สามารถส่งลิงก์ได้";
+      toast.error("ส่งลิงก์ไม่สำเร็จ", { description: msg });
+    } finally {
+      setForgotLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
