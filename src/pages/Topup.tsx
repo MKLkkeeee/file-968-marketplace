@@ -343,7 +343,7 @@ export default function Topup() {
           <Card className="card-elegant mt-6 flex items-center justify-between p-5">
             <div>
               <p className="text-sm text-muted-foreground">ยอดเงินปัจจุบัน</p>
-              <p className="font-display text-3xl font-bold gradient-text">{profile.points.toLocaleString()}</p>
+              <p className="font-display text-3xl font-bold gradient-text">฿{profile.points.toLocaleString()}</p>
             </div>
             <Wallet className="h-10 w-10 text-primary" />
           </Card>

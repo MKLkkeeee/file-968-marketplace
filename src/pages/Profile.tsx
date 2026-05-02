@@ -291,7 +291,7 @@ export default function Profile() {
               <div className="mt-2 flex items-baseline gap-2">
                 <Coins className="h-6 w-6 text-warning" />
                 <span className="font-display text-4xl font-bold gradient-text">
-                  {profile.points.toLocaleString()}
+                  ฿{profile.points.toLocaleString()}
                 </span>
               </div>
             </div>

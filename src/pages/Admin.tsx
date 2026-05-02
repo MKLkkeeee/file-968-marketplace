@@ -1096,7 +1096,7 @@ function OrderTable({ orders, search, page, setPage }: {
                   ).map(([name, qty]: any) => (<div key={name}>{name} x{qty}</div>))}
                 </TableCell>
                 <TableCell>{o.discountCode || "-"}</TableCell>
-                <TableCell className="font-semibold gradient-text">{o.finalPrice}</TableCell>
+                <TableCell className="font-semibold gradient-text">฿{o.finalPrice}</TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -1160,7 +1160,7 @@ function TopupTable({ topups, search, page, setPage }: {
                 <TableCell className="text-xs">{new Date(t.createdAt).toLocaleString("th-TH")}</TableCell>
                 <TableCell>{t.username}</TableCell>
                 <TableCell><Badge variant="outline">{t.method}</Badge></TableCell>
-                <TableCell className="font-semibold">{t.amount}</TableCell>
+                <TableCell className="font-semibold">฿{t.amount}</TableCell>
                 <TableCell className="max-w-[200px] truncate text-xs">{t.ref}</TableCell>
               </TableRow>
             ))}
