@@ -137,6 +137,42 @@ export const adjustPoints = async (uid: string, delta: number) => {
 export const setUserRole = (uid: string, role: "user" | "admin") =>
   update(ref(db, `users/${uid}`), { role });
 
+// Transfer points from one user to another (by username)
+export const transferPointsByUsername = async (
+  fromUid: string,
+  toUsername: string,
+  amount: number
+) => {
+  if (!Number.isFinite(amount) || amount <= 0) {
+    throw new Error("จำนวน Point ต้องมากกว่า 0");
+  }
+  const intAmount = Math.floor(amount);
+
+  // find recipient by username (case-insensitive)
+  const usersSnap = await get(ref(db, "users"));
+  if (!usersSnap.exists()) throw new Error("ไม่พบผู้ใช้ปลายทาง");
+  const users = usersSnap.val() as Record<string, any>;
+  const target = Object.values(users).find(
+    (u: any) => (u?.username || "").toLowerCase() === toUsername.trim().toLowerCase()
+  ) as any;
+  if (!target?.uid) throw new Error("ไม่พบผู้ใช้ปลายทาง");
+  if (target.uid === fromUid) throw new Error("ไม่สามารถโอนให้ตัวเองได้");
+
+  // check sender balance
+  const fromSnap = await get(ref(db, `users/${fromUid}/points`));
+  const fromPoints = fromSnap.exists() ? Number(fromSnap.val()) : 0;
+  if (fromPoints < intAmount) throw new Error("ยอด Point ไม่เพียงพอ");
+
+  const toPoints = Number(target.points || 0);
+
+  await update(ref(db), {
+    [`users/${fromUid}/points`]: fromPoints - intAmount,
+    [`users/${target.uid}/points`]: toPoints + intAmount,
+  });
+
+  return { toUid: target.uid as string, toUsername: target.username as string };
+};
+
 // Orders
 export const createOrder = async (data: Omit<Order, "id" | "createdAt">) => {
   const r = push(ref(db, "orders"));

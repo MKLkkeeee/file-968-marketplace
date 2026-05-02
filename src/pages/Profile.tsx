@@ -20,7 +20,18 @@ import {
   updatePassword,
 } from "firebase/auth";
 import { toast } from "sonner";
-import { Camera, CheckCircle2, Clock, Coins, Heart, History, KeyRound, Loader2, Mail, Package, Shield, ShoppingCart, User as UserIcon, Wallet, XCircle } from "lucide-react";
+import { Camera, CheckCircle2, Clock, Coins, Heart, History, KeyRound, Loader2, Mail, Package, Send, Shield, ShoppingCart, User as UserIcon, Wallet, XCircle } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { transferPointsByUsername } from "@/lib/store";
 import { motion } from "framer-motion";
 import { fileToResizedDataUrl } from "@/lib/imageUtils";
 
@@ -34,6 +45,51 @@ export default function Profile() {
   const [confirmPwd, setConfirmPwd] = useState("");
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+
+  // Transfer Point states
+  const [transferTo, setTransferTo] = useState("");
+  const [transferAmount, setTransferAmount] = useState("");
+  const [transferPwd, setTransferPwd] = useState("");
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [transferring, setTransferring] = useState(false);
+
+  const handleOpenTransferConfirm = () => {
+    if (!profile || !user) return;
+    const toName = transferTo.trim();
+    const amount = Math.floor(Number(transferAmount));
+    if (!toName) return toast.error("กรุณากรอกชื่อผู้ใช้ปลายทาง");
+    if (toName.toLowerCase() === (profile.username || "").toLowerCase())
+      return toast.error("ไม่สามารถโอนให้ตัวเองได้");
+    if (!Number.isFinite(amount) || amount <= 0)
+      return toast.error("จำนวน Point ต้องมากกว่า 0");
+    if (amount > (profile.points || 0)) return toast.error("ยอด Point ไม่เพียงพอ");
+    if (!transferPwd) return toast.error("กรุณากรอกรหัสผ่านเพื่อยืนยัน");
+    setConfirmOpen(true);
+  };
+
+  const handleConfirmTransfer = async () => {
+    if (!user || !auth.currentUser?.email) return;
+    setTransferring(true);
+    try {
+      const cred = EmailAuthProvider.credential(auth.currentUser.email, transferPwd);
+      await reauthenticateWithCredential(auth.currentUser, cred);
+      const amount = Math.floor(Number(transferAmount));
+      const res = await transferPointsByUsername(user.uid, transferTo.trim(), amount);
+      toast.success(`โอน ${amount.toLocaleString()} Point ให้ ${res.toUsername} สำเร็จ`);
+      setTransferTo(""); setTransferAmount(""); setTransferPwd("");
+      setConfirmOpen(false);
+      await refreshProfile();
+    } catch (e: any) {
+      const code = e?.code || "";
+      if (code.includes("wrong-password") || code.includes("invalid-credential")) {
+        toast.error("รหัสผ่านไม่ถูกต้อง");
+      } else {
+        toast.error("โอน Point ไม่สำเร็จ", { description: e?.message });
+      }
+    } finally {
+      setTransferring(false);
+    }
+  };
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -329,6 +385,95 @@ export default function Profile() {
             บันทึกรหัสผ่านใหม่
           </Button>
         </Card>
+
+        {/* Transfer Points */}
+        <Card className="card-elegant mt-6 p-6">
+          <div className="mb-5 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04]">
+              <Send className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h3 className="font-display text-xl font-semibold">โอน Point ให้ผู้ใช้อื่น</h3>
+              <p className="text-xs text-white/50">
+                ยอดคงเหลือ: <span className="text-white">{(profile.points || 0).toLocaleString()}</span> Point
+              </p>
+            </div>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-3">
+            <div>
+              <Label>ชื่อผู้ใช้ปลายทาง</Label>
+              <Input
+                value={transferTo}
+                onChange={(e) => setTransferTo(e.target.value)}
+                placeholder="username"
+                maxLength={50}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label>จำนวน Point</Label>
+              <Input
+                type="number"
+                min={1}
+                step={1}
+                value={transferAmount}
+                onChange={(e) => setTransferAmount(e.target.value)}
+                placeholder="0"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label>รหัสผ่านยืนยัน</Label>
+              <Input
+                type="password"
+                value={transferPwd}
+                onChange={(e) => setTransferPwd(e.target.value)}
+                placeholder="••••••••"
+                className="mt-1"
+              />
+            </div>
+          </div>
+
+          <Button onClick={handleOpenTransferConfirm} disabled={transferring} className="mt-5">
+            <Send className="h-4 w-4" />
+            โอน Point
+          </Button>
+        </Card>
+
+        <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>ยืนยันการโอน Point</AlertDialogTitle>
+              <AlertDialogDescription>
+                คุณต้องการโอน{" "}
+                <span className="font-semibold text-foreground">
+                  {Math.floor(Number(transferAmount) || 0).toLocaleString()} Point
+                </span>{" "}
+                ให้กับ{" "}
+                <span className="font-semibold text-foreground">{transferTo.trim()}</span>{" "}
+                ใช่หรือไม่? การกระทำนี้ไม่สามารถย้อนกลับได้
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="flex-row-reverse sm:flex-row-reverse sm:justify-start gap-2">
+              {/* ขวา = ยกเลิก */}
+              <AlertDialogCancel disabled={transferring} className="mt-0">
+                ยกเลิก
+              </AlertDialogCancel>
+              {/* ซ้าย = โอน */}
+              <AlertDialogAction
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleConfirmTransfer();
+                }}
+                disabled={transferring}
+              >
+                {transferring && <Loader2 className="h-4 w-4 animate-spin" />}
+                โอน
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         <FavoritesSection />
       </motion.div>
