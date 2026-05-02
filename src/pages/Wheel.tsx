@@ -329,6 +329,16 @@ export default function Wheel() {
 
             {N < 2 && <p className="mt-3 text-sm text-white/40">วงล้อยังไม่มีช่องเพียงพอ</p>}
 
+            {user && (
+              <Button
+                variant="outline"
+                className="mt-3 w-full max-w-xs"
+                onClick={() => navigate("/wheel/history")}
+              >
+                ประวัติการหมุนของฉัน
+              </Button>
+            )}
+
             {/* Legend */}
             {activeSlices.length > 0 && (
               <Card className="card-elegant mt-8 w-full max-w-xl p-5">
