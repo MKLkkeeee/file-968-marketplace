@@ -13,6 +13,7 @@ import { Coins, Eye, Package, Search, ShoppingCart, Sparkles } from "lucide-reac
 import { useNavigate, Link } from "react-router-dom";
 import Landing from "./Landing";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Footer } from "@/components/Footer";
 import { FavoriteButton } from "@/components/FavoriteButton";
 
