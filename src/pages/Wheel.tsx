@@ -356,6 +356,51 @@ export default function Wheel() {
               {spinning ? "กำลังหมุน..." : !user ? "เข้าสู่ระบบเพื่อหมุน" : `หมุน — ${config.spinCost} Point`}
             </Button>
 
+            {/* Last spin summary bar */}
+            {lastSummary && (() => {
+              const net = lastSummary.gainedPoints - lastSummary.cost;
+              const isWin = lastSummary.type !== "nothing";
+              return (
+                <motion.div
+                  key={lastSummary.at}
+                  initial={{ opacity: 0, y: -8, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                  className={
+                    "mt-4 w-full max-w-md rounded-xl border p-3 " +
+                    (isWin ? "border-warning/40 bg-warning/10" : "border-white/15 bg-white/[0.03]")
+                  }
+                >
+                  <div className="grid grid-cols-3 gap-2 text-center">
+                    <div>
+                      <p className="text-[11px] uppercase tracking-wide text-white/50">หัก</p>
+                      <p className="mt-0.5 flex items-center justify-center gap-1 font-bold text-destructive">
+                        <Coins className="h-4 w-4" /> -{lastSummary.cost.toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="border-x border-white/10">
+                      <p className="text-[11px] uppercase tracking-wide text-white/50">ได้รับ</p>
+                      <p className={"mt-0.5 flex items-center justify-center gap-1 font-bold " + (lastSummary.gainedPoints > 0 ? "text-emerald-400" : "text-white/40")}>
+                        <Coins className="h-4 w-4" />
+                        {lastSummary.gainedPoints > 0
+                          ? `+${lastSummary.gainedPoints.toLocaleString()}`
+                          : lastSummary.type === "item" ? "ของ" : "—"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] uppercase tracking-wide text-white/50">สุทธิ</p>
+                      <p className={"mt-0.5 font-bold " + (net > 0 ? "text-emerald-400" : net < 0 ? "text-destructive" : "text-white/60")}>
+                        {net > 0 ? `+${net.toLocaleString()}` : net.toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                  <p className="mt-2 truncate text-center text-xs text-white/60">
+                    รางวัลล่าสุด: <span className="font-semibold text-white">{lastSummary.sliceLabel}</span>
+                  </p>
+                </motion.div>
+              );
+            })()}
+
             {N < 2 && <p className="mt-3 text-sm text-white/40">วงล้อยังไม่มีช่องเพียงพอ</p>}
 
             {user && (
