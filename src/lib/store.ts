@@ -280,6 +280,22 @@ export const redeemPointCode = async (
     return { success: false, message: "โค้ดถูกใช้ครบแล้ว" };
   }
 
+  // ตรวจเงื่อนไขผู้ใช้
+  const scope = item.userScope || "all";
+  if (scope === "new") {
+    const days = item.newUserDays ?? 2;
+    const userSnap = await get(ref(db, `users/${uid}/createdAt`));
+    const createdAt = userSnap.exists() ? Number(userSnap.val()) : 0;
+    const ageMs = Date.now() - createdAt;
+    if (ageMs > days * 24 * 60 * 60 * 1000) {
+      return { success: false, message: `โค้ดนี้สำหรับผู้ใช้ใหม่เท่านั้น (ไม่เกิน ${days} วัน)` };
+    }
+  } else if (scope === "specific") {
+    if (!(item.userIds || []).includes(uid)) {
+      return { success: false, message: "คุณไม่มีสิทธิ์ใช้โค้ดนี้" };
+    }
+  }
+
   await adjustPoints(uid, item.value);
 
   await update(ref(db, `discounts/${item.id}`), {
