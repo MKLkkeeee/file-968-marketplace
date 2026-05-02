@@ -68,6 +68,23 @@ export const updateCategory = (id: string, data: Partial<Category>) =>
   update(ref(db, `categories/${id}`), data);
 export const deleteCategory = (id: string) => remove(ref(db, `categories/${id}`));
 
+// CRUD - Announcements
+export interface Announcement {
+  id: string;
+  text: string;
+  active: boolean;
+  permanent: boolean;
+  expiresAt: number | null; // ms timestamp; null when permanent
+  createdAt: number;
+}
+export const createAnnouncement = async (data: Omit<Announcement, "id" | "createdAt">) => {
+  const r = push(ref(db, "announcements"));
+  await set(r, { ...data, id: r.key, createdAt: Date.now() });
+};
+export const updateAnnouncement = (id: string, data: Partial<Announcement>) =>
+  update(ref(db, `announcements/${id}`), data);
+export const deleteAnnouncement = (id: string) => remove(ref(db, `announcements/${id}`));
+
 // CRUD - Products
 export const createProduct = async (data: Omit<Product, "id" | "createdAt">) => {
   const r = push(ref(db, "products"));
