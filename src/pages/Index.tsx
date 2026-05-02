@@ -93,8 +93,17 @@ export default function Index() {
 
       {/* Categories */}
       <section className="container py-12">
-        <div className="mb-8 flex items-center justify-between">
+        <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <h2 className="font-display text-3xl font-bold">สินค้าทั้งหมด</h2>
+          <div className="relative w-full md:max-w-xs">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="ค้นหาชื่อสินค้า..."
+              className="pl-9"
+            />
+          </div>
         </div>
         <div className="mb-8 flex flex-wrap gap-2">
           <button
