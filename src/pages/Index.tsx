@@ -14,6 +14,7 @@ import { useNavigate, Link } from "react-router-dom";
 import Landing from "./Landing";
 import { Input } from "@/components/ui/input";
 import { Footer } from "@/components/Footer";
+import { FavoriteButton } from "@/components/FavoriteButton";
 
 export default function Index() {
   const { user, loading } = useAuth();
