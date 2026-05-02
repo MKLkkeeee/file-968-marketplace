@@ -39,9 +39,20 @@ export default function Index() {
 
   const byCat = activeCat === "all" ? products : products.filter((p) => p.categoryId === activeCat);
   const q = search.trim().toLowerCase();
-  const filteredAll = q
+  const searched = q
     ? byCat.filter((p) => `${p.name} ${p.description}`.toLowerCase().includes(q))
     : byCat;
+  const sorted = [...searched].sort((a, b) => {
+    switch (sortBy) {
+      case "price-asc": return a.price - b.price;
+      case "price-desc": return b.price - a.price;
+      case "name-asc": return a.name.localeCompare(b.name);
+      case "name-desc": return b.name.localeCompare(a.name);
+      case "stock-desc": return stockCount(b.stockItems) - stockCount(a.stockItems);
+      default: return 0;
+    }
+  });
+  const filteredAll = sorted;
   const filtered = filteredAll.slice(0, 6);
 
   const handleAdd = (e: React.MouseEvent, p: Product) => {
