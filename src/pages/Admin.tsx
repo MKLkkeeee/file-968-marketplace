@@ -21,11 +21,11 @@ import { onValue, ref } from "firebase/database";
 import { adjustPoints } from "@/lib/store";
 import { db, ADMIN_SECRET } from "@/lib/firebase";
 import {
-  Category, DiscountCode, Product, Topup, Order, Announcement, stockCount,
+  Category, DiscountCode, Product, Topup, Order, WelcomePopupConfig, stockCount,
   createCategory, createDiscount, createProduct, deleteCategory,
   deleteDiscount, deleteProduct, setUserRole, updateCategory,
   updateDiscount, updateProduct,
-  createAnnouncement, updateAnnouncement, deleteAnnouncement,
+  getWelcomePopup, saveWelcomePopup,
 } from "@/lib/store";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserProfile } from "@/contexts/AuthContext";
@@ -47,7 +47,7 @@ export default function Admin() {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [topups, setTopups] = useState<Topup[]>([]);
-  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  // welcome popup is loaded inside its own manager
   const [userSearch, setUserSearch] = useState("");
   const [userPage, setUserPage] = useState(1);
   const [orderSearch, setOrderSearch] = useState("");
@@ -83,8 +83,7 @@ export default function Admin() {
     const off4 = onValue(ref(db, "users"), (s) => setUsers(s.exists() ? Object.values(s.val()) : []));
     const off5 = onValue(ref(db, "orders"), (s) => setOrders(s.exists() ? Object.values(s.val()) : []));
     const off6 = onValue(ref(db, "topups"), (s) => setTopups(s.exists() ? Object.values(s.val()) : []));
-    const off7 = onValue(ref(db, "announcements"), (s) => setAnnouncements(s.exists() ? Object.values(s.val()) : []));
-    return () => { off1(); off2(); off3(); off4(); off5(); off6(); off7(); };
+    return () => { off1(); off2(); off3(); off4(); off5(); off6(); };
   }, []);
 
   if (!unlocked) {
@@ -152,7 +151,7 @@ export default function Admin() {
             <TabsTrigger value="users">ผู้ใช้</TabsTrigger>
             <TabsTrigger value="orders">คำสั่งซื้อ</TabsTrigger>
             <TabsTrigger value="topups">เติมเงิน</TabsTrigger>
-            <TabsTrigger value="announcements">ประกาศ</TabsTrigger>
+            <TabsTrigger value="popup">ป๊อปอัพ</TabsTrigger>
           </TabsList>
 
           <TabsContent value="products">
@@ -237,10 +236,10 @@ export default function Admin() {
               </Card>
             </motion.div>
           </TabsContent>
-          <TabsContent value="announcements">
+          <TabsContent value="popup">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
               <Card className="card-elegant p-6">
-                <AnnouncementManager announcements={announcements} />
+                <WelcomePopupManager />
               </Card>
             </motion.div>
           </TabsContent>
@@ -695,186 +694,109 @@ function TopupTable({ topups, search, page, setPage }: {
   );
 }
 
-function AnnouncementManager({ announcements }: { announcements: Announcement[] }) {
-  const [open, setOpen] = useState(false);
-  const [edit, setEdit] = useState<Announcement | null>(null);
+function WelcomePopupManager() {
+  const [enabled, setEnabled] = useState(false);
+  const [imageUrl, setImageUrl] = useState("");
   const [text, setText] = useState("");
-  const [mode, setMode] = useState<"timed" | "permanent">("timed");
-  const [minutes, setMinutes] = useState<number>(60);
-  const [active, setActive] = useState(true);
-  const [priority, setPriority] = useState<"high" | "normal">("normal");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
-  const openCreate = () => {
-    setEdit(null); setText(""); setMode("timed"); setMinutes(60); setActive(true); setPriority("normal");
-    setOpen(true);
-  };
-
-  const openEdit = (a: Announcement) => {
-    setEdit(a);
-    setText(a.text);
-    setMode(a.permanent ? "permanent" : "timed");
-    const remaining = a.expiresAt ? Math.max(1, Math.round((a.expiresAt - Date.now()) / 60000)) : 60;
-    setMinutes(remaining);
-    setActive(a.active);
-    setPriority(a.priority === "high" ? "high" : "normal");
-    setOpen(true);
-  };
+  useEffect(() => {
+    (async () => {
+      const cfg = await getWelcomePopup();
+      if (cfg) {
+        setEnabled(!!cfg.enabled);
+        setImageUrl(cfg.imageUrl || "");
+        setText(cfg.text || "");
+      }
+      setLoading(false);
+    })();
+  }, []);
 
   const submit = async () => {
-    const t = text.trim();
-    if (!t) return toast.error("กรุณากรอกข้อความ");
-    if (mode === "timed" && (!minutes || minutes <= 0)) return toast.error("กรุณาเลือกระยะเวลา");
-
-    const data = {
-      text: t,
-      active,
-      permanent: mode === "permanent",
-      expiresAt: mode === "permanent" ? null : Date.now() + minutes * 60_000,
-      priority,
-    };
-
-    if (edit) await updateAnnouncement(edit.id, data);
-    else await createAnnouncement(data);
-
-    toast.success(edit ? "อัปเดตประกาศแล้ว" : "สร้างประกาศแล้ว");
-    setOpen(false);
+    if (enabled && !imageUrl.trim() && !text.trim()) {
+      return toast.error("กรุณากรอกรูปหรือข้อความอย่างน้อย 1 อย่าง");
+    }
+    setSaving(true);
+    try {
+      await saveWelcomePopup({ enabled, imageUrl: imageUrl.trim(), text: text.trim() });
+      toast.success("บันทึกแล้ว");
+    } catch {
+      toast.error("บันทึกไม่สำเร็จ");
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const remove = async (id: string) => {
-    if (!confirm("ลบประกาศนี้?")) return;
-    await deleteAnnouncement(id);
-    toast.success("ลบแล้ว");
-  };
-
-  const sorted = [...announcements].sort((a, b) => {
-    const pa = a.priority === "high" ? 1 : 0;
-    const pb = b.priority === "high" ? 1 : 0;
-    if (pa !== pb) return pb - pa;
-    return b.createdAt - a.createdAt;
-  });
+  if (loading) {
+    return <p className="py-8 text-center text-sm text-white/40">กำลังโหลด...</p>;
+  }
 
   return (
-    <div>
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <Megaphone className="h-5 w-5 text-warning" />
-          <h2 className="font-display text-xl font-semibold">ประกาศแถบเลื่อน</h2>
+    <div className="space-y-5">
+      <div className="flex items-center gap-2">
+        <Megaphone className="h-5 w-5 text-warning" />
+        <h2 className="font-display text-xl font-semibold">ป๊อปอัพต้อนรับ</h2>
+      </div>
+      <p className="text-sm text-white/50">
+        แสดงป๊อปอัพให้ผู้เข้าชมเห็นเมื่อเปิดเว็บครั้งแรก ผู้ใช้สามารถติ๊ก "ไม่แสดงเป็นเวลา 1 ชั่วโมง" ได้
+      </p>
+
+      <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.03] p-3">
+        <div>
+          <p className="text-sm font-medium">เปิดใช้งานป๊อปอัพ</p>
+          <p className="text-xs text-white/40">ปิดเพื่อหยุดแสดงป๊อปอัพ</p>
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={openCreate}><Plus className="h-4 w-4" /> เพิ่มประกาศ</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{edit ? "แก้ไขประกาศ" : "สร้างประกาศใหม่"}</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label>ข้อความประกาศ</Label>
-                <Textarea
-                  value={text}
-                  onChange={(e) => setText(e.target.value)}
-                  placeholder="เช่น ร้านเปิดให้บริการตามปกติ มีโปรโมชันพิเศษ..."
-                  rows={3}
-                  maxLength={300}
-                  className="mt-1"
-                />
-                <p className="mt-1 text-right text-xs text-white/40">{text.length}/300</p>
-              </div>
-              <div>
-                <Label>ระยะเวลา</Label>
-                <Select value={mode} onValueChange={(v) => setMode(v as any)}>
-                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="timed">เลือกเวลาเอง</SelectItem>
-                    <SelectItem value="permanent">ถาวร</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              {mode === "timed" && (
-                <div>
-                  <Label>หมดอายุใน (นาที)</Label>
-                  <Input
-                    type="number"
-                    min={1}
-                    value={minutes}
-                    onChange={(e) => setMinutes(Number(e.target.value))}
-                    className="mt-1"
-                  />
-                  <p className="mt-1 text-xs text-white/40">
-                    ตัวอย่าง: 60 = 1 ชั่วโมง · 1440 = 1 วัน · 10080 = 1 สัปดาห์
-                  </p>
-                </div>
-              )}
-              <div>
-                <Label>ความสำคัญ</Label>
-                <Select value={priority} onValueChange={(v) => setPriority(v as any)}>
-                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="normal">ปกติ</SelectItem>
-                    <SelectItem value="high">สูง (แสดงด้านบนสุด)</SelectItem>
-                  </SelectContent>
-                </Select>
-                <p className="mt-1 text-xs text-white/40">
-                  ประกาศ "สูง" จะแสดงเป็นแถบสีแดงด้านบนแยกจากประกาศปกติ
-                </p>
-              </div>
-              <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.03] p-3">
-                <div>
-                  <p className="text-sm font-medium">เปิดใช้งาน</p>
-                  <p className="text-xs text-white/40">ปิดเพื่อซ่อนโดยไม่ลบ</p>
-                </div>
-                <Switch checked={active} onCheckedChange={setActive} />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setOpen(false)}>ยกเลิก</Button>
-              <Button onClick={submit}>{edit ? "บันทึก" : "สร้าง"}</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <Switch checked={enabled} onCheckedChange={setEnabled} />
       </div>
 
-      {sorted.length === 0 ? (
-        <p className="py-8 text-center text-sm text-white/40">ยังไม่มีประกาศ</p>
-      ) : (
-        <div className="space-y-2">
-          {sorted.map((a) => {
-            const expired = !a.permanent && (a.expiresAt ?? 0) <= Date.now();
-            const remainingMin = a.expiresAt ? Math.max(0, Math.round((a.expiresAt - Date.now()) / 60000)) : 0;
-            return (
-              <div key={a.id} className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-4">
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Badge variant={a.active && !expired ? "default" : "outline"} className="text-[10px]">
-                      {!a.active ? "ปิด" : expired ? "หมดอายุ" : "เปิด"}
-                    </Badge>
-                    <Badge variant="outline" className="text-[10px]">
-                      {a.permanent ? "ถาวร" : `เหลือ ${remainingMin} นาที`}
-                    </Badge>
-                    {a.priority === "high" && (
-                      <Badge variant="destructive" className="text-[10px]">ด่วน</Badge>
-                    )}
-                  </div>
-                  <p className="mt-2 line-clamp-2 text-sm">{a.text}</p>
-                  <p className="mt-1 text-[11px] text-white/40">
-                    สร้าง: {new Date(a.createdAt).toLocaleString("th-TH")}
-                    {a.expiresAt ? ` · หมดอายุ: ${new Date(a.expiresAt).toLocaleString("th-TH")}` : ""}
-                  </p>
-                </div>
-                <div className="flex shrink-0 items-center gap-2">
-                  <Button size="icon" variant="outline" onClick={() => openEdit(a)}>
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button size="icon" variant="destructive" onClick={() => remove(a.id)}>
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            );
-          })}
+      <div>
+        <Label>URL รูปภาพ (ด้านบน)</Label>
+        <Input
+          value={imageUrl}
+          onChange={(e) => setImageUrl(e.target.value)}
+          placeholder="https://example.com/banner.jpg"
+          className="mt-1"
+        />
+        <p className="mt-1 text-xs text-white/40">วาง URL รูปจากที่อื่น เช่น Imgur, Discord CDN, ฯลฯ</p>
+      </div>
+
+      <div>
+        <Label>ข้อความ (ด้านล่างรูป)</Label>
+        <Textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="เช่น ยินดีต้อนรับสู่ร้านของเรา! โปรโมชันพิเศษวันนี้..."
+          rows={4}
+          maxLength={500}
+          className="mt-1"
+        />
+        <p className="mt-1 text-right text-xs text-white/40">{text.length}/500</p>
+      </div>
+
+      {(imageUrl || text) && (
+        <div>
+          <Label>ตัวอย่าง</Label>
+          <div className="mt-2 overflow-hidden rounded-xl border border-white/10 bg-white/[0.03]">
+            {imageUrl && (
+              <img
+                src={imageUrl}
+                alt="ตัวอย่าง"
+                className="max-h-64 w-full object-cover"
+                onError={(e) => ((e.currentTarget.style.display = "none"))}
+              />
+            )}
+            {text && <p className="whitespace-pre-wrap p-4 text-sm">{text}</p>}
+          </div>
         </div>
       )}
+
+      <div className="flex justify-end">
+        <Button onClick={submit} disabled={saving}>
+          {saving ? "กำลังบันทึก..." : "บันทึก"}
+        </Button>
+      </div>
     </div>
   );
 }
+

@@ -16,7 +16,7 @@ import Orders from "./pages/Orders.tsx";
 import ProductDetail from "./pages/ProductDetail.tsx";
 import Profile from "./pages/Profile.tsx";
 import NotFound from "./pages/NotFound.tsx";
-import { AnnouncementBar } from "@/components/AnnouncementBar";
+import { WelcomePopup } from "@/components/WelcomePopup";
 
 const queryClient = new QueryClient();
 
@@ -28,8 +28,9 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <CartProvider>
+            <WelcomePopup />
             <Routes>
-              <Route path="/" element={<><AnnouncementBar /><Index /></>} />
+              <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/product/:id" element={<ProductDetail />} />
