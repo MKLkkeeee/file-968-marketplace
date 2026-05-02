@@ -75,7 +75,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     await set(ref(db, `users/${cred.user.uid}`), newProfile);
   };
 
-  const login = async (email: string, password: string) => {
+  const login = async (identifier: string, password: string) => {
+    let email = identifier.trim();
+    if (!email.includes("@")) {
+      // Treat as username — look up the email from RTDB
+      const snap = await get(ref(db, "users"));
+      if (!snap.exists()) throw new Error("ไม่พบบัญชีผู้ใช้");
+      const users = snap.val() as Record<string, UserProfile>;
+      const match = Object.values(users).find(
+        (u) => (u.username || "").toLowerCase() === email.toLowerCase()
+      );
+      if (!match) throw new Error("ไม่พบชื่อผู้ใช้นี้");
+      email = match.email;
+    }
     await signInWithEmailAndPassword(auth, email, password);
   };
 
