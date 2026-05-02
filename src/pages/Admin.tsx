@@ -153,26 +153,27 @@ export default function Admin() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        className="container py-10"
+        className="container px-3 sm:px-6 py-6 sm:py-10"
       >
-        <h1 className="font-display text-4xl font-bold">หน้าผู้ดูแลระบบ</h1>
-        <p className="mt-1 text-muted-foreground">จัดการข้อมูลระบบ</p>
+        <h1 className="font-display text-2xl sm:text-4xl font-bold">หน้าผู้ดูแลระบบ</h1>
+        <p className="mt-1 text-sm sm:text-base text-muted-foreground">จัดการข้อมูลระบบ</p>
 
-        <Tabs defaultValue="products" className="mt-8">
-          <TabsList className="flex flex-wrap">
-            <TabsTrigger value="products">สินค้า</TabsTrigger>
-            <TabsTrigger value="categories">หมวดหมู่</TabsTrigger>
-            <TabsTrigger value="discounts">โค้ด</TabsTrigger>
-            <TabsTrigger value="users">ผู้ใช้</TabsTrigger>
-            <TabsTrigger value="orders">คำสั่งซื้อ</TabsTrigger>
-            <TabsTrigger value="topups">เติมเงิน</TabsTrigger>
-            <TabsTrigger value="popup">ป๊อปอัพ</TabsTrigger>
-            
-          </TabsList>
+        <Tabs defaultValue="products" className="mt-5 sm:mt-8">
+          <div className="-mx-3 sm:mx-0 overflow-x-auto scrollbar-hide">
+            <TabsList className="inline-flex w-max min-w-full px-3 sm:px-0 sm:flex sm:flex-wrap">
+              <TabsTrigger value="products">สินค้า</TabsTrigger>
+              <TabsTrigger value="categories">หมวดหมู่</TabsTrigger>
+              <TabsTrigger value="discounts">โค้ด</TabsTrigger>
+              <TabsTrigger value="users">ผู้ใช้</TabsTrigger>
+              <TabsTrigger value="orders">คำสั่งซื้อ</TabsTrigger>
+              <TabsTrigger value="topups">เติมเงิน</TabsTrigger>
+              <TabsTrigger value="popup">ป๊อปอัพ</TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="products">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
-              <Card className="card-elegant p-6">
+              <Card className="card-elegant p-3 sm:p-6">
                 <ProductManager categories={categories} products={products} />
               </Card>
             </motion.div>
@@ -180,7 +181,7 @@ export default function Admin() {
 
           <TabsContent value="categories">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
-              <Card className="card-elegant p-6">
+              <Card className="card-elegant p-3 sm:p-6">
                 <CategoryManager categories={categories} />
               </Card>
             </motion.div>
@@ -188,7 +189,7 @@ export default function Admin() {
 
           <TabsContent value="discounts">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
-              <Card className="card-elegant p-6">
+              <Card className="card-elegant p-3 sm:p-6">
                 <DiscountManager discounts={discounts} products={products} categories={categories} />
               </Card>
             </motion.div>
@@ -196,7 +197,7 @@ export default function Admin() {
 
           <TabsContent value="users">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
-              <Card className="card-elegant p-6">
+              <Card className="card-elegant p-3 sm:p-6">
                 <div className="mb-4 relative">
                   <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
                   <Input
@@ -221,7 +222,7 @@ export default function Admin() {
 
           <TabsContent value="orders">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
-              <Card className="card-elegant p-6">
+              <Card className="card-elegant p-3 sm:p-6">
                 <div className="mb-4 relative">
                   <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
                   <Input
@@ -238,7 +239,7 @@ export default function Admin() {
 
           <TabsContent value="topups">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
-              <Card className="card-elegant p-6">
+              <Card className="card-elegant p-3 sm:p-6">
                 <div className="mb-4 relative">
                   <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
                   <Input
@@ -254,7 +255,7 @@ export default function Admin() {
           </TabsContent>
           <TabsContent value="popup">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
-              <Card className="card-elegant p-6">
+              <Card className="card-elegant p-3 sm:p-6">
                 <WelcomePopupManager />
               </Card>
             </motion.div>
@@ -288,7 +289,7 @@ function CategoryManager({ categories }: { categories: Category[] }) {
 
   return (
     <>
-      <div className="mb-4 flex items-center justify-between gap-3">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h3 className="font-display text-xl font-semibold">หมวดหมู่ ({categories.length})</h3>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
@@ -296,7 +297,7 @@ function CategoryManager({ categories }: { categories: Category[] }) {
               <Plus className="h-4 w-4" />เพิ่มหมวดหมู่
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="w-[calc(100vw-1.5rem)] max-w-md max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle>{edit ? "แก้ไข" : "เพิ่ม"}หมวดหมู่</DialogTitle></DialogHeader>
             <div className="space-y-3">
               <div><Label>ไอคอน</Label><Input value={icon} onChange={(e) => setIcon(e.target.value)} /></div>
@@ -381,7 +382,7 @@ function ProductManager({ categories, products }: { categories: Category[]; prod
 
   return (
     <>
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h3 className="font-display text-xl font-semibold">สินค้า ({products.length})</h3>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
@@ -389,7 +390,7 @@ function ProductManager({ categories, products }: { categories: Category[]; prod
               <Plus className="h-4 w-4" />เพิ่มสินค้า
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-lg">
+          <DialogContent className="w-[calc(100vw-1.5rem)] max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle>{edit ? "แก้ไข" : "เพิ่ม"}สินค้า</DialogTitle></DialogHeader>
             <div className="space-y-3">
               <div><Label>ชื่อสินค้า</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
@@ -441,41 +442,82 @@ function ProductManager({ categories, products }: { categories: Category[]; prod
         const { slice, totalPages, page: pg } = usePaged(filtered, page, 10);
         return (
           <>
-            <Table>
-              <TableHeader><TableRow>
-                <TableHead></TableHead><TableHead>ชื่อ</TableHead><TableHead>หมวด</TableHead><TableHead>ราคา</TableHead><TableHead>Stock</TableHead><TableHead></TableHead>
-              </TableRow></TableHeader>
-              <TableBody>
-                {slice.map((p) => {
-                  const cat = categories.find((c) => c.id === p.categoryId);
-                  const stk = stockCount(p.stockItems);
-                  return (
-                    <TableRow key={p.id}>
-                      <TableCell>{p.image && <img src={p.image} className="h-10 w-10 rounded object-cover" />}</TableCell>
-                      <TableCell className="font-medium">{p.name}</TableCell>
-                      <TableCell>{cat ? `${cat.icon} ${cat.name}` : "-"}</TableCell>
-                      <TableCell>{p.price}</TableCell>
-                      <TableCell>
-                        <Badge variant={stk > 0 ? "outline" : "destructive"}>{stk === Infinity ? "∞" : stk}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Button asChild size="icon" variant="ghost" title="ดูรายละเอียด">
-                          <a href={`/product/${p.id}`} target="_blank" rel="noreferrer">
-                            <Eye className="h-4 w-4" />
-                          </a>
+            {/* Desktop table */}
+            <div className="hidden md:block">
+              <Table>
+                <TableHeader><TableRow>
+                  <TableHead></TableHead><TableHead>ชื่อ</TableHead><TableHead>หมวด</TableHead><TableHead>ราคา</TableHead><TableHead>Stock</TableHead><TableHead></TableHead>
+                </TableRow></TableHeader>
+                <TableBody>
+                  {slice.map((p) => {
+                    const cat = categories.find((c) => c.id === p.categoryId);
+                    const stk = stockCount(p.stockItems);
+                    return (
+                      <TableRow key={p.id}>
+                        <TableCell>{p.image && <img src={p.image} className="h-10 w-10 rounded object-cover" />}</TableCell>
+                        <TableCell className="font-medium">{p.name}</TableCell>
+                        <TableCell>{cat ? `${cat.icon} ${cat.name}` : "-"}</TableCell>
+                        <TableCell>{p.price}</TableCell>
+                        <TableCell>
+                          <Badge variant={stk > 0 ? "outline" : "destructive"}>{stk === Infinity ? "∞" : stk}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Button asChild size="icon" variant="ghost" title="ดูรายละเอียด">
+                            <a href={`/product/${p.id}`} target="_blank" rel="noreferrer">
+                              <Eye className="h-4 w-4" />
+                            </a>
+                          </Button>
+                          <Button size="icon" variant="ghost" onClick={() => { setEdit(p); setForm({ name: p.name, description: p.description, price: p.price, image: p.image, categoryId: p.categoryId, stockItems: p.stockItems || "" }); setOpen(true); }}>
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button size="icon" variant="ghost" onClick={() => deleteProduct(p.id)}>
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Mobile cards */}
+            <div className="md:hidden space-y-3">
+              {slice.map((p) => {
+                const cat = categories.find((c) => c.id === p.categoryId);
+                const stk = stockCount(p.stockItems);
+                return (
+                  <div key={p.id} className="rounded-2xl border border-white/10 bg-white/[0.03] p-3 flex gap-3">
+                    {p.image ? (
+                      <img src={p.image} className="h-16 w-16 rounded-lg object-cover flex-shrink-0" />
+                    ) : (
+                      <div className="h-16 w-16 rounded-lg bg-white/5 flex-shrink-0" />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium truncate">{p.name}</div>
+                      <div className="text-xs text-muted-foreground truncate">{cat ? `${cat.icon} ${cat.name}` : "-"}</div>
+                      <div className="mt-1 flex items-center gap-2 text-sm">
+                        <span className="font-semibold">{p.price}</span>
+                        <Badge variant={stk > 0 ? "outline" : "destructive"} className="text-xs">{stk === Infinity ? "∞" : stk}</Badge>
+                      </div>
+                      <div className="mt-2 flex gap-1">
+                        <Button asChild size="icon" variant="ghost" className="h-8 w-8">
+                          <a href={`/product/${p.id}`} target="_blank" rel="noreferrer"><Eye className="h-4 w-4" /></a>
                         </Button>
-                        <Button size="icon" variant="ghost" onClick={() => { setEdit(p); setForm({ name: p.name, description: p.description, price: p.price, image: p.image, categoryId: p.categoryId, stockItems: p.stockItems || "" }); setOpen(true); }}>
+                        <Button size="icon" variant="ghost" className="h-8 w-8"
+                          onClick={() => { setEdit(p); setForm({ name: p.name, description: p.description, price: p.price, image: p.image, categoryId: p.categoryId, stockItems: p.stockItems || "" }); setOpen(true); }}>
                           <Pencil className="h-4 w-4" />
                         </Button>
-                        <Button size="icon" variant="ghost" onClick={() => deleteProduct(p.id)}>
+                        <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => deleteProduct(p.id)}>
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
             <Paginator page={pg} totalPages={totalPages} onChange={setPage} />
           </>
         );
@@ -544,13 +586,13 @@ function DiscountManager({
 
   return (
     <>
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h3 className="font-display text-xl font-semibold">จัดการโค้ด</h3>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button className="bg-gradient-primary text-primary-foreground"><Plus className="h-4 w-4" />เพิ่มโค้ด</Button>
           </DialogTrigger>
-          <DialogContent className="max-h-[85vh] overflow-y-auto">
+          <DialogContent className="w-[calc(100vw-1.5rem)] max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle>เพิ่มโค้ดใหม่</DialogTitle></DialogHeader>
             <div className="space-y-3">
               <div><Label>โค้ด</Label><Input value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })} /></div>
@@ -693,27 +735,53 @@ function DiscountManager({
         const { slice, totalPages, page: pg } = usePaged(filtered, page, 10);
         return (
           <>
-            <Table>
-              <TableHeader><TableRow>
-                <TableHead>โค้ด</TableHead><TableHead>ประเภท</TableHead><TableHead>ค่า</TableHead><TableHead>การใช้งาน</TableHead><TableHead>สถานะ</TableHead><TableHead></TableHead>
-              </TableRow></TableHeader>
-              <TableBody>
-                {slice.map((d) => (
-                  <TableRow key={d.id}>
-                    <TableCell className="font-mono font-bold">{d.code}</TableCell>
-                    <TableCell><Badge variant="outline">{d.type}</Badge></TableCell>
-                    <TableCell>{d.value}</TableCell>
-                    <TableCell>{d.usedCount}/{d.maxUses}</TableCell>
-                    <TableCell><Switch checked={d.active} onCheckedChange={(v) => updateDiscount(d.id, { active: v })} /></TableCell>
-                    <TableCell>
-                      <Button size="icon" variant="ghost" onClick={() => deleteDiscount(d.id)}>
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <div className="hidden md:block">
+              <Table>
+                <TableHeader><TableRow>
+                  <TableHead>โค้ด</TableHead><TableHead>ประเภท</TableHead><TableHead>ค่า</TableHead><TableHead>การใช้งาน</TableHead><TableHead>สถานะ</TableHead><TableHead></TableHead>
+                </TableRow></TableHeader>
+                <TableBody>
+                  {slice.map((d) => (
+                    <TableRow key={d.id}>
+                      <TableCell className="font-mono font-bold">{d.code}</TableCell>
+                      <TableCell><Badge variant="outline">{d.type}</Badge></TableCell>
+                      <TableCell>{d.value}</TableCell>
+                      <TableCell>{d.usedCount}/{d.maxUses}</TableCell>
+                      <TableCell><Switch checked={d.active} onCheckedChange={(v) => updateDiscount(d.id, { active: v })} /></TableCell>
+                      <TableCell>
+                        <Button size="icon" variant="ghost" onClick={() => deleteDiscount(d.id)}>
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            <div className="md:hidden space-y-3">
+              {slice.map((d) => (
+                <div key={d.id} className="rounded-2xl border border-white/10 bg-white/[0.03] p-3 space-y-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="font-mono font-bold truncate">{d.code}</div>
+                      <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                        <Badge variant="outline" className="text-xs">{d.type}</Badge>
+                        <span className="text-xs text-muted-foreground">ค่า {d.value}</span>
+                        <span className="text-xs text-muted-foreground">• {d.usedCount}/{d.maxUses}</span>
+                      </div>
+                    </div>
+                    <Switch checked={d.active} onCheckedChange={(v) => updateDiscount(d.id, { active: v })} />
+                  </div>
+                  <div className="flex justify-end">
+                    <Button size="sm" variant="ghost" onClick={() => deleteDiscount(d.id)}>
+                      <Trash2 className="h-4 w-4 text-destructive" /> ลบ
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
             <Paginator page={pg} totalPages={totalPages} onChange={setPage} />
           </>
         );
@@ -874,33 +942,64 @@ function OrderTable({ orders, search, page, setPage }: {
   const { slice, totalPages, page: p } = usePaged(filtered, page, 10);
   return (
     <>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>เวลา</TableHead><TableHead>ผู้ซื้อ</TableHead>
-            <TableHead>สินค้า</TableHead><TableHead>โค้ด</TableHead>
-            <TableHead>จ่ายจริง</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {slice.map((o) => (
-            <TableRow key={o.id}>
-              <TableCell className="text-xs">{new Date(o.createdAt).toLocaleString("th-TH")}</TableCell>
-              <TableCell>{o.username}</TableCell>
-              <TableCell className="text-xs">
-                {Object.entries(
-                  (o.items || []).reduce((acc: any, item: any) => {
-                    acc[item.productName] = (acc[item.productName] || 0) + 1;
-                    return acc;
-                  }, {})
-                ).map(([name, qty]: any) => (<div key={name}>{name} x{qty}</div>))}
-              </TableCell>
-              <TableCell>{o.discountCode || "-"}</TableCell>
-              <TableCell className="font-semibold gradient-text">{o.finalPrice}</TableCell>
+      <div className="hidden md:block overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>เวลา</TableHead><TableHead>ผู้ซื้อ</TableHead>
+              <TableHead>สินค้า</TableHead><TableHead>โค้ด</TableHead>
+              <TableHead>จ่ายจริง</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {slice.map((o) => (
+              <TableRow key={o.id}>
+                <TableCell className="text-xs">{new Date(o.createdAt).toLocaleString("th-TH")}</TableCell>
+                <TableCell>{o.username}</TableCell>
+                <TableCell className="text-xs">
+                  {Object.entries(
+                    (o.items || []).reduce((acc: any, item: any) => {
+                      acc[item.productName] = (acc[item.productName] || 0) + 1;
+                      return acc;
+                    }, {})
+                  ).map(([name, qty]: any) => (<div key={name}>{name} x{qty}</div>))}
+                </TableCell>
+                <TableCell>{o.discountCode || "-"}</TableCell>
+                <TableCell className="font-semibold gradient-text">{o.finalPrice}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      <div className="md:hidden space-y-3">
+        {slice.map((o) => {
+          const itemMap = (o.items || []).reduce((acc: any, item: any) => {
+            acc[item.productName] = (acc[item.productName] || 0) + 1;
+            return acc;
+          }, {});
+          return (
+            <div key={o.id} className="rounded-2xl border border-white/10 bg-white/[0.03] p-3 space-y-2">
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <div className="font-medium truncate">{o.username}</div>
+                  <div className="text-xs text-muted-foreground">{new Date(o.createdAt).toLocaleString("th-TH")}</div>
+                </div>
+                <div className="font-semibold gradient-text">฿{o.finalPrice}</div>
+              </div>
+              <div className="text-xs space-y-0.5">
+                {Object.entries(itemMap).map(([name, qty]: any) => (
+                  <div key={name} className="truncate">• {name} x{qty}</div>
+                ))}
+              </div>
+              {o.discountCode && (
+                <Badge variant="outline" className="text-xs">โค้ด {o.discountCode}</Badge>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
       <Paginator page={p} totalPages={totalPages} onChange={setPage} />
     </>
   );
@@ -916,25 +1015,46 @@ function TopupTable({ topups, search, page, setPage }: {
   const { slice, totalPages, page: p } = usePaged(filtered, page, 10);
   return (
     <>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>เวลา</TableHead><TableHead>ผู้ใช้</TableHead>
-            <TableHead>วิธี</TableHead><TableHead>จำนวน</TableHead><TableHead>Ref</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {slice.map((t) => (
-            <TableRow key={t.id}>
-              <TableCell className="text-xs">{new Date(t.createdAt).toLocaleString("th-TH")}</TableCell>
-              <TableCell>{t.username}</TableCell>
-              <TableCell><Badge variant="outline">{t.method}</Badge></TableCell>
-              <TableCell className="font-semibold">{t.amount}</TableCell>
-              <TableCell className="max-w-[200px] truncate text-xs">{t.ref}</TableCell>
+      <div className="hidden md:block overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>เวลา</TableHead><TableHead>ผู้ใช้</TableHead>
+              <TableHead>วิธี</TableHead><TableHead>จำนวน</TableHead><TableHead>Ref</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {slice.map((t) => (
+              <TableRow key={t.id}>
+                <TableCell className="text-xs">{new Date(t.createdAt).toLocaleString("th-TH")}</TableCell>
+                <TableCell>{t.username}</TableCell>
+                <TableCell><Badge variant="outline">{t.method}</Badge></TableCell>
+                <TableCell className="font-semibold">{t.amount}</TableCell>
+                <TableCell className="max-w-[200px] truncate text-xs">{t.ref}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      <div className="md:hidden space-y-3">
+        {slice.map((t) => (
+          <div key={t.id} className="rounded-2xl border border-white/10 bg-white/[0.03] p-3 space-y-1.5">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <div className="font-medium truncate">{t.username}</div>
+                <div className="text-xs text-muted-foreground">{new Date(t.createdAt).toLocaleString("th-TH")}</div>
+              </div>
+              <div className="text-right">
+                <div className="font-semibold">+{t.amount}</div>
+                <Badge variant="outline" className="text-[10px] mt-0.5">{t.method}</Badge>
+              </div>
+            </div>
+            <div className="text-[11px] text-muted-foreground/70 break-all line-clamp-2">{t.ref}</div>
+          </div>
+        ))}
+      </div>
+
       <Paginator page={p} totalPages={totalPages} onChange={setPage} />
     </>
   );

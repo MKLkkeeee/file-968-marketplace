@@ -186,7 +186,7 @@ export default function Profile() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        className="container max-w-4xl py-10"
+        className="container max-w-4xl px-3 sm:px-6 py-6 sm:py-10"
       >
         <h1 className="font-display text-4xl font-bold flex items-center gap-3">
           <UserIcon className="h-8 w-8" /> โปรไฟล์
@@ -442,7 +442,7 @@ export default function Profile() {
         </Card>
 
         <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-          <AlertDialogContent>
+          <AlertDialogContent className="w-[calc(100vw-1.5rem)] max-w-md">
             <AlertDialogHeader>
               <AlertDialogTitle>ยืนยันการโอน Point</AlertDialogTitle>
               <AlertDialogDescription>

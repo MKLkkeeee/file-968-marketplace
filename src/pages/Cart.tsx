@@ -215,7 +215,7 @@ export default function Cart() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <div className="container max-w-5xl py-10">
+      <div className="container max-w-5xl px-3 sm:px-6 py-6 sm:py-10">
         <h1 className="font-display text-4xl font-bold flex items-center gap-3">
           <ShoppingBag className="h-8 w-8" /> ตะกร้าสินค้า
         </h1>
@@ -354,7 +354,7 @@ export default function Cart() {
                         ชำระเงิน
                       </Button>
                     </AlertDialogTrigger>
-                    <AlertDialogContent>
+                    <AlertDialogContent className="w-[calc(100vw-1.5rem)] max-w-md">
                       <AlertDialogHeader>
                         <AlertDialogTitle className="flex items-center gap-2">
                           <ShoppingBag className="h-5 w-5" />
