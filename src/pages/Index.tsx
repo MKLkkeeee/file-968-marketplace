@@ -9,9 +9,11 @@ import { Category, Product, stockCount } from "@/lib/store";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
 import { toast } from "sonner";
-import { Coins, Package, ShoppingCart, Sparkles } from "lucide-react";
+import { Coins, Package, Search, ShoppingCart, Sparkles } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import Landing from "./Landing";
+import { Input } from "@/components/ui/input";
+import { Footer } from "@/components/Footer";
 
 export default function Index() {
   const { user, loading } = useAuth();
@@ -20,6 +22,7 @@ export default function Index() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [activeCat, setActiveCat] = useState<string>("all");
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     const unsubC = onValue(ref(db, "categories"), (snap) => {
@@ -31,7 +34,12 @@ export default function Index() {
     return () => { unsubC(); unsubP(); };
   }, []);
 
-  const filtered = activeCat === "all" ? products : products.filter((p) => p.categoryId === activeCat);
+  const byCat = activeCat === "all" ? products : products.filter((p) => p.categoryId === activeCat);
+  const q = search.trim().toLowerCase();
+  const filteredAll = q
+    ? byCat.filter((p) => `${p.name} ${p.description}`.toLowerCase().includes(q))
+    : byCat;
+  const filtered = filteredAll.slice(0, 6);
 
   const handleAdd = (e: React.MouseEvent, p: Product) => {
     e.stopPropagation();
