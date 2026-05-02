@@ -109,14 +109,29 @@ export default function Index() {
       <section className="container py-12">
         <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <h2 className="font-display text-3xl font-bold">สินค้าทั้งหมด</h2>
-          <div className="relative w-full md:max-w-xs">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
-            <Input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="ค้นหาชื่อสินค้า..."
-              className="pl-9"
-            />
+          <div className="flex w-full flex-col gap-2 sm:flex-row md:w-auto md:max-w-xl">
+            <div className="relative w-full sm:flex-1">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="ค้นหาชื่อสินค้า..."
+                className="pl-9"
+              />
+            </div>
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-full sm:w-[200px]">
+                <SelectValue placeholder="เรียงลำดับ" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="default">ค่าเริ่มต้น</SelectItem>
+                <SelectItem value="price-asc">ราคา: น้อย → มาก</SelectItem>
+                <SelectItem value="price-desc">ราคา: มาก → น้อย</SelectItem>
+                <SelectItem value="name-asc">ชื่อ: A → Z</SelectItem>
+                <SelectItem value="name-desc">ชื่อ: Z → A</SelectItem>
+                <SelectItem value="stock-desc">สต๊อกคงเหลือมากสุด</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
         <div className="mb-8 flex flex-wrap gap-2">
