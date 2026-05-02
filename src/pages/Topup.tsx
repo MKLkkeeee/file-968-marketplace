@@ -105,6 +105,24 @@ export default function Topup() {
       return toast.error("โค้ดนี้ถูกใช้ครบจำนวนแล้ว");
     }
 
+    // ✅ เช็คเงื่อนไขผู้ใช้
+    const scope = d.userScope || "all";
+    if (scope === "new") {
+      const days = d.newUserDays ?? 2;
+      const ageMs = Date.now() - (profile.createdAt || 0);
+      const maxMs = days * 24 * 60 * 60 * 1000;
+      if (ageMs > maxMs) {
+        return toast.error("โค้ดนี้สำหรับผู้ใช้ใหม่เท่านั้น", {
+          description: `ใช้ได้เฉพาะบัญชีที่สร้างไม่เกิน ${days} วัน`,
+        });
+      }
+    } else if (scope === "specific") {
+      const allow = d.userIds || [];
+      if (!allow.includes(user.uid)) {
+        return toast.error("คุณไม่มีสิทธิ์ใช้โค้ดนี้");
+      }
+    }
+
     // ✅ เช็คเคยใช้ยัง
     const alreadyUsed = await hasUserUsedCode(d.id, user.uid);
 
