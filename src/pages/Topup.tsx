@@ -153,10 +153,25 @@ export default function Topup() {
     if (!phone || !giftLink) return toast.error("กรุณากรอกข้อมูลให้ครบ");
     setTwLoading(true);
     try {
+      // กันใช้ซองอั่งเปาซ้ำ
+      const dup = await isSlipRefUsed(giftLink);
+      if (dup.used) {
+        toast.error("ซองอั่งเปานี้เคยใช้แล้ว", {
+          description: "ไม่สามารถเติมเงินด้วยลิงก์เดิมซ้ำได้",
+        });
+        setTwLoading(false);
+        return;
+      }
       const data = await verifyTruewalletGift(phone, giftLink);
       if (data.status === "success") {
         const amount = parseFloat(data.amount);
         await adjustPoints(user.uid, amount);
+        await markSlipRefUsed(giftLink, {
+          uid: user.uid,
+          username: profile.username,
+          amount,
+          method: "truewallet",
+        });
         await recordTopup({
           userId: user.uid,
           username: profile.username,
