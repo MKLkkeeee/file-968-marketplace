@@ -505,7 +505,7 @@ function ProductManager({ categories, products }: { categories: Category[]; prod
                           <a href={`/product/${p.id}`} target="_blank" rel="noreferrer"><Eye className="h-4 w-4" /></a>
                         </Button>
                         <Button size="icon" variant="ghost" className="h-8 w-8"
-                          onClick={() => { setEdit(p); setForm({ name: p.name, description: p.description, price: p.price, image: p.image, categoryId: p.categoryId, ||); setOpen(true); }}>
+                          onClick={() => { setEdit(p); setForm({ name: p.name, description: p.description, price: p.price, image: p.image, categoryId: p.categoryId, stockItems: p.stockItems || "", isHot: !!p.isHot }); setOpen(true); }}>
                           <Pencil className="h-4 w-4" />
                         </Button>
                         <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => deleteProduct(p.id)}>
