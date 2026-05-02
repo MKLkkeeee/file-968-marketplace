@@ -166,6 +166,32 @@ export default function Wheel() {
       setResult({ slice: finalSlice, reward });
       setShowResult(true);
 
+      // Summary bar + toast
+      const gainedPoints = finalSlice.type === "point" ? (chosen.pointValue || 0) : 0;
+      setLastSummary({
+        cost: config.spinCost,
+        gainedPoints,
+        sliceLabel: finalSlice.label,
+        type: finalSlice.type,
+        at: Date.now(),
+      });
+
+      const net = gainedPoints - config.spinCost;
+      const netStr = net >= 0 ? `+${net}` : `${net}`;
+      if (finalSlice.type === "nothing") {
+        toast.error("เสียดาย! ไม่ได้รางวัล", {
+          description: `หัก ${config.spinCost} Point · สุทธิ ${netStr}`,
+        });
+      } else if (finalSlice.type === "point") {
+        toast.success(`ได้รับ +${gainedPoints} Point!`, {
+          description: `หัก ${config.spinCost} Point · สุทธิ ${netStr}`,
+        });
+      } else {
+        toast.success(`ได้รางวัล: ${finalSlice.label}`, {
+          description: `หัก ${config.spinCost} Point`,
+        });
+      }
+
       if (finalSlice.type !== "nothing") {
         fireConfetti();
         setShake(true);
