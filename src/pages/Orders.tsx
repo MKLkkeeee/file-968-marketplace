@@ -100,7 +100,7 @@ export default function Orders() {
 
                         <p className="gradient-text flex items-center justify-end gap-1 font-display text-xl font-bold">
                           <Coins className="h-4 w-4" />
-                          {o.finalPrice.toLocaleString()}
+                          ฿{o.finalPrice.toLocaleString()}
                         </p>
                       </div>
                     </div>

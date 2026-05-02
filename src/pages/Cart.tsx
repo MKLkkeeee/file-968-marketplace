@@ -122,7 +122,7 @@ export default function Cart() {
       categoryIds: d.categoryIds,
     });
     toast.success(`ใช้โค้ดส่วนลด ${d.value}% สำเร็จ`, {
-      description: `ประหยัด ${saved.toLocaleString()} ฿${(hasProductFilter || hasCategoryFilter) ? " (เฉพาะสินค้าที่เข้าเงื่อนไข)" : ""}`,
+      description: `ประหยัด ฿${saved.toLocaleString()}${(hasProductFilter || hasCategoryFilter) ? " (เฉพาะสินค้าที่เข้าเงื่อนไข)" : ""}`,
     });
   };
 
@@ -272,7 +272,7 @@ export default function Cart() {
                         ) : (
                           <>
                             <Coins className="h-4 w-4 text-warning" />
-                            <span className="font-bold">{it.product.price.toLocaleString()}</span>
+                            <span className="font-bold">฿{it.product.price.toLocaleString()}</span>
                           </>
                         )}
                         <Badge variant="outline" className="text-xs">stock {stk === Infinity ? "∞" : stk}</Badge>
@@ -335,7 +335,7 @@ export default function Cart() {
                 <div className="mt-5 space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">รวมสินค้า</span>
-                    <span>{subtotal.toLocaleString()}</span>
+                    <span>฿{subtotal.toLocaleString()}</span>
                   </div>
                   {discountInfo && (
                     <>
@@ -344,24 +344,24 @@ export default function Cart() {
                           <Tag className="h-3 w-3" />
                           ส่วนลด {discountInfo.pct}% ({discountInfo.code})
                         </span>
-                        <span className="font-semibold">-{discountAmount.toLocaleString()}</span>
+                        <span className="font-semibold">-฿{discountAmount.toLocaleString()}</span>
                       </div>
                       {isRestricted && (
                         <p className="text-xs text-warning/80">
-                          * ใช้กับสินค้าที่เข้าเงื่อนไขเท่านั้น ({eligibleSubtotal.toLocaleString()} บาท)
+                          * ใช้กับสินค้าที่เข้าเงื่อนไขเท่านั้น (฿{eligibleSubtotal.toLocaleString()})
                         </p>
                       )}
                     </>
                   )}
                   <div className="flex items-center justify-between border-t border-border pt-3">
                     <span className="font-semibold">ยอดสุทธิ</span>
-                    <span className="font-display text-2xl font-bold gradient-text">{finalPrice.toLocaleString()}</span>
+                    <span className="font-display text-2xl font-bold gradient-text">฿{finalPrice.toLocaleString()}</span>
                   </div>
                 </div>
 
                 {profile && (
                   <p className="mt-3 text-right text-xs text-muted-foreground">
-                    ยอดเงินของคุณ: {profile.points.toLocaleString()}
+                    ยอดเงินของคุณ: ฿{profile.points.toLocaleString()}
                   </p>
                 )}
 

@@ -46,7 +46,7 @@ export default function Profile() {
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
-  // Transfer บาท states
+  // Transfer money states
   const [transferTo, setTransferTo] = useState("");
   const [transferAmount, setTransferAmount] = useState("");
   const [transferPwd, setTransferPwd] = useState("");
@@ -96,7 +96,7 @@ export default function Profile() {
     if (usernameStatus === "checking") return toast.error("กำลังตรวจสอบชื่อผู้ใช้ กรุณารอสักครู่");
     if (usernameStatus !== "found") return toast.error("ไม่พบชื่อผู้ใช้ปลายทาง");
     if (!Number.isFinite(amount) || amount <= 0)
-      return toast.error("จำนวนบาทต้องมากกว่า 0");
+      return toast.error("จำนวนเงินต้องมากกว่า 0");
     if (amount > (profile.points || 0)) return toast.error("ยอดเงินไม่เพียงพอ");
     if (!transferPwd) return toast.error("กรุณากรอกรหัสผ่านเพื่อยืนยัน");
     setConfirmOpen(true);
@@ -110,7 +110,7 @@ export default function Profile() {
       await reauthenticateWithCredential(auth.currentUser, cred);
       const amount = Math.floor(Number(transferAmount));
       const res = await transferPointsByUsername(user.uid, transferTo.trim(), amount);
-      toast.success(`โอน ${amount.toLocaleString()} บาท ให้ ${res.toUsername} สำเร็จ`);
+      toast.success(`โอน ฿${amount.toLocaleString()} ให้ ${res.toUsername} สำเร็จ`);
       setTransferTo(""); setTransferAmount(""); setTransferPwd("");
       setConfirmOpen(false);
       await refreshProfile();
@@ -291,7 +291,7 @@ export default function Profile() {
               <div className="mt-2 flex items-baseline gap-2">
                 <Coins className="h-6 w-6 text-warning" />
                 <span className="font-display text-4xl font-bold gradient-text">
-                  {profile.points.toLocaleString()}
+                  ฿{profile.points.toLocaleString()}
                 </span>
               </div>
             </div>
@@ -430,7 +430,7 @@ export default function Profile() {
             <div>
               <h3 className="font-display text-xl font-semibold">โอนเงินให้ผู้ใช้อื่น</h3>
               <p className="text-xs text-white/50">
-                ยอดคงเหลือ: <span className="text-white">{(profile.points || 0).toLocaleString()}</span> บาท
+                ยอดคงเหลือ: <span className="text-white">฿{(profile.points || 0).toLocaleString()}</span>
               </p>
             </div>
           </div>
@@ -479,7 +479,7 @@ export default function Profile() {
               )}
             </div>
             <div>
-              <Label>จำนวนเงิน (บาท)</Label>
+              <Label>จำนวนเงิน (฿)</Label>
               <Input
                 type="number"
                 min={1}
@@ -515,7 +515,7 @@ export default function Profile() {
               <AlertDialogDescription>
                 คุณต้องการโอน{" "}
                 <span className="font-semibold text-foreground">
-                  {Math.floor(Number(transferAmount) || 0).toLocaleString()} บาท
+                  ฿{Math.floor(Number(transferAmount) || 0).toLocaleString()}
                 </span>{" "}
                 ให้กับ{" "}
                 <span className="font-semibold text-foreground">{transferTo.trim()}</span>{" "}
@@ -607,7 +607,7 @@ function FavoritesSection() {
                   ) : (
                     <div className="mt-1 flex items-center gap-1 text-warning">
                       <Coins className="h-3.5 w-3.5" />
-                      <span className="text-sm font-bold">{p.price.toLocaleString()}</span>
+                      <span className="text-sm font-bold">฿{p.price.toLocaleString()}</span>
                     </div>
                   )}
                 </div>

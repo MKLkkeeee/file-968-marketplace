@@ -198,7 +198,7 @@ export default function Topup() {
           ref: giftLink,
           status: "success",
         });
-        toast.success(`เติมเงินสำเร็จ +${amount} บาท`);
+        toast.success(`เติมเงินสำเร็จ +฿${amount}`);
         setPhone(""); setGiftLink("");
         await refreshProfile();
       } else {
@@ -343,7 +343,7 @@ export default function Topup() {
           <Card className="card-elegant mt-6 flex items-center justify-between p-5">
             <div>
               <p className="text-sm text-muted-foreground">ยอดเงินปัจจุบัน</p>
-              <p className="font-display text-3xl font-bold gradient-text">{profile.points.toLocaleString()}</p>
+              <p className="font-display text-3xl font-bold gradient-text">฿{profile.points.toLocaleString()}</p>
             </div>
             <Wallet className="h-10 w-10 text-primary" />
           </Card>
@@ -551,7 +551,7 @@ export default function Topup() {
                       </div>
                       <div className="text-right">
                         <p className={`font-display text-lg font-bold ${isFailed ? "text-white/30 line-through" : "text-success"}`}>
-                          {isFailed ? "—" : `+${t.amount.toLocaleString()}`}
+                          {isFailed ? "—" : `+฿${t.amount.toLocaleString()}`}
                         </p>
                         <p className="text-[11px] text-white/40">{new Date(t.createdAt).toLocaleString("th-TH")}</p>
                       </div>

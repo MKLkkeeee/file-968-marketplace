@@ -57,7 +57,7 @@ export const sendOrderWebhook = async (
 ) => {
   const itemFields = items.map(item => ({
     name: `${item.name || "ไม่ระบุชื่อสินค้า"}`,
-    value: `nราคา: ${item.price} ฿\nจำนวน: ${item.quantity} ชิ้น`,
+    value: `\nราคา: ฿${item.price}\nจำนวน: ${item.quantity} ชิ้น`,
     inline: false
   }));
 
@@ -68,7 +68,7 @@ export const sendOrderWebhook = async (
         color: 3066993,
         fields: [
           { name: "ผู้ซื้อ", value: username || "ไม่ระบุ", inline: true },
-          { name: "ยอดรวม", value: `${totalPrice} ฿`, inline: true },
+          { name: "ยอดรวม", value: `฿${totalPrice}`, inline: true },
           { name: "เวลา", value: new Date().toLocaleString("th-TH"), inline: true },
           ...itemFields
         ]

@@ -63,7 +63,7 @@ export default function Admin() {
     const amount = Number(pointInputs[uid]);
     
     if (!amount || amount <= 0) {
-      toast.error("กรุณาระบุจำนวนเงิน (บาท)");
+      toast.error("กรุณาระบุจำนวนเงิน");
       return;
     }
 
@@ -72,7 +72,7 @@ export default function Admin() {
       const current = target?.points ?? 0;
       if (amount > current) {
         toast.error("ลบไม่สำเร็จ", {
-          description: `ผู้ใช้มีเพียง ${current.toLocaleString()} บาท ไม่สามารถลบ ${amount.toLocaleString()} บาทได้`,
+          description: `ผู้ใช้มีเพียง ฿${current.toLocaleString()} ไม่สามารถลบ ฿${amount.toLocaleString()} ได้`,
         });
         return;
       }
@@ -81,7 +81,7 @@ export default function Admin() {
     try {
       const delta = mode === "add" ? amount : -amount;
       await adjustPoints(uid, delta);
-      toast.success(mode === "add" ? `เพิ่ม ${amount} บาท สำเร็จ` : `ลบ ${amount} บาท สำเร็จ`);
+      toast.success(mode === "add" ? `เพิ่ม ฿${amount} สำเร็จ` : `ลบ ฿${amount} สำเร็จ`);
       setPointInputs((prev) => ({
         ...prev,
         [uid]: "",
@@ -1096,7 +1096,7 @@ function OrderTable({ orders, search, page, setPage }: {
                   ).map(([name, qty]: any) => (<div key={name}>{name} x{qty}</div>))}
                 </TableCell>
                 <TableCell>{o.discountCode || "-"}</TableCell>
-                <TableCell className="font-semibold gradient-text">{o.finalPrice}</TableCell>
+                <TableCell className="font-semibold gradient-text">฿{o.finalPrice}</TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -1160,7 +1160,7 @@ function TopupTable({ topups, search, page, setPage }: {
                 <TableCell className="text-xs">{new Date(t.createdAt).toLocaleString("th-TH")}</TableCell>
                 <TableCell>{t.username}</TableCell>
                 <TableCell><Badge variant="outline">{t.method}</Badge></TableCell>
-                <TableCell className="font-semibold">{t.amount}</TableCell>
+                <TableCell className="font-semibold">฿{t.amount}</TableCell>
                 <TableCell className="max-w-[200px] truncate text-xs">{t.ref}</TableCell>
               </TableRow>
             ))}
