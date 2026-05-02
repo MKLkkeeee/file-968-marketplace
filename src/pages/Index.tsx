@@ -11,9 +11,10 @@ import { useCart } from "@/contexts/CartContext";
 import { toast } from "sonner";
 import { Coins, Package, ShoppingCart, Sparkles } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
+import Landing from "./Landing";
 
 export default function Index() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const { add } = useCart();
   const navigate = useNavigate();
   const [categories, setCategories] = useState<Category[]>([]);
