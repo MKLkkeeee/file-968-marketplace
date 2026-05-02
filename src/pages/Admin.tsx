@@ -810,3 +810,224 @@ function WelcomePopupManager() {
   );
 }
 
+
+// ============= Wheel Manager =============
+const WHEEL_COLORS = ["#ef4444","#f59e0b","#10b981","#3b82f6","#8b5cf6","#ec4899","#14b8a6","#f97316"];
+
+function WheelManager() {
+  const [config, setConfig] = useState<WheelConfig>({ enabled: false, spinCost: 50, updatedAt: 0 });
+  const [slices, setSlices] = useState<WheelSlice[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [savingCfg, setSavingCfg] = useState(false);
+
+  // editor state
+  const [open, setOpen] = useState(false);
+  const [edit, setEdit] = useState<WheelSlice | null>(null);
+  const [label, setLabel] = useState("");
+  const [type, setType] = useState<"point" | "item" | "nothing">("point");
+  const [pointValue, setPointValue] = useState<number>(10);
+  const [stockItems, setStockItems] = useState("");
+  const [weight, setWeight] = useState<number>(1);
+  const [color, setColor] = useState(WHEEL_COLORS[0]);
+  const [active, setActive] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      const cfg = await getWheelConfig();
+      setConfig(cfg);
+      setLoading(false);
+    })();
+    const off = onValue(ref(db, "wheel/slices"), (s) => {
+      setSlices(s.exists() ? Object.values(s.val() as Record<string, WheelSlice>) : []);
+    });
+    return () => off();
+  }, []);
+
+  const saveCfg = async () => {
+    setSavingCfg(true);
+    try {
+      await saveWheelConfig({ enabled: config.enabled, spinCost: Math.max(0, config.spinCost) });
+      toast.success("บันทึกการตั้งค่าแล้ว");
+    } catch { toast.error("บันทึกไม่สำเร็จ"); }
+    finally { setSavingCfg(false); }
+  };
+
+  const openCreate = () => {
+    setEdit(null); setLabel(""); setType("point"); setPointValue(10);
+    setStockItems(""); setWeight(1); setColor(WHEEL_COLORS[slices.length % WHEEL_COLORS.length]); setActive(true);
+    setOpen(true);
+  };
+  const openEdit = (s: WheelSlice) => {
+    setEdit(s); setLabel(s.label); setType(s.type); setPointValue(s.pointValue ?? 0);
+    setStockItems(s.stockItems ?? ""); setWeight(s.weight ?? 1); setColor(s.color || WHEEL_COLORS[0]); setActive(s.active);
+    setOpen(true);
+  };
+  const submit = async () => {
+    if (!label.trim()) return toast.error("กรอกชื่อช่อง");
+    if (weight <= 0) return toast.error("น้ำหนักต้องมากกว่า 0");
+    if (type === "point" && pointValue <= 0) return toast.error("Point ต้องมากกว่า 0");
+    const data: any = {
+      label: label.trim(), type, weight: Number(weight), color, active,
+    };
+    if (type === "point") data.pointValue = Number(pointValue);
+    if (type === "item") data.stockItems = stockItems;
+    if (edit) await updateWheelSlice(edit.id, data);
+    else await createWheelSlice(data);
+    toast.success(edit ? "อัปเดตแล้ว" : "เพิ่มช่องแล้ว");
+    setOpen(false);
+  };
+  const removeSlice = async (id: string) => {
+    if (!confirm("ลบช่องนี้?")) return;
+    await deleteWheelSlice(id);
+    toast.success("ลบแล้ว");
+  };
+
+  if (loading) return <p className="py-8 text-center text-sm text-white/40">กำลังโหลด...</p>;
+
+  const totalWeight = slices.filter(s => s.active).reduce((sum, s) => sum + (s.weight || 0), 0);
+
+  return (
+    <div className="space-y-5">
+      <div className="flex items-center gap-2">
+        <Megaphone className="h-5 w-5 text-warning" />
+        <h2 className="font-display text-xl font-semibold">วงล้อหมุนรางวัล</h2>
+      </div>
+
+      {/* Config */}
+      <div className="grid gap-4 rounded-xl border border-white/10 bg-white/[0.03] p-4 md:grid-cols-3">
+        <div className="flex items-center justify-between gap-3 md:col-span-1">
+          <div>
+            <p className="text-sm font-medium">เปิดใช้งานวงล้อ</p>
+            <p className="text-xs text-white/40">ผู้ใช้จะเห็นหน้า /wheel</p>
+          </div>
+          <Switch checked={config.enabled} onCheckedChange={(v) => setConfig((c) => ({ ...c, enabled: v }))} />
+        </div>
+        <div>
+          <Label>ค่าหมุนต่อครั้ง (Point)</Label>
+          <Input
+            type="number" min={0} value={config.spinCost}
+            onChange={(e) => setConfig((c) => ({ ...c, spinCost: Number(e.target.value) }))}
+            className="mt-1"
+          />
+        </div>
+        <div className="flex items-end justify-end">
+          <Button onClick={saveCfg} disabled={savingCfg}>{savingCfg ? "กำลังบันทึก..." : "บันทึกการตั้งค่า"}</Button>
+        </div>
+      </div>
+
+      {/* Slices */}
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-white/60">ช่องรางวัลทั้งหมด {slices.length} ช่อง · น้ำหนักรวม (เปิดใช้งาน) {totalWeight}</p>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button onClick={openCreate}><Plus className="h-4 w-4" /> เพิ่มช่อง</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{edit ? "แก้ไขช่องรางวัล" : "เพิ่มช่องรางวัล"}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>ชื่อที่แสดงบนวงล้อ</Label>
+                <Input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="เช่น 100 Point, ของรางวัลพิเศษ" className="mt-1" />
+              </div>
+              <div>
+                <Label>ประเภทรางวัล</Label>
+                <Select value={type} onValueChange={(v) => setType(v as any)}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="point">Point</SelectItem>
+                    <SelectItem value="item">ของ (สต๊อกหลายชิ้น)</SelectItem>
+                    <SelectItem value="nothing">ไม่ได้อะไร / เสียดาย</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {type === "point" && (
+                <div>
+                  <Label>จำนวน Point ที่ได้</Label>
+                  <Input type="number" min={1} value={pointValue} onChange={(e) => setPointValue(Number(e.target.value))} className="mt-1" />
+                </div>
+              )}
+              {type === "item" && (
+                <div>
+                  <Label>คลังของ (1 บรรทัด = 1 ชิ้น)</Label>
+                  <Textarea
+                    value={stockItems} onChange={(e) => setStockItems(e.target.value)}
+                    placeholder={"item-code-1\nitem-code-2\nhttps://..."}
+                    rows={5} className="mt-1"
+                  />
+                  <p className="mt-1 text-xs text-white/40">เมื่อผู้ใช้สุ่มได้ ระบบจะหยิบบรรทัดบนสุดส่งให้ทันที</p>
+                </div>
+              )}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>น้ำหนัก (โอกาส)</Label>
+                  <Input type="number" min={0.1} step={0.1} value={weight} onChange={(e) => setWeight(Number(e.target.value))} className="mt-1" />
+                  <p className="mt-1 text-xs text-white/40">ยิ่งสูง ยิ่งออกบ่อย</p>
+                </div>
+                <div>
+                  <Label>สีช่อง</Label>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {WHEEL_COLORS.map((c) => (
+                      <button key={c} type="button" onClick={() => setColor(c)}
+                        className={"h-7 w-7 rounded-full border-2 " + (color === c ? "border-white" : "border-white/20")}
+                        style={{ backgroundColor: c }} />
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.03] p-3">
+                <div>
+                  <p className="text-sm font-medium">เปิดใช้งานช่องนี้</p>
+                  <p className="text-xs text-white/40">ปิดเพื่อตัดออกจากการสุ่ม</p>
+                </div>
+                <Switch checked={active} onCheckedChange={setActive} />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setOpen(false)}>ยกเลิก</Button>
+              <Button onClick={submit}>{edit ? "บันทึก" : "เพิ่ม"}</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {slices.length === 0 ? (
+        <p className="py-8 text-center text-sm text-white/40">ยังไม่มีช่องรางวัล</p>
+      ) : (
+        <div className="space-y-2">
+          {slices
+            .slice()
+            .sort((a, b) => b.createdAt - a.createdAt)
+            .map((s) => {
+              const stock = s.type === "item" ? stockCount(s.stockItems || "") : null;
+              const pct = totalWeight > 0 && s.active ? ((s.weight / totalWeight) * 100).toFixed(1) : "—";
+              return (
+                <div key={s.id} className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-4">
+                  <div className="flex min-w-0 flex-1 items-center gap-3">
+                    <span className="h-8 w-8 shrink-0 rounded-full" style={{ backgroundColor: s.color }} />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="truncate font-medium">{s.label}</p>
+                        <Badge variant="outline" className="text-[10px]">
+                          {s.type === "point" ? `+${s.pointValue} Point` : s.type === "item" ? `ของ · เหลือ ${stock}` : "ไม่ได้อะไร"}
+                        </Badge>
+                        <Badge variant={s.active ? "default" : "outline"} className="text-[10px]">
+                          {s.active ? "เปิด" : "ปิด"}
+                        </Badge>
+                      </div>
+                      <p className="mt-1 text-xs text-white/40">น้ำหนัก {s.weight} · โอกาสออก ~{pct}%</p>
+                    </div>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <Button size="icon" variant="outline" onClick={() => openEdit(s)}><Pencil className="h-4 w-4" /></Button>
+                    <Button size="icon" variant="destructive" onClick={() => removeSlice(s.id)}><Trash2 className="h-4 w-4" /></Button>
+                  </div>
+                </div>
+              );
+            })}
+        </div>
+      )}
+    </div>
+  );
+}
