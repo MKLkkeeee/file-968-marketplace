@@ -276,7 +276,7 @@ export default function Cart() {
                           <Minus className="h-3 w-3" />
                         </Button>
                         <span className="w-8 text-center text-sm font-semibold">{it.qty}</span>
-                        <Button size="icon" variant="outline" className="h-7 w-7" disabled={it.qty >= stk || it.qty >= 5} onClick={() => { if (it.qty >= 5) { toast.error("ซื้อได้สูงสุด 5 ชิ้นต่อสินค้า");return;}setQty(it.product.id, it.qty + 1);}}>
+                        <Button size="icon" variant="outline" className="h-7 w-7" disabled={it.qty >= stk} onClick={() => { if (it.qty >= stk) { toast.error(`สต๊อกคงเหลือ ${stk === Infinity ? "∞" : stk} ชิ้น`); return; } setQty(it.product.id, it.qty + 1); }}>
                           <Plus className="h-3 w-3" />
                         </Button>
                         <Button size="icon" variant="ghost" className="ml-auto h-7 w-7" onClick={() => remove(it.product.id)}>
