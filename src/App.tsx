@@ -16,6 +16,7 @@ import Orders from "./pages/Orders.tsx";
 import ProductDetail from "./pages/ProductDetail.tsx";
 import Profile from "./pages/Profile.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import { AnnouncementBar } from "@/components/AnnouncementBar";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <CartProvider>
+            <AnnouncementBar />
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
