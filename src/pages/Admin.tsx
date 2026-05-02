@@ -178,17 +178,6 @@ export default function Admin() {
           <TabsContent value="users">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
               <Card className="card-elegant p-6">
-                <div className="mb-4">
-                  <Input
-                    placeholder="ค้นหา username / email / uid"
-                    value={userSearch}
-                    onChange={(e) => setUserSearch(e.target.value)}
-                  />
-                </div>
-
-          <TabsContent value="users">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
-              <Card className="card-elegant p-6">
                 <div className="mb-4 relative">
                   <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
                   <Input
@@ -198,73 +187,15 @@ export default function Admin() {
                     className="pl-9"
                   />
                 </div>
-
-                {(() => {
-                  const filtered = users.filter((u) =>
-                    `${u.username} ${u.email} ${u.uid}`.toLowerCase().includes(userSearch.toLowerCase())
-                  );
-                  const { slice, totalPages, page } = usePaged(filtered, userPage, 10);
-                  return (
-                    <>
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Username</TableHead>
-                            <TableHead>Email</TableHead>
-                            <TableHead>Point</TableHead>
-                            <TableHead>Role</TableHead>
-                            <TableHead>เพิ่ม Point</TableHead>
-                            <TableHead></TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {slice.map((u) => (
-                            <TableRow key={u.uid}>
-                              <TableCell>{u.username}</TableCell>
-                              <TableCell>{u.email}</TableCell>
-                              <TableCell>{u.points?.toLocaleString() ?? 0}</TableCell>
-                              <TableCell>
-                                <Badge variant={u.role === "admin" ? "default" : "outline"}>{u.role}</Badge>
-                              </TableCell>
-                              <TableCell>
-                                <div className="flex gap-2">
-                                  <Input
-                                    type="number"
-                                    placeholder="100"
-                                    className="w-24"
-                                    value={pointInputs[u.uid] || ""}
-                                    onChange={(e) =>
-                                      setPointInputs((prev) => ({ ...prev, [u.uid]: e.target.value }))
-                                    }
-                                  />
-                                  <Button
-                                    size="sm"
-                                    className="bg-gradient-primary text-primary-foreground"
-                                    onClick={() => handleAddPoint(u.uid)}
-                                  >
-                                    เพิ่ม
-                                  </Button>
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() =>
-                                    setUserRole(u.uid, u.role === "admin" ? "user" : "admin")
-                                  }
-                                >
-                                  {u.role === "admin" ? "ลดเป็น user" : "เลื่อนเป็น admin"}
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                      <Paginator page={page} totalPages={totalPages} onChange={setUserPage} />
-                    </>
-                  );
-                })()}
+                <UserTable
+                  users={users}
+                  search={userSearch}
+                  page={userPage}
+                  setPage={setUserPage}
+                  pointInputs={pointInputs}
+                  setPointInputs={setPointInputs}
+                  handleAddPoint={handleAddPoint}
+                />
               </Card>
             </motion.div>
           </TabsContent>
@@ -272,51 +203,16 @@ export default function Admin() {
           <TabsContent value="orders">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
               <Card className="card-elegant p-6">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>เวลา</TableHead>
-                      <TableHead>ผู้ซื้อ</TableHead>
-                      <TableHead>สินค้า</TableHead>
-                      <TableHead>โค้ด</TableHead>
-                      <TableHead>จ่ายจริง</TableHead>
-                    </TableRow>
-                  </TableHeader>
-
-                  <TableBody>
-                    {orders
-                      .sort((a, b) => b.createdAt - a.createdAt)
-                      .map((o) => (
-                        <TableRow key={o.id}>
-                          <TableCell className="text-xs">
-                            {new Date(o.createdAt).toLocaleString("th-TH")}
-                          </TableCell>
-
-                          <TableCell>{o.username}</TableCell>
-
-                          <TableCell className="text-xs">
-                            {Object.entries(
-                              (o.items || []).reduce((acc: any, item: any) => {
-                                acc[item.productName] =
-                                  (acc[item.productName] || 0) + 1;
-                                return acc;
-                              }, {})
-                            ).map(([name, qty]: any) => (
-                              <div key={name}>
-                                {name} x{qty}
-                              </div>
-                            ))}
-                          </TableCell>
-
-                          <TableCell>{o.discountCode || "-"}</TableCell>
-
-                          <TableCell className="font-semibold gradient-text">
-                            {o.finalPrice}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                  </TableBody>
-                </Table>
+                <div className="mb-4 relative">
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+                  <Input
+                    placeholder="ค้นหา ผู้ซื้อ / โค้ด / สินค้า"
+                    value={orderSearch}
+                    onChange={(e) => { setOrderSearch(e.target.value); setOrderPage(1); }}
+                    className="pl-9"
+                  />
+                </div>
+                <OrderTable orders={orders} search={orderSearch} page={orderPage} setPage={setOrderPage} />
               </Card>
             </motion.div>
           </TabsContent>
@@ -324,28 +220,16 @@ export default function Admin() {
           <TabsContent value="topups">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
               <Card className="card-elegant p-6">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>เวลา</TableHead>
-                      <TableHead>ผู้ใช้</TableHead>
-                      <TableHead>วิธี</TableHead>
-                      <TableHead>จำนวน</TableHead>
-                      <TableHead>Ref</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {topups.sort((a, b) => b.createdAt - a.createdAt).map((t) => (
-                      <TableRow key={t.id}>
-                        <TableCell className="text-xs">{new Date(t.createdAt).toLocaleString("th-TH")}</TableCell>
-                        <TableCell>{t.username}</TableCell>
-                        <TableCell><Badge variant="outline">{t.method}</Badge></TableCell>
-                        <TableCell className="font-semibold">{t.amount}</TableCell>
-                        <TableCell className="max-w-[200px] truncate text-xs">{t.ref}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                <div className="mb-4 relative">
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+                  <Input
+                    placeholder="ค้นหา ผู้ใช้ / Ref / วิธี"
+                    value={topupSearch}
+                    onChange={(e) => { setTopupSearch(e.target.value); setTopupPage(1); }}
+                    className="pl-9"
+                  />
+                </div>
+                <TopupTable topups={topups} search={topupSearch} page={topupPage} setPage={setTopupPage} />
               </Card>
             </motion.div>
           </TabsContent>
