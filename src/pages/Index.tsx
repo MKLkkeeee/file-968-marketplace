@@ -29,6 +29,7 @@ export default function Index() {
   const [sortBy, setSortBy] = useState<string>("default");
   const [hotOnly, setHotOnly] = useState(false);
   const scrollerRef = useRef<HTMLDivElement>(null);
+
   const scrollByCard = (dir: 1 | -1) => {
     const el = scrollerRef.current;
     if (!el) return;
@@ -112,7 +113,6 @@ export default function Index() {
     <div className="min-h-screen">
       <Navbar />
 
-      {/* Hero */}
       <section className="relative overflow-hidden border-b border-white/[0.06]">
         <div className="pointer-events-none absolute inset-0">
           <div className="orb-drift-1 absolute -left-40 top-0 h-[500px] w-[500px] rounded-full bg-[radial-gradient(circle,rgba(168,85,247,0.15),transparent_70%)] blur-3xl" />
@@ -126,7 +126,7 @@ export default function Index() {
             </div>
           </Reveal>
           <h1 className="mt-6 font-display text-5xl md:text-7xl font-extrabold leading-[0.95] tracking-tight [perspective:1000px]">
-            <span className="block bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent">
+            <span className="block bg-gradient-to-b from-white via-white to-white/70 bg-clip-text text-transparent">
               <LetterReveal text="FILE 968" perLetter={42} />
             </span>
             <span className="mt-1 block bg-gradient-to-b from-white/90 to-white/50 bg-clip-text text-transparent">
@@ -156,7 +156,6 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Categories */}
       <section className="container py-12">
         <Reveal className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <h2 className="font-display text-3xl font-bold">สินค้าทั้งหมด</h2>
@@ -228,7 +227,6 @@ export default function Index() {
           </Card>
         ) : (
           <div className="relative">
-            {/* Prev */}
             <button
               type="button"
               onClick={() => scrollByCard(-1)}
@@ -237,7 +235,6 @@ export default function Index() {
             >
               <ChevronLeft className="h-5 w-5" />
             </button>
-            {/* Next */}
             <button
               type="button"
               onClick={() => scrollByCard(1)}
@@ -323,7 +320,6 @@ export default function Index() {
               })}
             </div>
 
-            {/* Mobile controls */}
             <div className="mt-3 flex items-center justify-center gap-3 md:hidden">
               <button
                 type="button"
