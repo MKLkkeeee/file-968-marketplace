@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,9 +6,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
-import { SHOP_TRUEWALLET_PHONE, SHOP_PROMPTPAY, BANK_RECEIVER_NAME } from "@/lib/firebase";
+import { SHOP_TRUEWALLET_PHONE, SHOP_PROMPTPAY, BANK_RECEIVER_NAME, db } from "@/lib/firebase";
+import { onValue, ref as dbRef } from "firebase/database";
+import { Paginator, usePaged } from "@/components/Paginator";
+import { Topup as TopupType } from "@/lib/store";
 import { toast } from "sonner";
-import { Building2, Copy, Gift, Loader2, Upload, Wallet } from "lucide-react";
+import { Building2, Copy, Gift, History, Loader2, Upload, Wallet, Banknote, KeyRound } from "lucide-react";
 import { Html5Qrcode } from "html5-qrcode";
 import {
   adjustPoints,
