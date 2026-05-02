@@ -197,12 +197,13 @@ export default function Cart() {
         quantity: it.qty
       }));
 
-      await sendOrderWebhook(
+      // ส่ง webhook แบบ fire-and-forget — ไม่ต้องรอ ไม่บล็อก UX
+      sendOrderWebhook(
         profile.username,
         orderItems,
         finalPrice,
         webhookUrl
-      );
+      ).catch(() => {});
 
       toast.success("ซื้อสำเร็จ", { description: `ใช้ไป ${finalPrice} point — ดูประวัติได้ในหน้า "ประวัติการซื้อ"` });
       clear();
