@@ -212,7 +212,7 @@ export default function Index() {
               {c.icon} {c.name}
             </button>
           ))}
-        </div>
+        </Reveal>
 
         {filteredAll.length === 0 ? (
           <Card className="card-elegant flex flex-col items-center gap-3 p-16 text-center">
