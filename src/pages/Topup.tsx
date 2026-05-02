@@ -28,6 +28,22 @@ import {
 export default function Topup() {
   const { user, profile, refreshProfile } = useAuth();
   const [tab, setTab] = useState("truewallet");
+  const [historyPage, setHistoryPage] = useState(1);
+  const [history, setHistory] = useState<TopupType[]>([]);
+
+  useEffect(() => {
+    if (!user) return;
+    const off = onValue(dbRef(db, "topups"), (snap) => {
+      const all: TopupType[] = snap.exists() ? Object.values(snap.val()) : [];
+      const mine = all
+        .filter((t) => t.userId === user.uid)
+        .sort((a, b) => b.createdAt - a.createdAt);
+      setHistory(mine);
+    });
+    return () => off();
+  }, [user]);
+
+  const paged = usePaged(history, historyPage, 10);
 
   // TrueWallet
   const [phone, setPhone] = useState(SHOP_TRUEWALLET_PHONE);
