@@ -25,6 +25,7 @@ export default function Index() {
   const [products, setProducts] = useState<Product[]>([]);
   const [activeCat, setActiveCat] = useState<string>("all");
   const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState<string>("default");
 
   useEffect(() => {
     const unsubC = onValue(ref(db, "categories"), (snap) => {
