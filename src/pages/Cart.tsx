@@ -49,17 +49,28 @@ export default function Cart() {
 
   const applyDiscount = async () => {
     const code = discountCode.trim();
-    if (!code) return;
+    if (!code) return toast.error("กรุณากรอกโค้ด");
+    if (discountInfo) return toast.error("ใช้โค้ดอยู่แล้ว", { description: "ลบโค้ดเดิมก่อนใช้โค้ดใหม่" });
     const d = await findDiscountByCode(code);
     if (!d) return toast.error("ไม่พบโค้ดนี้");
+    if (!d.active) return toast.error("โค้ดนี้ถูกปิดใช้งาน");
     if (d.type !== "discount") {
       return toast.error("โค้ดนี้ใช้ที่หน้าเติมเงิน (Special Code)", {
         description: "โค้ดส่วนลดในตะกร้าต้องเป็นประเภท ส่วนลด % เท่านั้น",
       });
     }
     if (d.usedCount >= d.maxUses) return toast.error("โค้ดถูกใช้ครบจำนวนแล้ว");
+    if (user && d.usedBy?.[user.uid]) return toast.error("คุณใช้โค้ดนี้ไปแล้ว");
     setDiscountInfo({ pct: d.value, code: d.code, id: d.id });
-    toast.success(`ใช้โค้ดส่วนลด ${d.value}% สำเร็จ`);
+    toast.success(`ใช้โค้ดส่วนลด ${d.value}% สำเร็จ`, {
+      description: `ประหยัด ${(subtotal - Math.round(subtotal * (1 - d.value / 100))).toLocaleString()} Point`,
+    });
+  };
+
+  const removeDiscount = () => {
+    setDiscountInfo(null);
+    setDiscountCode("");
+    toast.info("ลบโค้ดส่วนลดแล้ว");
   };
 
   const checkout = async () => {
