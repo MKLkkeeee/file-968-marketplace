@@ -26,6 +26,8 @@ import {
   deleteDiscount, deleteProduct, setUserRole, updateCategory,
   updateDiscount, updateProduct,
   getWelcomePopup, saveWelcomePopup,
+  WheelSlice, WheelConfig, getWheelConfig, saveWheelConfig,
+  createWheelSlice, updateWheelSlice, deleteWheelSlice,
 } from "@/lib/store";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserProfile } from "@/contexts/AuthContext";
