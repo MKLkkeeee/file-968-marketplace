@@ -254,7 +254,7 @@ export default function Index() {
                             </div>
                           )}
                           <Badge variant={stk > 0 ? "outline" : "destructive"} className="text-xs">
-                            {stk > 0 ? `stock ${stk}` : "หมด"}
+                            {stk > 0 ? (stk === Infinity ? "stock ∞" : `stock ${stk}`) : "หมด"}
                           </Badge>
                         </div>
                         <div className="mt-3 grid grid-cols-2 gap-2">

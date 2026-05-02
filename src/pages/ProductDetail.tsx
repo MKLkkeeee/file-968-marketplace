@@ -83,7 +83,7 @@ export default function ProductDetail() {
                 </div>
               )}
               <Badge variant={stk > 0 ? "outline" : "destructive"}>
-                {stk > 0 ? `เหลือ ${stk} ชิ้น` : "หมดสต๊อก"}
+                {stk > 0 ? (stk === Infinity ? "ไม่จำกัด" : `เหลือ ${stk} ชิ้น`) : "หมดสต๊อก"}
               </Badge>
             </div>
 

@@ -269,7 +269,7 @@ export default function Cart() {
                             <span className="font-bold">{it.product.price.toLocaleString()}</span>
                           </>
                         )}
-                        <Badge variant="outline" className="text-xs">stock {stk}</Badge>
+                        <Badge variant="outline" className="text-xs">stock {stk === Infinity ? "∞" : stk}</Badge>
                       </div>
                       <div className="mt-2 flex items-center gap-2">
                         <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => setQty(it.product.id, it.qty - 1)}>

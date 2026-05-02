@@ -414,9 +414,10 @@ function ProductManager({ categories, products }: { categories: Category[]; prod
                   onChange={(e) => setForm({ ...form, stockItems: e.target.value })}
                   rows={6}
                   className="font-mono text-sm"
+                  placeholder={`1 บรรทัด = 1 ชิ้น เช่น license key หรือลิงก์\n\nหรือพิมพ์รูปแบบ "ค่า = inf" เพื่อทำสต๊อกไม่จำกัด เช่น\nhttps://lovable.dev = inf`}
                 />
                 <p className="mt-1 text-xs text-muted-foreground">
-                  จำนวนปัจจุบัน: {stockCount(form.stockItems)}
+                  จำนวนปัจจุบัน: {stockCount(form.stockItems) === Infinity ? "∞ (ไม่จำกัด)" : stockCount(form.stockItems)}
                 </p>
               </div>
             </div>
@@ -455,7 +456,7 @@ function ProductManager({ categories, products }: { categories: Category[]; prod
                       <TableCell>{cat ? `${cat.icon} ${cat.name}` : "-"}</TableCell>
                       <TableCell>{p.price}</TableCell>
                       <TableCell>
-                        <Badge variant={stk > 0 ? "outline" : "destructive"}>{stk}</Badge>
+                        <Badge variant={stk > 0 ? "outline" : "destructive"}>{stk === Infinity ? "∞" : stk}</Badge>
                       </TableCell>
                       <TableCell>
                         <Button asChild size="icon" variant="ghost" title="ดูรายละเอียด">
