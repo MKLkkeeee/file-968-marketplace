@@ -67,8 +67,8 @@ export default function Index() {
   const byHot = hotOnly ? byCat.filter((p) => p.isHot) : byCat;
   const q = search.trim().toLowerCase();
   const searched = q
-    ? byCat.filter((p) => `${p.name} ${p.description}`.toLowerCase().includes(q))
-    : byCat;
+    ? byHot.filter((p) => `${p.name} ${p.description}`.toLowerCase().includes(q))
+    : byHot;
   const sorted = [...searched].sort((a, b) => {
     switch (sortBy) {
       case "price-asc": return a.price - b.price;
