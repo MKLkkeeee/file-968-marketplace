@@ -31,6 +31,8 @@ export default function Topup() {
   const [historyPage, setHistoryPage] = useState(1);
   const [historyFilter, setHistoryFilter] = useState<"all" | "success" | "failed">("all");
   const [history, setHistory] = useState<TopupType[]>([]);
+  const [lastUpdated, setLastUpdated] = useState<number>(Date.now());
+  const prevTopIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -38,8 +40,14 @@ export default function Topup() {
       const all: TopupType[] = snap.exists() ? Object.values(snap.val()) : [];
       const mine = all
         .filter((t) => t.userId === user.uid)
-        .sort((a, b) => b.createdAt - a.createdAt);
+        .sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0));
       setHistory(mine);
+      setLastUpdated(Date.now());
+      const newTopId = mine[0]?.id ?? null;
+      if (prevTopIdRef.current && newTopId && newTopId !== prevTopIdRef.current) {
+        setHistoryPage(1);
+      }
+      prevTopIdRef.current = newTopId;
     });
     return () => off();
   }, [user]);
@@ -47,9 +55,10 @@ export default function Topup() {
   useEffect(() => { setHistoryPage(1); }, [historyFilter]);
 
   const filteredHistory = useMemo(() => {
-    if (historyFilter === "all") return history;
-    // Treat legacy entries (no status) as "success"
-    return history.filter((t) => (t.status ?? "success") === historyFilter);
+    const base = historyFilter === "all"
+      ? history
+      : history.filter((t) => (t.status ?? "success") === historyFilter);
+    return [...base].sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0));
   }, [history, historyFilter]);
 
   const paged = usePaged(filteredHistory, historyPage, 10);
