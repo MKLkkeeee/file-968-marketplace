@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { onValue, ref as dbRef2 } from "firebase/database";
+import { onValue, ref as dbRef2, get } from "firebase/database";
 import { Product } from "@/lib/store";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { Navbar } from "@/components/Navbar";
