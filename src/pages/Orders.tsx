@@ -39,6 +39,15 @@ export default function Orders() {
     toast.success("คัดลอกแล้ว");
   };
 
+  const copyAll = (o: Order) => {
+    const lines = (o.items || [])
+      .map((it) => it.deliveredItem)
+      .filter(Boolean);
+    if (lines.length === 0) return toast.error("ไม่มีรายการให้คัดลอก");
+    navigator.clipboard.writeText(lines.join("\n"));
+    toast.success(`คัดลอกทั้งหมด ${lines.length} รายการแล้ว`);
+  };
+
   const totalPages = Math.max(1, Math.ceil(orders.length / perPage));
 
   const currentOrders = orders.slice(
