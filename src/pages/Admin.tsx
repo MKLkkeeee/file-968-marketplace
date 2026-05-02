@@ -488,12 +488,13 @@ function DiscountManager({
   discounts: DiscountCode[]; products: Product[]; categories: Category[];
 }) {
   const [open, setOpen] = useState(false);
+  type Scope = "all" | "categories" | "products";
   const [form, setForm] = useState<{
     code: string; type: "discount" | "point"; value: number; maxUses: number; active: boolean;
-    productIds: string[]; categoryIds: string[];
+    scope: Scope; productIds: string[]; categoryIds: string[];
   }>({
     code: "", type: "discount", value: 10, maxUses: 100, active: true,
-    productIds: [], categoryIds: [],
+    scope: "all", productIds: [], categoryIds: [],
   });
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -503,19 +504,27 @@ function DiscountManager({
       toast.error("กรุณาระบุโค้ด");
       return;
     }
+    if (form.type === "discount") {
+      if (form.scope === "categories" && form.categoryIds.length === 0) {
+        return toast.error("กรุณาเลือกอย่างน้อย 1 หมวดหมู่");
+      }
+      if (form.scope === "products" && form.productIds.length === 0) {
+        return toast.error("กรุณาเลือกอย่างน้อย 1 สินค้า");
+      }
+    }
     const payload: any = {
       code: form.code, type: form.type, value: form.value,
       maxUses: form.maxUses, active: form.active,
     };
-    // เก็บเฉพาะกรณีโค้ดส่วนลด และมีการเลือก
     if (form.type === "discount") {
-      if (form.productIds.length > 0) payload.productIds = form.productIds;
-      if (form.categoryIds.length > 0) payload.categoryIds = form.categoryIds;
+      if (form.scope === "categories") payload.categoryIds = form.categoryIds;
+      else if (form.scope === "products") payload.productIds = form.productIds;
+      // scope === "all" → ไม่ต้องส่ง productIds/categoryIds (= ทุกสินค้า)
     }
     await createDiscount(payload);
     toast.success("บันทึกข้อมูลสำเร็จ");
     setOpen(false); 
-    setForm({ code: "", type: "discount", value: 10, maxUses: 100, active: true, productIds: [], categoryIds: [] });
+    setForm({ code: "", type: "discount", value: 10, maxUses: 100, active: true, scope: "all", productIds: [], categoryIds: [] });
   };
 
   const toggleProduct = (id: string) => {
