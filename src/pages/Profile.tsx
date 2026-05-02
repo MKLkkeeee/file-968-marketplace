@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { onValue, ref as dbRef2 } from "firebase/database";
+import { onValue, ref as dbRef2, get } from "firebase/database";
 import { Product } from "@/lib/store";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { Navbar } from "@/components/Navbar";
@@ -52,6 +52,39 @@ export default function Profile() {
   const [transferPwd, setTransferPwd] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [transferring, setTransferring] = useState(false);
+  const [usernameStatus, setUsernameStatus] = useState<"idle" | "checking" | "found" | "notfound" | "self">("idle");
+  const [foundUsername, setFoundUsername] = useState<string>("");
+
+  // ตรวจสอบ username แบบ debounce
+  useEffect(() => {
+    const name = transferTo.trim();
+    if (!name) { setUsernameStatus("idle"); setFoundUsername(""); return; }
+    if (profile && name.toLowerCase() === (profile.username || "").toLowerCase()) {
+      setUsernameStatus("self"); setFoundUsername(""); return;
+    }
+    setUsernameStatus("checking");
+    const t = setTimeout(async () => {
+      try {
+        const snap = await get(dbRef2(db, "users"));
+        if (!snap.exists()) { setUsernameStatus("notfound"); setFoundUsername(""); return; }
+        const users = snap.val() as Record<string, any>;
+        const target = Object.values(users).find(
+          (u: any) => (u?.username || "").toLowerCase() === name.toLowerCase()
+        ) as any;
+        if (target?.username) {
+          setFoundUsername(target.username);
+          setUsernameStatus("found");
+        } else {
+          setFoundUsername("");
+          setUsernameStatus("notfound");
+        }
+      } catch {
+        setUsernameStatus("notfound");
+      }
+    }, 400);
+    return () => clearTimeout(t);
+  }, [transferTo, profile?.username]);
+
 
   const handleOpenTransferConfirm = () => {
     if (!profile || !user) return;
@@ -60,6 +93,8 @@ export default function Profile() {
     if (!toName) return toast.error("กรุณากรอกชื่อผู้ใช้ปลายทาง");
     if (toName.toLowerCase() === (profile.username || "").toLowerCase())
       return toast.error("ไม่สามารถโอนให้ตัวเองได้");
+    if (usernameStatus === "checking") return toast.error("กำลังตรวจสอบชื่อผู้ใช้ กรุณารอสักครู่");
+    if (usernameStatus !== "found") return toast.error("ไม่พบชื่อผู้ใช้ปลายทาง");
     if (!Number.isFinite(amount) || amount <= 0)
       return toast.error("จำนวน Point ต้องมากกว่า 0");
     if (amount > (profile.points || 0)) return toast.error("ยอด Point ไม่เพียงพอ");
@@ -408,8 +443,40 @@ export default function Profile() {
                 onChange={(e) => setTransferTo(e.target.value)}
                 placeholder="username"
                 maxLength={50}
-                className="mt-1"
+                className={
+                  "mt-1 transition-colors " +
+                  (usernameStatus === "found"
+                    ? "border-success focus-visible:ring-success/40"
+                    : usernameStatus === "notfound" || usernameStatus === "self"
+                    ? "border-destructive focus-visible:ring-destructive/40"
+                    : "")
+                }
               />
+              {transferTo.trim() && (
+                <p
+                  className={
+                    "mt-1.5 flex items-center gap-1.5 text-xs " +
+                    (usernameStatus === "found"
+                      ? "text-success"
+                      : usernameStatus === "checking"
+                      ? "text-white/50"
+                      : "text-destructive")
+                  }
+                >
+                  {usernameStatus === "checking" && (
+                    <><Loader2 className="h-3 w-3 animate-spin" /> กำลังตรวจสอบ...</>
+                  )}
+                  {usernameStatus === "found" && (
+                    <><CheckCircle2 className="h-3 w-3" /> พบผู้ใช้: {foundUsername}</>
+                  )}
+                  {usernameStatus === "notfound" && (
+                    <><XCircle className="h-3 w-3" /> ไม่พบชื่อผู้ใช้นี้</>
+                  )}
+                  {usernameStatus === "self" && (
+                    <><XCircle className="h-3 w-3" /> ไม่สามารถโอนให้ตัวเองได้</>
+                  )}
+                </p>
+              )}
             </div>
             <div>
               <Label>จำนวน Point</Label>
