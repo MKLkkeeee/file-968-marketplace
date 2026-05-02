@@ -928,7 +928,10 @@ function UserTable({
     }
     if (!confirm(`ส่งลิงก์รีเซ็ตรหัสผ่านไปที่อีเมลของ ${username} (${email}) ?`)) return;
     try {
-      await sendPasswordResetEmail(auth, email);
+      await sendPasswordResetEmail(auth, email, {
+        url: `${window.location.origin}/login`,
+        handleCodeInApp: false,
+      });
       toast.success("ส่งลิงก์รีเซ็ตรหัสผ่านสำเร็จ", {
         description: `ผู้ใช้ ${username} จะได้รับอีเมลที่ ${email}`,
       });
