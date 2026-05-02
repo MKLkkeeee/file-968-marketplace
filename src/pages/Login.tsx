@@ -56,13 +56,13 @@ export default function Login() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-white/60">อีเมล</label>
+              <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-white/60">อีเมลหรือชื่อผู้ใช้</label>
               <input
-                type="email"
+                type="text"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
+                placeholder="you@example.com หรือ username"
                 className="w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-white/30 focus:bg-white/[0.06]"
               />
             </div>
