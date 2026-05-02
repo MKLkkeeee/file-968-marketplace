@@ -64,6 +64,7 @@ export default function Index() {
   }, []);
 
   const byCat = activeCat === "all" ? products : products.filter((p) => p.categoryId === activeCat);
+  const byHot = hotOnly ? byCat.filter((p) => p.isHot) : byCat;
   const q = search.trim().toLowerCase();
   const searched = q
     ? byCat.filter((p) => `${p.name} ${p.description}`.toLowerCase().includes(q))
