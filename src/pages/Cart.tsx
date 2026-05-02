@@ -275,7 +275,23 @@ export default function Cart() {
                         <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => setQty(it.product.id, it.qty - 1)}>
                           <Minus className="h-3 w-3" />
                         </Button>
-                        <span className="w-8 text-center text-sm font-semibold">{it.qty}</span>
+                        <input
+                          type="number"
+                          min={1}
+                          max={stk === Infinity ? undefined : stk}
+                          value={it.qty}
+                          onChange={(e) => {
+                            const raw = parseInt(e.target.value, 10);
+                            if (!Number.isFinite(raw)) return;
+                            let v = Math.max(1, raw);
+                            if (stk !== Infinity && v > stk) {
+                              v = stk;
+                              toast.error(`สต๊อกคงเหลือ ${stk} ชิ้น`);
+                            }
+                            setQty(it.product.id, v);
+                          }}
+                          className="h-7 w-14 rounded-md border border-white/10 bg-white/[0.04] text-center text-sm font-semibold outline-none focus:border-white/30 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                        />
                         <Button size="icon" variant="outline" className="h-7 w-7" disabled={it.qty >= stk} onClick={() => { if (it.qty >= stk) { toast.error(`สต๊อกคงเหลือ ${stk === Infinity ? "∞" : stk} ชิ้น`); return; } setQty(it.product.id, it.qty + 1); }}>
                           <Plus className="h-3 w-3" />
                         </Button>
