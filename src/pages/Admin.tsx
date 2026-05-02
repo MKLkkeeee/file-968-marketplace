@@ -30,7 +30,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { UserProfile } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { Lock, Pencil, Plus, Shield, Trash2 } from "lucide-react";
+import { Lock, Megaphone, Pencil, Plus, Shield, Trash2 } from "lucide-react";
 import { sendRestockWebhook } from "@/lib/discord";
 import { motion } from "framer-motion";
 import { Paginator, usePaged } from "@/components/Paginator";
