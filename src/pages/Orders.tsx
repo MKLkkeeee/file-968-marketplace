@@ -92,22 +92,6 @@ export default function Orders() {
                       </p>
                     </div>
 
-                    <div className="text-right">
-                      <p className="text-xs text-muted-foreground">
-                        ยอดสุทธิ
-                      </p>
-
-                  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
-                    <div>
-                      <p className="text-xs text-muted-foreground">
-                        Order #{o.id.slice(-8)}
-                      </p>
-
-                      <p className="text-sm">
-                        {new Date(o.createdAt).toLocaleString("th-TH")}
-                      </p>
-                    </div>
-
                     <div className="flex items-center gap-3">
                       <div className="text-right">
                         <p className="text-xs text-muted-foreground">
