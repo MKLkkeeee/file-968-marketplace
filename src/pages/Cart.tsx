@@ -255,10 +255,10 @@ export default function Cart() {
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button
-                        className="mt-5 w-full bg-gradient-primary text-primary-foreground"
+                        className="btn-cta mt-5 w-full bg-gradient-primary text-base font-bold text-primary-foreground"
                         disabled={buying || items.length === 0}
                       >
-                        {buying && <Loader2 className="h-4 w-4 animate-spin" />}
+                        {buying && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         ชำระเงิน
                       </Button>
                     </AlertDialogTrigger>
