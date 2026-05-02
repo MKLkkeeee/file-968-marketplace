@@ -57,34 +57,31 @@ export function AnnouncementBar() {
                 : "border-warning/30 bg-gradient-to-r from-warning/15 via-warning/5 to-warning/15 text-warning")
             }
           >
-            <div className="flex items-center py-2">
-              {/* Label pill */}
+            {/* Marquee fills the entire bar — text travels edge to edge */}
+            <div className="relative overflow-hidden py-2">
               <div
                 className={
-                  "z-10 flex shrink-0 items-center gap-1.5 border-r px-3 text-[11px] font-bold uppercase tracking-[0.18em] " +
-                  (isHigh ? "border-destructive/40" : "border-warning/30")
+                  "marquee-track flex whitespace-nowrap text-sm " +
+                  (isHigh ? "font-bold" : "font-medium")
                 }
+                style={{ animationDuration: `${duration}s` }}
               >
-                {isHigh ? (
-                  <AlertTriangle className="h-3.5 w-3.5 animate-pulse" />
-                ) : (
-                  <Megaphone className="h-3.5 w-3.5" />
-                )}
-                <span>ประกาศ</span>
-              </div>
-
-              {/* Marquee with edge fade mask */}
-              <div className="relative flex-1 overflow-hidden">
-                <div
-                  className={
-                    "marquee-track flex whitespace-nowrap text-sm " +
-                    (isHigh ? "font-bold" : "font-medium")
-                  }
-                  style={{ animationDuration: `${duration}s` }}
-                >
-                  <span className="px-8">{row.text}</span>
-                  <span className="px-8" aria-hidden="true">{row.text}</span>
-                </div>
+                <span className="inline-flex items-center gap-1.5 px-8">
+                  {isHigh ? (
+                    <AlertTriangle className="h-3.5 w-3.5" />
+                  ) : (
+                    <Megaphone className="h-3.5 w-3.5" />
+                  )}
+                  {row.text}
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-8" aria-hidden="true">
+                  {isHigh ? (
+                    <AlertTriangle className="h-3.5 w-3.5" />
+                  ) : (
+                    <Megaphone className="h-3.5 w-3.5" />
+                  )}
+                  {row.text}
+                </span>
               </div>
             </div>
           </div>
