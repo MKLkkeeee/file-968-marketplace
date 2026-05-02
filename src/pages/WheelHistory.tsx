@@ -57,7 +57,7 @@ export default function WheelHistory() {
     });
   }, [spins, search, filter]);
 
-  const { paged, totalPages } = usePaged(filtered, page, 10);
+  const { slice: paged, totalPages } = usePaged(filtered, page, 10);
 
   const stats = useMemo(() => {
     const wins = spins.filter((x) => x.type !== "nothing").length;
