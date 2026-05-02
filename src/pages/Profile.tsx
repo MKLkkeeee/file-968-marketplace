@@ -20,7 +20,18 @@ import {
   updatePassword,
 } from "firebase/auth";
 import { toast } from "sonner";
-import { Camera, CheckCircle2, Clock, Coins, Heart, History, KeyRound, Loader2, Mail, Package, Shield, ShoppingCart, User as UserIcon, Wallet, XCircle } from "lucide-react";
+import { Camera, CheckCircle2, Clock, Coins, Heart, History, KeyRound, Loader2, Mail, Package, Send, Shield, ShoppingCart, User as UserIcon, Wallet, XCircle } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { transferPointsByUsername } from "@/lib/store";
 import { motion } from "framer-motion";
 import { fileToResizedDataUrl } from "@/lib/imageUtils";
 
@@ -34,6 +45,51 @@ export default function Profile() {
   const [confirmPwd, setConfirmPwd] = useState("");
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+
+  // Transfer Point states
+  const [transferTo, setTransferTo] = useState("");
+  const [transferAmount, setTransferAmount] = useState("");
+  const [transferPwd, setTransferPwd] = useState("");
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [transferring, setTransferring] = useState(false);
+
+  const handleOpenTransferConfirm = () => {
+    if (!profile || !user) return;
+    const toName = transferTo.trim();
+    const amount = Math.floor(Number(transferAmount));
+    if (!toName) return toast.error("กรุณากรอกชื่อผู้ใช้ปลายทาง");
+    if (toName.toLowerCase() === (profile.username || "").toLowerCase())
+      return toast.error("ไม่สามารถโอนให้ตัวเองได้");
+    if (!Number.isFinite(amount) || amount <= 0)
+      return toast.error("จำนวน Point ต้องมากกว่า 0");
+    if (amount > (profile.points || 0)) return toast.error("ยอด Point ไม่เพียงพอ");
+    if (!transferPwd) return toast.error("กรุณากรอกรหัสผ่านเพื่อยืนยัน");
+    setConfirmOpen(true);
+  };
+
+  const handleConfirmTransfer = async () => {
+    if (!user || !auth.currentUser?.email) return;
+    setTransferring(true);
+    try {
+      const cred = EmailAuthProvider.credential(auth.currentUser.email, transferPwd);
+      await reauthenticateWithCredential(auth.currentUser, cred);
+      const amount = Math.floor(Number(transferAmount));
+      const res = await transferPointsByUsername(user.uid, transferTo.trim(), amount);
+      toast.success(`โอน ${amount.toLocaleString()} Point ให้ ${res.toUsername} สำเร็จ`);
+      setTransferTo(""); setTransferAmount(""); setTransferPwd("");
+      setConfirmOpen(false);
+      await refreshProfile();
+    } catch (e: any) {
+      const code = e?.code || "";
+      if (code.includes("wrong-password") || code.includes("invalid-credential")) {
+        toast.error("รหัสผ่านไม่ถูกต้อง");
+      } else {
+        toast.error("โอน Point ไม่สำเร็จ", { description: e?.message });
+      }
+    } finally {
+      setTransferring(false);
+    }
+  };
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
