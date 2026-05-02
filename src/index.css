@@ -192,7 +192,7 @@
   100% { transform: translateX(-50%); }
 }
 .marquee-track {
-  animation: marquee 30s linear infinite;
+  animation: marquee 12s linear infinite;
   width: max-content;
 }
 .marquee-track:hover { animation-play-state: paused; }
