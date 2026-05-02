@@ -32,6 +32,8 @@ import { toast } from "sonner";
 import { Lock, Pencil, Plus, Shield, Trash2 } from "lucide-react";
 import { sendRestockWebhook } from "@/lib/discord";
 import { motion } from "framer-motion";
+import { Paginator, usePaged } from "@/components/Paginator";
+import { Search } from "lucide-react";
 
 export default function Admin() {
   const { profile } = useAuth();
