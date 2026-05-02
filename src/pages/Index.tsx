@@ -56,32 +56,29 @@ export default function Index() {
       <Navbar />
 
       {/* Hero */}
-      <section className="relative overflow-hidden border-b border-border">
-        <div className="absolute inset-0 bg-gradient-glow" />
+      <section className="relative overflow-hidden border-b border-white/[0.06]">
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute -left-40 top-0 h-[500px] w-[500px] rounded-full bg-[radial-gradient(circle,rgba(168,85,247,0.15),transparent_70%)] blur-3xl" />
+          <div className="absolute -right-40 bottom-0 h-[500px] w-[500px] rounded-full bg-[radial-gradient(circle,rgba(56,189,248,0.12),transparent_70%)] blur-3xl" />
+        </div>
         <div className="container relative py-20 md:py-28">
-          <Badge className="mb-6 bg-primary/15 text-primary border-primary/30">
-            <Sparkles className="h-3 w-3" /> ONLINE
-          </Badge>
-          <h1 className="font-display text-5xl md:text-7xl font-extrabold leading-tight">
-            FILE <span className="gradient-text">968</span> <br />
-            <span className="text-foreground/90">SHOP</span>
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-1.5 text-xs font-medium tracking-[0.2em] text-white/60 backdrop-blur-md">
+            <Sparkles className="h-3 w-3" /> PREMIUM DIGITAL STORE
+          </div>
+          <h1 className="mt-6 font-display text-5xl md:text-7xl font-extrabold leading-[0.95] tracking-tight">
+            <span className="block bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent">FILE 968</span>
+            <span className="mt-1 block bg-gradient-to-b from-white/80 to-white/20 bg-clip-text text-transparent">SHOP</span>
           </h1>
-          <p className="mt-6 max-w-xl text-lg text-muted-foreground">
-            ร้านค้าออนไลน์พรีเมี่ยม — เติมเงินทันที ใช้ Point ซื้อสินค้าได้เลย รองรับ TrueWallet และโอนผ่านธนาคาร
+          <p className="mt-6 max-w-xl text-lg text-white/50">
+            ประสบการณ์ช้อปดิจิทัลระดับพรีเมี่ยม — เติมเงินทันที ใช้ Point ซื้อสินค้าได้เลย รองรับ TrueWallet และพร้อมเพย์
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            {!user ? (
-              <>
-                <Button size="lg" className="bg-gradient-primary text-primary-foreground glow-primary" onClick={() => navigate("/register")}>
-                  เริ่มต้นใช้งาน
-                </Button>
-                <Button size="lg" variant="outline" onClick={() => navigate("/login")}>เข้าสู่ระบบ</Button>
-              </>
-            ) : (
-              <Button size="lg" className="bg-gradient-primary text-primary-foreground glow-primary" onClick={() => navigate("/topup")}>
-                เติมเงินเลย
-              </Button>
-            )}
+            <Button size="lg" onClick={() => navigate("/topup")}>
+              เติมเงินเลย
+            </Button>
+            <Button size="lg" variant="outline" onClick={() => navigate("/orders")}>
+              ประวัติการซื้อ
+            </Button>
           </div>
         </div>
       </section>
