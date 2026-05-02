@@ -245,16 +245,17 @@ export default function Index() {
               className="scrollbar-hide flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth pb-4"
               style={{ scrollbarWidth: "none" }}
             >
-              {filteredAll.map((p) => {
+              {filteredAll.map((p, idx) => {
                 const stk = stockCount(p.stockItems);
                 return (
                   <Link
                     to={`/product/${p.id}`}
                     key={p.id}
                     data-product-card
-                    className="w-[70%] flex-shrink-0 snap-start sm:w-[45%] md:w-[31%] lg:w-[23%]"
+                    className="cine-in stagger w-[70%] flex-shrink-0 snap-start sm:w-[45%] md:w-[31%] lg:w-[23%]"
+                    style={{ ['--i' as any]: Math.min(idx, 8) }}
                   >
-                    <Card className="card-elegant group h-full cursor-pointer overflow-hidden p-0">
+                    <Card className="card-elegant tilt-hover group h-full cursor-pointer overflow-hidden p-0">
                       <div className="relative aspect-square overflow-hidden bg-white/[0.02]">
                         {p.image ? (
                           <img src={p.image} alt={p.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
