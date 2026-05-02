@@ -186,12 +186,13 @@ export function ProductReviews({ productId }: Props) {
 }
 
 function StarsDisplay({ value, size = 4 }: { value: number; size?: number }) {
+  const cls = size >= 5 ? "h-5 w-5" : "h-4 w-4";
   return (
     <div className="flex items-center gap-0.5">
       {[1, 2, 3, 4, 5].map((n) => (
         <Star
           key={n}
-          className={`h-${size} w-${size} ${
+          className={`${cls} ${
             value >= n - 0.25 ? "fill-warning text-warning" : "text-white/15"
           }`}
         />
