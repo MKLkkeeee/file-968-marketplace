@@ -1015,25 +1015,46 @@ function TopupTable({ topups, search, page, setPage }: {
   const { slice, totalPages, page: p } = usePaged(filtered, page, 10);
   return (
     <>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>เวลา</TableHead><TableHead>ผู้ใช้</TableHead>
-            <TableHead>วิธี</TableHead><TableHead>จำนวน</TableHead><TableHead>Ref</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {slice.map((t) => (
-            <TableRow key={t.id}>
-              <TableCell className="text-xs">{new Date(t.createdAt).toLocaleString("th-TH")}</TableCell>
-              <TableCell>{t.username}</TableCell>
-              <TableCell><Badge variant="outline">{t.method}</Badge></TableCell>
-              <TableCell className="font-semibold">{t.amount}</TableCell>
-              <TableCell className="max-w-[200px] truncate text-xs">{t.ref}</TableCell>
+      <div className="hidden md:block overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>เวลา</TableHead><TableHead>ผู้ใช้</TableHead>
+              <TableHead>วิธี</TableHead><TableHead>จำนวน</TableHead><TableHead>Ref</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {slice.map((t) => (
+              <TableRow key={t.id}>
+                <TableCell className="text-xs">{new Date(t.createdAt).toLocaleString("th-TH")}</TableCell>
+                <TableCell>{t.username}</TableCell>
+                <TableCell><Badge variant="outline">{t.method}</Badge></TableCell>
+                <TableCell className="font-semibold">{t.amount}</TableCell>
+                <TableCell className="max-w-[200px] truncate text-xs">{t.ref}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      <div className="md:hidden space-y-3">
+        {slice.map((t) => (
+          <div key={t.id} className="rounded-2xl border border-white/10 bg-white/[0.03] p-3 space-y-1.5">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <div className="font-medium truncate">{t.username}</div>
+                <div className="text-xs text-muted-foreground">{new Date(t.createdAt).toLocaleString("th-TH")}</div>
+              </div>
+              <div className="text-right">
+                <div className="font-semibold">+{t.amount}</div>
+                <Badge variant="outline" className="text-[10px] mt-0.5">{t.method}</Badge>
+              </div>
+            </div>
+            <div className="text-[11px] text-muted-foreground/70 break-all line-clamp-2">{t.ref}</div>
+          </div>
+        ))}
+      </div>
+
       <Paginator page={p} totalPages={totalPages} onChange={setPage} />
     </>
   );
