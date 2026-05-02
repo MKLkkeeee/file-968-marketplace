@@ -306,21 +306,21 @@ export default function Wheel() {
                         "inset 0 0 40px rgba(0,0,0,0.45), inset 0 0 80px rgba(255,255,255,0.06)",
                     }}
                   >
-                    {/* Slice separators (white lines) */}
+                    {/* Slice separators (white lines) — between slices, at i*sliceAngle + sliceAngle/2 */}
                     {activeSlices.map((_, i) => {
-                      const rot = i * sliceAngle;
+                      const rot = i * sliceAngle + sliceAngle / 2;
                       return (
                         <div
                           key={i}
                           className="absolute left-1/2 top-0 h-1/2 w-px origin-bottom bg-white/30"
-                          style={{ transform: `rotate(${rot - sliceAngle / 2}deg)` }}
+                          style={{ transform: `rotate(${rot}deg)` }}
                         />
                       );
                     })}
 
-                    {/* Slice labels */}
+                    {/* Slice labels — centered at i*sliceAngle (matches conic-gradient slice center) */}
                     {activeSlices.map((s, i) => {
-                      const rot = i * sliceAngle + sliceAngle / 2;
+                      const rot = i * sliceAngle;
                       return (
                         <div
                           key={s.id}
