@@ -413,6 +413,23 @@ export default function Topup() {
                 สแกนคิวอาโค๊ด แล้วอัพโหลดสลิป ในช่องด้านล่าง
               </p>
 
+              <div className="mt-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm">
+                <p className="font-medium text-amber-200">
+                  ⚠️ หมายเหตุ: รับเฉพาะสลิปโอนผ่านธนาคาร/พร้อมเพย์เท่านั้น
+                </p>
+                <p className="mt-1 text-xs text-amber-100/80">
+                  ไม่สามารถใช้สลิป TrueMoney Wallet ได้ — หากต้องการเติมผ่าน TrueMoney
+                  {" "}
+                  <button
+                    type="button"
+                    onClick={() => setTab("truewallet")}
+                    className="font-semibold text-primary underline underline-offset-2 hover:opacity-80"
+                  >
+                    คลิกที่นี่เพื่อไปหน้าเติมเงิน TrueMoney
+                  </button>
+                </p>
+              </div>
+
               <div className="mt-4 space-y-3 rounded-xl border border-primary/30 bg-primary/10 p-4">
                 <div>
                   <p className="text-xs text-muted-foreground">พร้อมเพย์</p>
