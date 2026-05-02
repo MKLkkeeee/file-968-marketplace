@@ -15,6 +15,7 @@ import {
   stockCount,
   updateDiscount,
 } from "@/lib/store";
+import { sendOrderWebhook } from "@/lib/discord";
 import { toast } from "sonner";
 import { Coins, Loader2, Minus, Package, Plus, ShoppingBag, Tag, Trash2 } from "lucide-react";
 
@@ -88,6 +89,23 @@ export default function Cart() {
         const d = await findDiscountByCode(discountInfo.code);
         if (d) await updateDiscount(d.id, { usedCount: d.usedCount + 1 });
       }
+
+      // ส่งแจ้งเตือนการสั่งซื้อไปยัง Discord Webhook
+      const webhookUrl = "https://discord.com/api/webhooks/1499929823257038929/9VyFxT798O9mw_QEsJ7PK6V-yH02oAwTzTXritnpfY4dQQWylO0wfHM1-LVAeZlFWmSk";
+      
+      const orderItems = items.map(it => ({
+        name: it.product.name,
+        category: it.product.categoryId || "ไม่ระบุหมวดหมู่",
+        price: it.product.price,
+        quantity: it.qty
+      }));
+
+      await sendOrderWebhook(
+        profile.username,
+        orderItems,
+        finalPrice,
+        webhookUrl
+      );
 
       toast.success("ซื้อสำเร็จ", { description: `ใช้ไป ${finalPrice} point — ดูประวัติได้ในหน้า "ประวัติการซื้อ"` });
       clear();
