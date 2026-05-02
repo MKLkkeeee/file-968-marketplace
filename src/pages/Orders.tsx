@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { Order } from "@/lib/store";
-import { Coins, History, Package } from "lucide-react";
+import { Coins, Copy, History, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -37,6 +37,15 @@ export default function Orders() {
   const copy = (text: string) => {
     navigator.clipboard.writeText(text);
     toast.success("คัดลอกแล้ว");
+  };
+
+  const copyAll = (o: Order) => {
+    const lines = (o.items || [])
+      .map((it) => it.deliveredItem)
+      .filter(Boolean);
+    if (lines.length === 0) return toast.error("ไม่มีรายการให้คัดลอก");
+    navigator.clipboard.writeText(lines.join("\n"));
+    toast.success(`คัดลอกทั้งหมด ${lines.length} รายการแล้ว`);
   };
 
   const totalPages = Math.max(1, Math.ceil(orders.length / perPage));
@@ -83,19 +92,36 @@ export default function Orders() {
                       </p>
                     </div>
 
-                    <div className="text-right">
-                      <p className="text-xs text-muted-foreground">
-                        ยอดสุทธิ
-                      </p>
+                    <div className="flex items-center gap-3">
+                      <div className="text-right">
+                        <p className="text-xs text-muted-foreground">
+                          ยอดสุทธิ
+                        </p>
 
-                      <p className="gradient-text flex items-center justify-end gap-1 font-display text-xl font-bold">
-                        <Coins className="h-4 w-4" />
-                        {o.finalPrice.toLocaleString()}
-                      </p>
+                        <p className="gradient-text flex items-center justify-end gap-1 font-display text-xl font-bold">
+                          <Coins className="h-4 w-4" />
+                          {o.finalPrice.toLocaleString()}
+                        </p>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="mt-3 space-y-2">
+                  <div className="mt-3 flex items-center justify-between gap-2">
+                    <p className="text-xs text-muted-foreground">
+                      {(o.items || []).length} รายการ
+                    </p>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => copyAll(o)}
+                      disabled={(o.items || []).length === 0}
+                    >
+                      <Copy className="h-4 w-4" />
+                      คัดลอกทั้งหมด
+                    </Button>
+                  </div>
+
+                  <div className="mt-2 max-h-72 space-y-2 overflow-y-auto rounded-lg border border-white/5 bg-black/10 p-2 pr-2">
                     {(o.items || []).map((it, i) => (
                       <div
                         key={i}
