@@ -26,6 +26,7 @@ export default function Index() {
   const [activeCat, setActiveCat] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<string>("default");
+  const [hotOnly, setHotOnly] = useState(false);
   const scrollerRef = useRef<HTMLDivElement>(null);
   const scrollByCard = (dir: 1 | -1) => {
     const el = scrollerRef.current;
