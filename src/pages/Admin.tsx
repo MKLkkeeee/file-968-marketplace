@@ -47,6 +47,7 @@ export default function Admin() {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [topups, setTopups] = useState<Topup[]>([]);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [userSearch, setUserSearch] = useState("");
   const [userPage, setUserPage] = useState(1);
   const [orderSearch, setOrderSearch] = useState("");
