@@ -10,6 +10,8 @@ export interface Product {
   categoryId: string;
   /** Multi-line stock: each non-empty line = 1 deliverable item (license / file link / code) */
   stockItems: string;
+  /** ทำเครื่องหมายเป็นสินค้า "HOT" (โชว์ป้ายมุมขวาบน) */
+  isHot?: boolean;
   createdAt: number;
 }
 

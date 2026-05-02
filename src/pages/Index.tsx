@@ -237,7 +237,12 @@ export default function Index() {
                         ) : (
                           <div className="flex h-full items-center justify-center"><Package className="h-12 w-12 text-white/20" /></div>
                         )}
-                        <FavoriteButton productId={p.id} stopPropagation className="absolute right-2 top-2" />
+                        <FavoriteButton productId={p.id} stopPropagation className="absolute left-2 top-2" />
+                        {p.isHot && (
+                          <div className="absolute right-2 top-2 select-none rounded-full bg-gradient-to-r from-red-500 to-orange-500 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow-lg shadow-red-500/40 animate-pulse">
+                            🔥 HOT
+                          </div>
+                        )}
                       </div>
                       <div className="p-4">
                         <h3 className="line-clamp-1 font-semibold text-white">{p.name}</h3>

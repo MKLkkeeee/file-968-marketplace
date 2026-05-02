@@ -339,11 +339,11 @@ function CategoryManager({ categories }: { categories: Category[] }) {
 function ProductManager({ categories, products }: { categories: Category[]; products: Product[] }) {
   const [open, setOpen] = useState(false);
   const [edit, setEdit] = useState<Product | null>(null);
-  const [form, setForm] = useState({ name: "", description: "", price: 0, image: "", categoryId: "", stockItems: "" });
+  const [form, setForm] = useState({ name: "", description: "", price: 0, image: "", categoryId: "", stockItems: "", isHot: false });
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
 
-  const reset = () => setForm({ name: "", description: "", price: 0, image: "", categoryId: "", stockItems: "" });
+  const reset = () => setForm({ name: "", description: "", price: 0, image: "", categoryId: "", stockItems: "", isHot: false });
 
   const submit = async () => {
     if (!form.name || !form.categoryId) {
@@ -408,6 +408,16 @@ function ProductManager({ categories, products }: { categories: Category[]; prod
                 </div>
               </div>
               <div><Label>URL รูปภาพ</Label><Input value={form.image} onChange={(e) => setForm({ ...form, image: e.target.value })} /></div>
+              <label className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] p-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={form.isHot}
+                  onChange={(e) => setForm({ ...form, isHot: e.target.checked })}
+                  className="h-4 w-4 accent-primary"
+                />
+                <span className="text-sm font-medium">🔥 ตั้งเป็นสินค้า HOT</span>
+                <span className="text-xs text-muted-foreground ml-auto">แสดงป้าย "HOT" มุมขวาบนของสินค้า</span>
+              </label>
               <div>
                 <Label>สต๊อกสินค้า</Label>
                 <Textarea
@@ -467,7 +477,7 @@ function ProductManager({ categories, products }: { categories: Category[]; prod
                               <Eye className="h-4 w-4" />
                             </a>
                           </Button>
-                          <Button size="icon" variant="ghost" onClick={() => { setEdit(p); setForm({ name: p.name, description: p.description, price: p.price, image: p.image, categoryId: p.categoryId, stockItems: p.stockItems || "" }); setOpen(true); }}>
+                          <Button size="icon" variant="ghost" onClick={() => { setEdit(p); setForm({ name: p.name, description: p.description, price: p.price, image: p.image, categoryId: p.categoryId, stockItems: p.stockItems || "", isHot: !!p.isHot }); setOpen(true); }}>
                             <Pencil className="h-4 w-4" />
                           </Button>
                           <Button size="icon" variant="ghost" onClick={() => deleteProduct(p.id)}>
@@ -505,7 +515,7 @@ function ProductManager({ categories, products }: { categories: Category[]; prod
                           <a href={`/product/${p.id}`} target="_blank" rel="noreferrer"><Eye className="h-4 w-4" /></a>
                         </Button>
                         <Button size="icon" variant="ghost" className="h-8 w-8"
-                          onClick={() => { setEdit(p); setForm({ name: p.name, description: p.description, price: p.price, image: p.image, categoryId: p.categoryId, stockItems: p.stockItems || "" }); setOpen(true); }}>
+                          onClick={() => { setEdit(p); setForm({ name: p.name, description: p.description, price: p.price, image: p.image, categoryId: p.categoryId, stockItems: p.stockItems || "", isHot: !!p.isHot }); setOpen(true); }}>
                           <Pencil className="h-4 w-4" />
                         </Button>
                         <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => deleteProduct(p.id)}>

@@ -53,11 +53,16 @@ export default function ProductDetail() {
 
         <div className="grid gap-8 md:grid-cols-2">
           <Card className="card-elegant overflow-hidden p-0">
-            <div className="aspect-square bg-secondary/30">
+            <div className="relative aspect-square bg-secondary/30">
               {product.image ? (
                 <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
               ) : (
                 <div className="flex h-full items-center justify-center"><Package className="h-20 w-20 text-muted-foreground" /></div>
+              )}
+              {product.isHot && (
+                <div className="absolute right-3 top-3 select-none rounded-full bg-gradient-to-r from-red-500 to-orange-500 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-white shadow-lg shadow-red-500/40 animate-pulse">
+                  🔥 HOT
+                </div>
               )}
             </div>
           </Card>
