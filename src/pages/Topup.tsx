@@ -29,6 +29,7 @@ export default function Topup() {
   const { user, profile, refreshProfile } = useAuth();
   const [tab, setTab] = useState("truewallet");
   const [historyPage, setHistoryPage] = useState(1);
+  const [historyFilter, setHistoryFilter] = useState<"all" | "success" | "failed">("all");
   const [history, setHistory] = useState<TopupType[]>([]);
 
   useEffect(() => {
@@ -43,7 +44,15 @@ export default function Topup() {
     return () => off();
   }, [user]);
 
-  const paged = usePaged(history, historyPage, 10);
+  useEffect(() => { setHistoryPage(1); }, [historyFilter]);
+
+  const filteredHistory = useMemo(() => {
+    if (historyFilter === "all") return history;
+    // Treat legacy entries (no status) as "success"
+    return history.filter((t) => (t.status ?? "success") === historyFilter);
+  }, [history, historyFilter]);
+
+  const paged = usePaged(filteredHistory, historyPage, 10);
 
   // TrueWallet
   const [phone, setPhone] = useState(SHOP_TRUEWALLET_PHONE);
