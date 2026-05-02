@@ -178,7 +178,7 @@ export default function Index() {
             </Select>
           </div>
         </Reveal>
-        <div className="mb-8 flex flex-wrap gap-2">
+        <Reveal delay={100} className="mb-8 flex flex-wrap gap-2">
           <button
             onClick={() => setActiveCat("all")}
             className={`rounded-full border px-5 py-2 text-sm font-medium transition-all duration-300 ${
