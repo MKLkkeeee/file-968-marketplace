@@ -36,7 +36,13 @@ export default function Cart() {
   const { user, profile, refreshProfile } = useAuth();
 
   const [discountCode, setDiscountCode] = useState("");
-  const [discountInfo, setDiscountInfo] = useState<{ pct: number; code: string; id: string } | null>(null);
+  const [discountInfo, setDiscountInfo] = useState<{
+    pct: number;
+    code: string;
+    id: string;
+    productIds?: string[];
+    categoryIds?: string[];
+  } | null>(null);
   const [buying, setBuying] = useState(false);
   const [search, setSearch] = useState("");
 
@@ -45,7 +51,29 @@ export default function Cart() {
     ? items.filter((it) => `${it.product.name} ${it.product.description}`.toLowerCase().includes(q))
     : items;
 
-  const finalPrice = Math.max(0, Math.round(subtotal * (1 - (discountInfo?.pct || 0) / 100)));
+  // คำนวณยอดที่เข้าเงื่อนไขส่วนลด (ตามสินค้า/หมวดหมู่)
+  const isItemEligible = (productId: string, categoryId: string) => {
+    if (!discountInfo) return false;
+    const hasProductFilter = (discountInfo.productIds?.length ?? 0) > 0;
+    const hasCategoryFilter = (discountInfo.categoryIds?.length ?? 0) > 0;
+    if (!hasProductFilter && !hasCategoryFilter) return true; // ใช้ได้กับทุกอย่าง
+    if (hasProductFilter && discountInfo.productIds!.includes(productId)) return true;
+    if (hasCategoryFilter && discountInfo.categoryIds!.includes(categoryId)) return true;
+    return false;
+  };
+
+  const eligibleSubtotal = items.reduce(
+    (s, x) => s + (isItemEligible(x.product.id, x.product.categoryId) ? x.product.price * x.qty : 0),
+    0,
+  );
+  const discountAmount = discountInfo
+    ? Math.round(eligibleSubtotal * (discountInfo.pct / 100))
+    : 0;
+  const finalPrice = Math.max(0, subtotal - discountAmount);
+  const isRestricted = !!discountInfo && (
+    (discountInfo.productIds?.length ?? 0) > 0 ||
+    (discountInfo.categoryIds?.length ?? 0) > 0
+  );
 
   const applyDiscount = async () => {
     const code = discountCode.trim();
@@ -61,9 +89,40 @@ export default function Cart() {
     }
     if (d.usedCount >= d.maxUses) return toast.error("โค้ดถูกใช้ครบจำนวนแล้ว");
     if (user && d.usedBy?.[user.uid]) return toast.error("คุณใช้โค้ดนี้ไปแล้ว");
-    setDiscountInfo({ pct: d.value, code: d.code, id: d.id });
+
+    // เช็คว่ามีสินค้าที่เข้าเงื่อนไขในตะกร้าไหม
+    const hasProductFilter = (d.productIds?.length ?? 0) > 0;
+    const hasCategoryFilter = (d.categoryIds?.length ?? 0) > 0;
+    if (hasProductFilter || hasCategoryFilter) {
+      const eligibleCount = items.filter((it) => {
+        if (hasProductFilter && d.productIds!.includes(it.product.id)) return true;
+        if (hasCategoryFilter && d.categoryIds!.includes(it.product.categoryId)) return true;
+        return false;
+      }).length;
+      if (eligibleCount === 0) {
+        return toast.error("โค้ดนี้ใช้ไม่ได้กับสินค้าในตะกร้า", {
+          description: "โค้ดจำกัดเฉพาะสินค้า/หมวดหมู่บางรายการเท่านั้น",
+        });
+      }
+    }
+
+    const eligibleAmount = items.reduce((s, x) => {
+      const ok = (!hasProductFilter && !hasCategoryFilter)
+        || (hasProductFilter && d.productIds!.includes(x.product.id))
+        || (hasCategoryFilter && d.categoryIds!.includes(x.product.categoryId));
+      return s + (ok ? x.product.price * x.qty : 0);
+    }, 0);
+    const saved = Math.round(eligibleAmount * (d.value / 100));
+
+    setDiscountInfo({
+      pct: d.value,
+      code: d.code,
+      id: d.id,
+      productIds: d.productIds,
+      categoryIds: d.categoryIds,
+    });
     toast.success(`ใช้โค้ดส่วนลด ${d.value}% สำเร็จ`, {
-      description: `ประหยัด ${(subtotal - Math.round(subtotal * (1 - d.value / 100))).toLocaleString()} Point`,
+      description: `ประหยัด ${saved.toLocaleString()} Point${(hasProductFilter || hasCategoryFilter) ? " (เฉพาะสินค้าที่เข้าเงื่อนไข)" : ""}`,
     });
   };
 
