@@ -47,6 +47,11 @@ export default function Admin() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [topups, setTopups] = useState<Topup[]>([]);
   const [userSearch, setUserSearch] = useState("");
+  const [userPage, setUserPage] = useState(1);
+  const [orderSearch, setOrderSearch] = useState("");
+  const [orderPage, setOrderPage] = useState(1);
+  const [topupSearch, setTopupSearch] = useState("");
+  const [topupPage, setTopupPage] = useState(1);
   const [pointInputs, setPointInputs] = useState<Record<string, string>>({});
 
   const handleAddPoint = async (uid: string) => {
