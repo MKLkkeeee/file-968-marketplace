@@ -87,8 +87,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (identifier: string, password: string) => {
     let email = identifier.trim();
+    let targetUid: string | null = null;
     if (!email.includes("@")) {
-      // Treat as username — look up the email from RTDB
       const snap = await get(ref(db, "users"));
       if (!snap.exists()) throw new Error("ไม่พบบัญชีผู้ใช้");
       const users = snap.val() as Record<string, UserProfile>;
@@ -97,11 +97,51 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       );
       if (!match) throw new Error("ไม่พบชื่อผู้ใช้นี้");
       email = match.email;
+      targetUid = match.uid;
     }
-    await signInWithEmailAndPassword(auth, email, password);
+    try {
+      const cred = await signInWithEmailAndPassword(auth, email, password);
+      await update(ref(db, `users/${cred.user.uid}`), {
+        lastLoginAt: Date.now(),
+        lastLoginStatus: "success",
+        lastLoginError: null,
+      });
+    } catch (err: any) {
+      // Best-effort: record failed attempt if we know the uid
+      if (!targetUid) {
+        try {
+          const snap = await get(ref(db, "users"));
+          if (snap.exists()) {
+            const users = snap.val() as Record<string, UserProfile>;
+            const match = Object.values(users).find(
+              (u) => (u.email || "").toLowerCase() === email.toLowerCase()
+            );
+            if (match) targetUid = match.uid;
+          }
+        } catch {}
+      }
+      if (targetUid) {
+        try {
+          await update(ref(db, `users/${targetUid}`), {
+            lastLoginAt: Date.now(),
+            lastLoginStatus: "failed",
+            lastLoginError: err?.code || err?.message || "unknown",
+          });
+        } catch {}
+      }
+      throw err;
+    }
   };
 
   const logout = async () => {
+    if (auth.currentUser) {
+      try {
+        await update(ref(db, `users/${auth.currentUser.uid}`), {
+          online: false,
+          lastSeenAt: Date.now(),
+        });
+      } catch {}
+    }
     await signOut(auth);
   };
 
