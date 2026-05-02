@@ -2,8 +2,18 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, Mail } from "lucide-react";
 import boxLogo from "@/assets/box-logo.png";
+import { sendPasswordResetEmail } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 export default function Login() {
   const { login } = useAuth();
@@ -11,6 +21,41 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [forgotOpen, setForgotOpen] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotLoading, setForgotLoading] = useState(false);
+
+  const handleForgot = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const target = forgotEmail.trim();
+    if (!target || !target.includes("@")) {
+      toast.error("กรุณากรอกอีเมลให้ถูกต้อง");
+      return;
+    }
+    setForgotLoading(true);
+    try {
+      await sendPasswordResetEmail(auth, target, {
+        url: `${window.location.origin}/login`,
+        handleCodeInApp: false,
+      });
+      toast.success("ส่งลิงก์รีเซ็ตรหัสผ่านแล้ว", {
+        description: `กรุณาเช็คอีเมล ${target} (รวมถึงโฟลเดอร์ Spam)`,
+      });
+      setForgotOpen(false);
+      setForgotEmail("");
+    } catch (err: any) {
+      const code = err?.code || "";
+      const msg =
+        code === "auth/user-not-found"
+          ? "ไม่พบบัญชีผู้ใช้ที่ใช้อีเมลนี้"
+          : code === "auth/invalid-email"
+          ? "รูปแบบอีเมลไม่ถูกต้อง"
+          : err?.message || "ไม่สามารถส่งลิงก์ได้";
+      toast.error("ส่งลิงก์ไม่สำเร็จ", { description: msg });
+    } finally {
+      setForgotLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,7 +112,19 @@ export default function Login() {
               />
             </div>
             <div>
-              <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-white/60">รหัสผ่าน</label>
+              <div className="mb-2 flex items-center justify-between">
+                <label className="block text-xs font-medium uppercase tracking-wider text-white/60">รหัสผ่าน</label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setForgotEmail(email.includes("@") ? email : "");
+                    setForgotOpen(true);
+                  }}
+                  className="text-xs font-medium text-white/60 transition hover:text-white hover:underline"
+                >
+                  ลืมรหัสผ่าน?
+                </button>
+              </div>
               <input
                 type="password"
                 required
@@ -93,6 +150,53 @@ export default function Login() {
           </p>
         </div>
       </div>
+
+      <Dialog open={forgotOpen} onOpenChange={setForgotOpen}>
+        <DialogContent className="w-[calc(100vw-1.5rem)] max-w-md">
+          <DialogHeader>
+            <DialogTitle>ลืมรหัสผ่าน</DialogTitle>
+            <DialogDescription>
+              กรอกอีเมลที่ใช้สมัคร เราจะส่งลิงก์รีเซ็ตรหัสผ่านไปให้
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleForgot} className="space-y-4">
+            <div>
+              <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-white/60">
+                อีเมล
+              </label>
+              <div className="relative">
+                <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
+                <input
+                  type="email"
+                  required
+                  autoFocus
+                  value={forgotEmail}
+                  onChange={(e) => setForgotEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  className="w-full rounded-xl border border-white/10 bg-white/[0.04] py-3 pl-9 pr-4 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-white/30 focus:bg-white/[0.06]"
+                />
+              </div>
+            </div>
+            <DialogFooter className="gap-2 sm:gap-2">
+              <button
+                type="button"
+                onClick={() => setForgotOpen(false)}
+                className="rounded-full border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-medium text-white/70 transition hover:bg-white/[0.08]"
+              >
+                ยกเลิก
+              </button>
+              <button
+                type="submit"
+                disabled={forgotLoading}
+                className="flex items-center justify-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black transition hover:opacity-90 disabled:opacity-60"
+              >
+                {forgotLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+                ส่งลิงก์รีเซ็ต
+              </button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
