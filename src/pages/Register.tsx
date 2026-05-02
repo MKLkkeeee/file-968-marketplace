@@ -15,6 +15,10 @@ export default function Register() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!username.trim()) {
+      toast.error("กรุณากรอกชื่อผู้ใช้");
+      return;
+    }
     if (password.length < 6) {
       toast.error("รหัสผ่านต้องอย่างน้อย 6 ตัวอักษร");
       return;
@@ -25,7 +29,12 @@ export default function Register() {
       toast.success("สมัครสมาชิกสำเร็จ");
       navigate("/");
     } catch (err: any) {
-      toast.error("สมัครไม่สำเร็จ", { description: err.message });
+      const code = err?.code || "";
+      let msg = err?.message || "เกิดข้อผิดพลาด";
+      if (code === "auth/email-already-in-use") msg = "อีเมลนี้ถูกใช้งานแล้ว กรุณาใช้อีเมลอื่น";
+      else if (code === "auth/invalid-email") msg = "รูปแบบอีเมลไม่ถูกต้อง";
+      else if (code === "auth/weak-password") msg = "รหัสผ่านไม่ปลอดภัย ต้องอย่างน้อย 6 ตัว";
+      toast.error("สมัครไม่สำเร็จ", { description: msg });
     } finally {
       setLoading(false);
     }
