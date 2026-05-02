@@ -36,6 +36,23 @@ export default function Index() {
   };
 
   useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+      const t = e.target as HTMLElement | null;
+      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
+      const el = scrollerRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const inView = rect.bottom > 0 && rect.top < window.innerHeight;
+      if (!inView) return;
+      e.preventDefault();
+      scrollByCard(e.key === "ArrowRight" ? 1 : -1);
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
+
+  useEffect(() => {
     const unsubC = onValue(ref(db, "categories"), (snap) => {
       setCategories(snap.exists() ? Object.values(snap.val()) : []);
     });
