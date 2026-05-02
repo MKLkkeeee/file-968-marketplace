@@ -226,6 +226,16 @@ export default function Topup() {
     }
 
     try {
+      // กันสแกนสลิปเดิมซ้ำ (เช็คจาก qrText ก่อนยิง API)
+      const dupQr = await isSlipRefUsed(qrText);
+      if (dupQr.used) {
+        toast.error("สลิปนี้เคยใช้แล้ว", {
+          description: "ไม่สามารถใช้สลิปเดิมเติมเงินซ้ำได้",
+        });
+        setBankLoading(false);
+        return;
+      }
+
       const data = await verifyBankSlip(qrText);
       if (data.status !== "success") {
         const msg = typeof data.message === "string" ? data.message : data.message?.massage_th || "ตรวจสอบไม่สำเร็จ";
@@ -260,15 +270,38 @@ export default function Topup() {
         return;
       }
       const amount = Number(data.amount);
-      // Prevent duplicate by transactionId
-      const ref = data.transactionId;
+      // Prevent duplicate by transactionId (เช็คอีกครั้งจาก txn id ของจริง)
+      const refStr = data.transactionId || qrText;
+      const dupTxn = await isSlipRefUsed(refStr);
+      if (dupTxn.used) {
+        toast.error("สลิปนี้เคยใช้แล้ว", {
+          description: "Transaction ID นี้ถูกใช้เติมเงินไปก่อนหน้าแล้ว",
+        });
+        setBankLoading(false);
+        return;
+      }
       await adjustPoints(user.uid, amount);
+      await markSlipRefUsed(refStr, {
+        uid: user.uid,
+        username: profile.username,
+        amount,
+        method: "bank",
+      });
+      // เผื่อเคส refStr ไม่เท่ากับ qrText ก็ mark qrText ด้วย
+      if (refStr !== qrText) {
+        await markSlipRefUsed(qrText, {
+          uid: user.uid,
+          username: profile.username,
+          amount,
+          method: "bank",
+        });
+      }
       await recordTopup({
         userId: user.uid,
         username: profile.username,
         method: "bank",
         amount,
-        ref,
+        ref: refStr,
         status: "success",
       });
       toast.success(`เติมเงินสำเร็จ! +${amount} point`);
