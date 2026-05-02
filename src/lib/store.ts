@@ -52,6 +52,8 @@ export interface Topup {
   amount: number;
   ref: string;
   createdAt: number;
+  status?: "success" | "failed";
+  error?: string;
 }
 
 export const stockCount = (s: string) =>
