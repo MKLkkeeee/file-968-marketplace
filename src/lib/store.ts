@@ -60,8 +60,24 @@ export interface Topup {
   error?: string;
 }
 
-export const stockCount = (s: string) =>
-  (s || "").split(/\r?\n/).filter((l) => l.trim().length > 0).length;
+/** ตรวจว่าบรรทัด stock เป็น "<value> = inf" หรือไม่ ถ้าใช่คืน value (string) */
+export const parseInfStockLine = (line: string): string | null => {
+  const m = (line || "").match(/^\s*(.+?)\s*=\s*inf\s*$/i);
+  return m ? m[1].trim() : null;
+};
+
+/** นับจำนวน stock — ถ้ามีบรรทัด inf จะคืน Infinity */
+export const stockCount = (s: string): number => {
+  const lines = (s || "").split(/\r?\n/).filter((l) => l.trim().length > 0);
+  if (lines.some((l) => parseInfStockLine(l) !== null)) return Infinity;
+  return lines.length;
+};
+
+/** แสดงผล stock เป็น string ("∞" ถ้าไม่จำกัด) */
+export const stockDisplay = (s: string): string => {
+  const c = stockCount(s);
+  return c === Infinity ? "∞" : String(c);
+};
 
 // CRUD - Categories
 export const createCategory = async (data: Omit<Category, "id" | "createdAt">) => {
