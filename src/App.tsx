@@ -17,6 +17,7 @@ import ProductDetail from "./pages/ProductDetail.tsx";
 import Profile from "./pages/Profile.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Wheel from "./pages/Wheel.tsx";
+import WheelHistory from "./pages/WheelHistory.tsx";
 import { WelcomePopup } from "@/components/WelcomePopup";
 
 const queryClient = new QueryClient();
