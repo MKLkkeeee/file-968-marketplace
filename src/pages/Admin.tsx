@@ -289,7 +289,7 @@ function CategoryManager({ categories }: { categories: Category[] }) {
 
   return (
     <>
-      <div className="mb-4 flex items-center justify-between gap-3">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h3 className="font-display text-xl font-semibold">หมวดหมู่ ({categories.length})</h3>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
@@ -382,7 +382,7 @@ function ProductManager({ categories, products }: { categories: Category[]; prod
 
   return (
     <>
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h3 className="font-display text-xl font-semibold">สินค้า ({products.length})</h3>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
@@ -586,7 +586,7 @@ function DiscountManager({
 
   return (
     <>
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h3 className="font-display text-xl font-semibold">จัดการโค้ด</h3>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
