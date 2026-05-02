@@ -108,33 +108,44 @@ export default function Index() {
       {/* Hero */}
       <section className="relative overflow-hidden border-b border-white/[0.06]">
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -left-40 top-0 h-[500px] w-[500px] rounded-full bg-[radial-gradient(circle,rgba(168,85,247,0.15),transparent_70%)] blur-3xl" />
-          <div className="absolute -right-40 bottom-0 h-[500px] w-[500px] rounded-full bg-[radial-gradient(circle,rgba(56,189,248,0.12),transparent_70%)] blur-3xl" />
+          <div className="orb-drift-1 absolute -left-40 top-0 h-[500px] w-[500px] rounded-full bg-[radial-gradient(circle,rgba(168,85,247,0.15),transparent_70%)] blur-3xl" />
+          <div className="orb-drift-2 absolute -right-40 bottom-0 h-[500px] w-[500px] rounded-full bg-[radial-gradient(circle,rgba(56,189,248,0.12),transparent_70%)] blur-3xl" />
+          <div className="absolute inset-0 cine-grid opacity-50" />
         </div>
         <div className="container relative py-20 md:py-28">
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-1.5 text-xs font-medium tracking-[0.2em] text-white/60 backdrop-blur-md">
-            <Sparkles className="h-3 w-3" /> ONLINE
-          </div>
-          <h1 className="mt-6 font-display text-5xl md:text-7xl font-extrabold leading-[0.95] tracking-tight">
-            <span className="block bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent">FILE 968</span>
-            <span className="mt-1 block bg-gradient-to-b from-white/80 to-white/20 bg-clip-text text-transparent">SHOP</span>
+          <Reveal>
+            <div className="cine-sheen inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-1.5 text-xs font-medium tracking-[0.2em] text-white/60 backdrop-blur-md">
+              <Sparkles className="h-3 w-3" /> ONLINE
+            </div>
+          </Reveal>
+          <h1 className="mt-6 font-display text-5xl md:text-7xl font-extrabold leading-[0.95] tracking-tight [perspective:1000px]">
+            <span className="block bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent">
+              <LetterReveal text="FILE 968" perLetter={42} />
+            </span>
+            <span className="mt-1 block bg-gradient-to-b from-white/80 to-white/20 bg-clip-text text-transparent">
+              <LetterReveal text="SHOP" perLetter={55} delayStart={380} />
+            </span>
           </h1>
-          <p className="mt-6 max-w-xl text-lg text-white/50">
-            ประสบการณ์ช้อปดิจิทัลระดับพรีเมี่ยม — เติมเงินทันที ใช้เงินซื้อสินค้าได้เลย รองรับ TrueWallet และพร้อมเพย์
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Button size="lg" asChild>
-              <a href="https://discord.gg/xPcm7SghYT" target="_blank" rel="noopener noreferrer">
-                ติดต่อแอดมิน
-              </a>
-            </Button>
-            <Button size="lg" variant="outline" onClick={() => navigate("/topup")}>
-              เติมเงิน
-            </Button>
-            <Button size="lg" variant="outline" onClick={() => navigate("/orders")}>
-              ประวัติการสั่งซื้อ
-            </Button>
-          </div>
+          <Reveal delay={800}>
+            <p className="mt-6 max-w-xl text-lg text-white/50">
+              ประสบการณ์ช้อปดิจิทัลระดับพรีเมี่ยม — เติมเงินทันที ใช้เงินซื้อสินค้าได้เลย รองรับ TrueWallet และพร้อมเพย์
+            </p>
+          </Reveal>
+          <Reveal delay={1000}>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Button size="lg" asChild className="cine-sheen">
+                <a href="https://discord.gg/xPcm7SghYT" target="_blank" rel="noopener noreferrer">
+                  ติดต่อแอดมิน
+                </a>
+              </Button>
+              <Button size="lg" variant="outline" onClick={() => navigate("/topup")}>
+                เติมเงิน
+              </Button>
+              <Button size="lg" variant="outline" onClick={() => navigate("/orders")}>
+                ประวัติการสั่งซื้อ
+              </Button>
+            </div>
+          </Reveal>
         </div>
       </section>
 
