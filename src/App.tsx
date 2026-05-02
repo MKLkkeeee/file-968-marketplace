@@ -28,8 +28,9 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <CartProvider>
+            <WelcomePopup />
             <Routes>
-              <Route path="/" element={<><AnnouncementBar /><Index /></>} />
+              <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/product/:id" element={<ProductDetail />} />
