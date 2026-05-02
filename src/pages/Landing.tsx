@@ -34,7 +34,7 @@ export default function Landing() {
           </div>
 
           <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-medium tracking-widest text-white/60 backdrop-blur-md">
-            <Sparkles className="h-3 w-3" /> PREMIUM DIGITAL STORE
+            <Sparkles className="h-3 w-3" /> ONLINE
           </div>
         </div>
 
