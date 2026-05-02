@@ -71,12 +71,25 @@ export default function Profile() {
     );
   }
 
+  const validateStrongPassword = (pwd: string): string | null => {
+    if (pwd.length < 8) return "รหัสผ่านต้องอย่างน้อย 8 ตัวอักษร";
+    if (!/[a-z]/.test(pwd)) return "รหัสผ่านต้องมีตัวพิมพ์เล็ก (a-z) อย่างน้อย 1 ตัว";
+    if (!/[A-Z]/.test(pwd)) return "รหัสผ่านต้องมีตัวพิมพ์ใหญ่ (A-Z) อย่างน้อย 1 ตัว";
+    if (!/[0-9]/.test(pwd)) return "รหัสผ่านต้องมีตัวเลข (0-9) อย่างน้อย 1 ตัว";
+    if (!/[!@#$%^&*()\-_=+[\]{};:'",.<>/?\\|`~]/.test(pwd)) {
+      return "รหัสผ่านต้องมีอักขระพิเศษอย่างน้อย 1 ตัว เช่น @ # $ % - _ !";
+    }
+    return null;
+  };
+
   const handleChangePassword = async () => {
     if (!currentPwd || !newPwd || !confirmPwd) {
       return toast.error("กรุณากรอกข้อมูลให้ครบ");
     }
-    if (newPwd.length < 6) return toast.error("รหัสผ่านใหม่ต้องมีอย่างน้อย 6 ตัวอักษร");
+    const pwdErr = validateStrongPassword(newPwd);
+    if (pwdErr) return toast.error("รหัสผ่านไม่ปลอดภัย", { description: pwdErr });
     if (newPwd !== confirmPwd) return toast.error("รหัสผ่านใหม่ไม่ตรงกัน");
+    if (newPwd === currentPwd) return toast.error("รหัสผ่านใหม่ต้องไม่เหมือนรหัสปัจจุบัน");
     if (!auth.currentUser?.email) return toast.error("ไม่พบอีเมล");
 
     setSaving(true);
@@ -99,6 +112,15 @@ export default function Profile() {
       setSaving(false);
     }
   };
+
+  // Real-time checklist สำหรับรหัสผ่านใหม่
+  const newPwdChecks = [
+    { label: "อย่างน้อย 8 ตัวอักษร", ok: newPwd.length >= 8 },
+    { label: "มีตัวพิมพ์เล็ก (a-z)", ok: /[a-z]/.test(newPwd) },
+    { label: "มีตัวพิมพ์ใหญ่ (A-Z)", ok: /[A-Z]/.test(newPwd) },
+    { label: "มีตัวเลข (0-9)", ok: /[0-9]/.test(newPwd) },
+    { label: "มีอักขระพิเศษ (@ # $ % - _ !)", ok: /[!@#$%^&*()\-_=+[\]{};:'",.<>/?\\|`~]/.test(newPwd) },
+  ];
 
   return (
     <div className="min-h-screen">
@@ -268,7 +290,7 @@ export default function Profile() {
                 type="password"
                 value={newPwd}
                 onChange={(e) => setNewPwd(e.target.value)}
-                placeholder="อย่างน้อย 6 ตัวอักษร"
+                placeholder="อย่างน้อย 8 ตัว ผสมตัวอักษร เลข อักขระพิเศษ"
                 className="mt-1"
               />
             </div>
@@ -283,6 +305,22 @@ export default function Profile() {
               />
             </div>
           </div>
+
+          {newPwd.length > 0 && (
+            <ul className="mt-3 grid grid-cols-1 gap-1 text-xs sm:grid-cols-2 md:grid-cols-3">
+              {newPwdChecks.map((c) => (
+                <li
+                  key={c.label}
+                  className={"flex items-center gap-1.5 " + (c.ok ? "text-success" : "text-white/40")}
+                >
+                  <span className={"inline-block h-3.5 w-3.5 rounded-full text-center text-[10px] leading-[14px] " + (c.ok ? "bg-success/20" : "bg-white/10")}>
+                    {c.ok ? "✓" : "•"}
+                  </span>
+                  {c.label}
+                </li>
+              ))}
+            </ul>
+          )}
 
           <Button onClick={handleChangePassword} disabled={saving} className="mt-5">
             {saving && <Loader2 className="h-4 w-4 animate-spin" />}
