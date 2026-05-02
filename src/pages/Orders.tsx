@@ -97,14 +97,47 @@ export default function Orders() {
                         ยอดสุทธิ
                       </p>
 
-                      <p className="gradient-text flex items-center justify-end gap-1 font-display text-xl font-bold">
-                        <Coins className="h-4 w-4" />
-                        {o.finalPrice.toLocaleString()}
+                  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
+                    <div>
+                      <p className="text-xs text-muted-foreground">
+                        Order #{o.id.slice(-8)}
                       </p>
+
+                      <p className="text-sm">
+                        {new Date(o.createdAt).toLocaleString("th-TH")}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <div className="text-right">
+                        <p className="text-xs text-muted-foreground">
+                          ยอดสุทธิ
+                        </p>
+
+                        <p className="gradient-text flex items-center justify-end gap-1 font-display text-xl font-bold">
+                          <Coins className="h-4 w-4" />
+                          {o.finalPrice.toLocaleString()}
+                        </p>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="mt-3 space-y-2">
+                  <div className="mt-3 flex items-center justify-between gap-2">
+                    <p className="text-xs text-muted-foreground">
+                      {(o.items || []).length} รายการ
+                    </p>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => copyAll(o)}
+                      disabled={(o.items || []).length === 0}
+                    >
+                      <Copy className="h-4 w-4" />
+                      คัดลอกทั้งหมด
+                    </Button>
+                  </div>
+
+                  <div className="mt-2 max-h-72 space-y-2 overflow-y-auto rounded-lg border border-white/5 bg-black/10 p-2 pr-2">
                     {(o.items || []).map((it, i) => (
                       <div
                         key={i}
