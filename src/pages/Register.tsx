@@ -13,14 +13,26 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const validatePassword = (pwd: string): string | null => {
+    if (pwd.length < 8) return "รหัสผ่านต้องอย่างน้อย 8 ตัวอักษร";
+    if (!/[a-z]/.test(pwd)) return "รหัสผ่านต้องมีตัวพิมพ์เล็ก (a-z) อย่างน้อย 1 ตัว";
+    if (!/[A-Z]/.test(pwd)) return "รหัสผ่านต้องมีตัวพิมพ์ใหญ่ (A-Z) อย่างน้อย 1 ตัว";
+    if (!/[0-9]/.test(pwd)) return "รหัสผ่านต้องมีตัวเลข (0-9) อย่างน้อย 1 ตัว";
+    if (!/[!@#$%^&*()\-_=+[\]{};:'",.<>/?\\|`~]/.test(pwd)) {
+      return "รหัสผ่านต้องมีอักขระพิเศษอย่างน้อย 1 ตัว เช่น @ # $ % - _ !";
+    }
+    return null;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username.trim()) {
       toast.error("กรุณากรอกชื่อผู้ใช้");
       return;
     }
-    if (password.length < 6) {
-      toast.error("รหัสผ่านต้องอย่างน้อย 6 ตัวอักษร");
+    const pwdErr = validatePassword(password);
+    if (pwdErr) {
+      toast.error("รหัสผ่านไม่ปลอดภัย", { description: pwdErr });
       return;
     }
     setLoading(true);
@@ -39,6 +51,15 @@ export default function Register() {
       setLoading(false);
     }
   };
+
+  // ตัวบ่งชี้ความแข็งแรงของรหัสผ่าน (real-time)
+  const checks = [
+    { label: "อย่างน้อย 8 ตัวอักษร", ok: password.length >= 8 },
+    { label: "มีตัวพิมพ์เล็ก (a-z)", ok: /[a-z]/.test(password) },
+    { label: "มีตัวพิมพ์ใหญ่ (A-Z)", ok: /[A-Z]/.test(password) },
+    { label: "มีตัวเลข (0-9)", ok: /[0-9]/.test(password) },
+    { label: "มีอักขระพิเศษ (@ # $ % - _ !)", ok: /[!@#$%^&*()\-_=+[\]{};:'",.<>/?\\|`~]/.test(password) },
+  ];
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#050505] px-4 py-12 text-white">
