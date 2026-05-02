@@ -386,6 +386,95 @@ export default function Profile() {
           </Button>
         </Card>
 
+        {/* Transfer Points */}
+        <Card className="card-elegant mt-6 p-6">
+          <div className="mb-5 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04]">
+              <Send className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h3 className="font-display text-xl font-semibold">โอน Point ให้ผู้ใช้อื่น</h3>
+              <p className="text-xs text-white/50">
+                ยอดคงเหลือ: <span className="text-white">{(profile.points || 0).toLocaleString()}</span> Point
+              </p>
+            </div>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-3">
+            <div>
+              <Label>ชื่อผู้ใช้ปลายทาง</Label>
+              <Input
+                value={transferTo}
+                onChange={(e) => setTransferTo(e.target.value)}
+                placeholder="username"
+                maxLength={50}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label>จำนวน Point</Label>
+              <Input
+                type="number"
+                min={1}
+                step={1}
+                value={transferAmount}
+                onChange={(e) => setTransferAmount(e.target.value)}
+                placeholder="0"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label>รหัสผ่านยืนยัน</Label>
+              <Input
+                type="password"
+                value={transferPwd}
+                onChange={(e) => setTransferPwd(e.target.value)}
+                placeholder="••••••••"
+                className="mt-1"
+              />
+            </div>
+          </div>
+
+          <Button onClick={handleOpenTransferConfirm} disabled={transferring} className="mt-5">
+            <Send className="h-4 w-4" />
+            โอน Point
+          </Button>
+        </Card>
+
+        <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>ยืนยันการโอน Point</AlertDialogTitle>
+              <AlertDialogDescription>
+                คุณต้องการโอน{" "}
+                <span className="font-semibold text-foreground">
+                  {Math.floor(Number(transferAmount) || 0).toLocaleString()} Point
+                </span>{" "}
+                ให้กับ{" "}
+                <span className="font-semibold text-foreground">{transferTo.trim()}</span>{" "}
+                ใช่หรือไม่? การกระทำนี้ไม่สามารถย้อนกลับได้
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="flex-row-reverse sm:flex-row-reverse sm:justify-start gap-2">
+              {/* ขวา = ยกเลิก */}
+              <AlertDialogCancel disabled={transferring} className="mt-0">
+                ยกเลิก
+              </AlertDialogCancel>
+              {/* ซ้าย = โอน */}
+              <AlertDialogAction
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleConfirmTransfer();
+                }}
+                disabled={transferring}
+              >
+                {transferring && <Loader2 className="h-4 w-4 animate-spin" />}
+                โอน
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
         <FavoritesSection />
       </motion.div>
       <Footer />
