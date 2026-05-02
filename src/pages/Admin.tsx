@@ -702,9 +702,10 @@ function AnnouncementManager({ announcements }: { announcements: Announcement[] 
   const [mode, setMode] = useState<"timed" | "permanent">("timed");
   const [minutes, setMinutes] = useState<number>(60);
   const [active, setActive] = useState(true);
+  const [priority, setPriority] = useState<"high" | "normal">("normal");
 
   const openCreate = () => {
-    setEdit(null); setText(""); setMode("timed"); setMinutes(60); setActive(true);
+    setEdit(null); setText(""); setMode("timed"); setMinutes(60); setActive(true); setPriority("normal");
     setOpen(true);
   };
 
@@ -715,6 +716,7 @@ function AnnouncementManager({ announcements }: { announcements: Announcement[] 
     const remaining = a.expiresAt ? Math.max(1, Math.round((a.expiresAt - Date.now()) / 60000)) : 60;
     setMinutes(remaining);
     setActive(a.active);
+    setPriority(a.priority === "high" ? "high" : "normal");
     setOpen(true);
   };
 
@@ -728,6 +730,7 @@ function AnnouncementManager({ announcements }: { announcements: Announcement[] 
       active,
       permanent: mode === "permanent",
       expiresAt: mode === "permanent" ? null : Date.now() + minutes * 60_000,
+      priority,
     };
 
     if (edit) await updateAnnouncement(edit.id, data);
@@ -743,7 +746,12 @@ function AnnouncementManager({ announcements }: { announcements: Announcement[] 
     toast.success("ลบแล้ว");
   };
 
-  const sorted = [...announcements].sort((a, b) => b.createdAt - a.createdAt);
+  const sorted = [...announcements].sort((a, b) => {
+    const pa = a.priority === "high" ? 1 : 0;
+    const pb = b.priority === "high" ? 1 : 0;
+    if (pa !== pb) return pb - pa;
+    return b.createdAt - a.createdAt;
+  });
 
   return (
     <div>
@@ -798,6 +806,19 @@ function AnnouncementManager({ announcements }: { announcements: Announcement[] 
                   </p>
                 </div>
               )}
+              <div>
+                <Label>ความสำคัญ</Label>
+                <Select value={priority} onValueChange={(v) => setPriority(v as any)}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="normal">ปกติ</SelectItem>
+                    <SelectItem value="high">สูง (แสดงด้านบนสุด)</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="mt-1 text-xs text-white/40">
+                  ประกาศ "สูง" จะแสดงเป็นแถบสีแดงด้านบนแยกจากประกาศปกติ
+                </p>
+              </div>
               <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.03] p-3">
                 <div>
                   <p className="text-sm font-medium">เปิดใช้งาน</p>
@@ -831,6 +852,9 @@ function AnnouncementManager({ announcements }: { announcements: Announcement[] 
                     <Badge variant="outline" className="text-[10px]">
                       {a.permanent ? "ถาวร" : `เหลือ ${remainingMin} นาที`}
                     </Badge>
+                    {a.priority === "high" && (
+                      <Badge variant="destructive" className="text-[10px]">ด่วน</Badge>
+                    )}
                   </div>
                   <p className="mt-2 line-clamp-2 text-sm">{a.text}</p>
                   <p className="mt-1 text-[11px] text-white/40">

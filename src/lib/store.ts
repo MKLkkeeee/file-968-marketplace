@@ -75,6 +75,7 @@ export interface Announcement {
   active: boolean;
   permanent: boolean;
   expiresAt: number | null; // ms timestamp; null when permanent
+  priority?: "high" | "normal";
   createdAt: number;
 }
 export const createAnnouncement = async (data: Omit<Announcement, "id" | "createdAt">) => {
