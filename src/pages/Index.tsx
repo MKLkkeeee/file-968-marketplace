@@ -151,7 +151,7 @@ export default function Index() {
 
       {/* Categories */}
       <section className="container py-12">
-        <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <Reveal className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <h2 className="font-display text-3xl font-bold">สินค้าทั้งหมด</h2>
           <div className="flex w-full flex-col gap-2 sm:flex-row md:w-auto md:max-w-xl">
             <div className="relative w-full sm:flex-1">
