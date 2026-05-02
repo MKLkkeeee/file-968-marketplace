@@ -806,6 +806,19 @@ function AnnouncementManager({ announcements }: { announcements: Announcement[] 
                   </p>
                 </div>
               )}
+              <div>
+                <Label>ความสำคัญ</Label>
+                <Select value={priority} onValueChange={(v) => setPriority(v as any)}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="normal">ปกติ</SelectItem>
+                    <SelectItem value="high">สูง (แสดงด้านบนสุด)</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="mt-1 text-xs text-white/40">
+                  ประกาศ "สูง" จะแสดงเป็นแถบสีแดงด้านบนแยกจากประกาศปกติ
+                </p>
+              </div>
               <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.03] p-3">
                 <div>
                   <p className="text-sm font-medium">เปิดใช้งาน</p>
