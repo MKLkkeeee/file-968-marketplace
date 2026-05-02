@@ -2,7 +2,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
-import { Coins, History, LogOut, Package, Shield, ShoppingCart, User as UserIcon, Wallet } from "lucide-react";
+import { Coins, History, LogOut, Shield, ShoppingCart, User as UserIcon, Wallet } from "lucide-react";
+import boxLogo from "@/assets/box-logo.png";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,7 +24,7 @@ export const Navbar = () => {
       <div className="container flex h-16 items-center justify-between">
         <Link to="/" className="group flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-xl transition-all group-hover:border-white/25">
-            <Package className="h-5 w-5 text-white" />
+            <img src={boxLogo} alt="logo" className="h-7 w-7 object-contain" />
           </div>
           <div className="font-display text-lg font-bold tracking-tight">
             FILE 968 <span className="text-white/40">SHOP</span>

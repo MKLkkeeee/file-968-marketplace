@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, Package } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
+import boxLogo from "@/assets/box-logo.png";
 
 export default function Register() {
   const { register } = useAuth();
@@ -47,7 +48,7 @@ export default function Register() {
       <div className="relative w-full max-w-md">
         <div className="mb-10 flex flex-col items-center gap-3">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-xl">
-            <Package className="h-6 w-6 text-white" />
+            <img src={boxLogo} alt="logo" className="h-8 w-8 object-contain" />
           </div>
           <div className="font-display text-xl font-bold tracking-wide">
             FILE 968 <span className="text-white/40">SHOP</span>
