@@ -115,7 +115,12 @@ export default function Cart() {
 
       if (discountInfo) {
         const d = await findDiscountByCode(discountInfo.code);
-        if (d) await updateDiscount(d.id, { usedCount: d.usedCount + 1 });
+        if (d) {
+          await updateDiscount(d.id, {
+            usedCount: d.usedCount + 1,
+            usedBy: { ...(d.usedBy || {}), [user.uid]: true },
+          });
+        }
       }
 
       // ส่งแจ้งเตือนการสั่งซื้อไปยัง Discord Webhook
@@ -234,9 +239,16 @@ export default function Cart() {
                   <Input
                     placeholder="โค้ดส่วนลด"
                     value={discountCode}
-                    onChange={(e) => setDiscountCode(e.target.value)}
+                    onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
+                    onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); applyDiscount(); } }}
+                    disabled={!!discountInfo}
+                    maxLength={32}
                   />
-                  <Button variant="outline" size="sm" onClick={applyDiscount}>ใช้</Button>
+                  {discountInfo ? (
+                    <Button variant="destructive" size="sm" onClick={removeDiscount}>ลบ</Button>
+                  ) : (
+                    <Button variant="outline" size="sm" onClick={applyDiscount}>ใช้</Button>
+                  )}
                 </div>
 
                 <div className="mt-5 space-y-2 text-sm">
@@ -246,8 +258,11 @@ export default function Cart() {
                   </div>
                   {discountInfo && (
                     <div className="flex justify-between text-success">
-                      <span>ส่วนลด {discountInfo.pct}% ({discountInfo.code})</span>
-                      <span>-{(subtotal - finalPrice).toLocaleString()}</span>
+                      <span className="flex items-center gap-1">
+                        <Tag className="h-3 w-3" />
+                        ส่วนลด {discountInfo.pct}% ({discountInfo.code})
+                      </span>
+                      <span className="font-semibold">-{(subtotal - finalPrice).toLocaleString()}</span>
                     </div>
                   )}
                   <div className="flex items-center justify-between border-t border-border pt-3">
