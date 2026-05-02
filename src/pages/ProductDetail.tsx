@@ -10,6 +10,8 @@ import { Category, Product, stockCount } from "@/lib/store";
 import { useCart } from "@/contexts/CartContext";
 import { toast } from "sonner";
 import { ArrowLeft, Coins, Package, ShoppingCart } from "lucide-react";
+import { ProductReviews } from "@/components/ProductReviews";
+import { FavoriteButton } from "@/components/FavoriteButton";
 
 export default function ProductDetail() {
   const { id } = useParams();
