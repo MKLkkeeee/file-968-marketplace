@@ -99,7 +99,10 @@ export const Navbar = () => {
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => logout()}>
+                  <DropdownMenuItem
+                    onSelect={(e) => { e.preventDefault(); setLogoutOpen(true); }}
+                    className="text-destructive focus:text-destructive"
+                  >
                     <LogOut className="h-4 w-4" />ออกจากระบบ
                   </DropdownMenuItem>
                 </DropdownMenuContent>
