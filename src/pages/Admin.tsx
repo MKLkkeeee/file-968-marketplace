@@ -942,33 +942,64 @@ function OrderTable({ orders, search, page, setPage }: {
   const { slice, totalPages, page: p } = usePaged(filtered, page, 10);
   return (
     <>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>เวลา</TableHead><TableHead>ผู้ซื้อ</TableHead>
-            <TableHead>สินค้า</TableHead><TableHead>โค้ด</TableHead>
-            <TableHead>จ่ายจริง</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {slice.map((o) => (
-            <TableRow key={o.id}>
-              <TableCell className="text-xs">{new Date(o.createdAt).toLocaleString("th-TH")}</TableCell>
-              <TableCell>{o.username}</TableCell>
-              <TableCell className="text-xs">
-                {Object.entries(
-                  (o.items || []).reduce((acc: any, item: any) => {
-                    acc[item.productName] = (acc[item.productName] || 0) + 1;
-                    return acc;
-                  }, {})
-                ).map(([name, qty]: any) => (<div key={name}>{name} x{qty}</div>))}
-              </TableCell>
-              <TableCell>{o.discountCode || "-"}</TableCell>
-              <TableCell className="font-semibold gradient-text">{o.finalPrice}</TableCell>
+      <div className="hidden md:block overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>เวลา</TableHead><TableHead>ผู้ซื้อ</TableHead>
+              <TableHead>สินค้า</TableHead><TableHead>โค้ด</TableHead>
+              <TableHead>จ่ายจริง</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {slice.map((o) => (
+              <TableRow key={o.id}>
+                <TableCell className="text-xs">{new Date(o.createdAt).toLocaleString("th-TH")}</TableCell>
+                <TableCell>{o.username}</TableCell>
+                <TableCell className="text-xs">
+                  {Object.entries(
+                    (o.items || []).reduce((acc: any, item: any) => {
+                      acc[item.productName] = (acc[item.productName] || 0) + 1;
+                      return acc;
+                    }, {})
+                  ).map(([name, qty]: any) => (<div key={name}>{name} x{qty}</div>))}
+                </TableCell>
+                <TableCell>{o.discountCode || "-"}</TableCell>
+                <TableCell className="font-semibold gradient-text">{o.finalPrice}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      <div className="md:hidden space-y-3">
+        {slice.map((o) => {
+          const itemMap = (o.items || []).reduce((acc: any, item: any) => {
+            acc[item.productName] = (acc[item.productName] || 0) + 1;
+            return acc;
+          }, {});
+          return (
+            <div key={o.id} className="rounded-2xl border border-white/10 bg-white/[0.03] p-3 space-y-2">
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <div className="font-medium truncate">{o.username}</div>
+                  <div className="text-xs text-muted-foreground">{new Date(o.createdAt).toLocaleString("th-TH")}</div>
+                </div>
+                <div className="font-semibold gradient-text">฿{o.finalPrice}</div>
+              </div>
+              <div className="text-xs space-y-0.5">
+                {Object.entries(itemMap).map(([name, qty]: any) => (
+                  <div key={name} className="truncate">• {name} x{qty}</div>
+                ))}
+              </div>
+              {o.discountCode && (
+                <Badge variant="outline" className="text-xs">โค้ด {o.discountCode}</Badge>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
       <Paginator page={p} totalPages={totalPages} onChange={setPage} />
     </>
   );
