@@ -55,8 +55,12 @@ export const Navbar = () => {
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="rounded-full">
-                    <UserIcon className="h-4 w-4" />
+                  <Button variant="outline" size="sm" className="rounded-full pl-1">
+                    {profile.avatarUrl ? (
+                      <img src={profile.avatarUrl} alt="" className="h-6 w-6 rounded-full object-cover" />
+                    ) : (
+                      <UserIcon className="h-4 w-4" />
+                    )}
                     <span className="hidden sm:inline">{profile.username}</span>
                   </Button>
                 </DropdownMenuTrigger>

@@ -33,7 +33,7 @@ import { Lock, Pencil, Plus, Shield, Trash2 } from "lucide-react";
 import { sendRestockWebhook } from "@/lib/discord";
 import { motion } from "framer-motion";
 import { Paginator, usePaged } from "@/components/Paginator";
-import { Search } from "lucide-react";
+import { Search, Eye } from "lucide-react";
 
 export default function Admin() {
   const { profile } = useAuth();
@@ -432,6 +432,11 @@ function ProductManager({ categories, products }: { categories: Category[]; prod
                         <Badge variant={stk > 0 ? "outline" : "destructive"}>{stk}</Badge>
                       </TableCell>
                       <TableCell>
+                        <Button asChild size="icon" variant="ghost" title="ดูรายละเอียด">
+                          <a href={`/product/${p.id}`} target="_blank" rel="noreferrer">
+                            <Eye className="h-4 w-4" />
+                          </a>
+                        </Button>
                         <Button size="icon" variant="ghost" onClick={() => { setEdit(p); setForm({ name: p.name, description: p.description, price: p.price, image: p.image, categoryId: p.categoryId, stockItems: p.stockItems || "" }); setOpen(true); }}>
                           <Pencil className="h-4 w-4" />
                         </Button>

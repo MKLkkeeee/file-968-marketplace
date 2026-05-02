@@ -9,7 +9,7 @@ import { Category, Product, stockCount } from "@/lib/store";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
 import { toast } from "sonner";
-import { Coins, Package, Search, ShoppingCart, Sparkles } from "lucide-react";
+import { Coins, Eye, Package, Search, ShoppingCart, Sparkles } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import Landing from "./Landing";
 import { Input } from "@/components/ui/input";
@@ -162,14 +162,22 @@ export default function Index() {
                           {stk > 0 ? `stock ${stk}` : "หมด"}
                         </Badge>
                       </div>
-                      <Button
-                        size="sm"
-                        className="mt-3 w-full"
-                        disabled={stk <= 0}
-                        onClick={(e) => handleAdd(e, p)}
-                      >
-                        <ShoppingCart className="h-4 w-4" /> ใส่ตะกร้า
-                      </Button>
+                      <div className="mt-3 grid grid-cols-2 gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); navigate(`/product/${p.id}`); }}
+                        >
+                          <Eye className="h-4 w-4" /> ดูรายละเอียด
+                        </Button>
+                        <Button
+                          size="sm"
+                          disabled={stk <= 0}
+                          onClick={(e) => handleAdd(e, p)}
+                        >
+                          <ShoppingCart className="h-4 w-4" /> ใส่ตะกร้า
+                        </Button>
+                      </div>
                     </div>
                   </Card>
                 </Link>

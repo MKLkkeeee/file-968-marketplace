@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -8,24 +8,57 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
-import { auth } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
+import { ref as dbRef, update } from "firebase/database";
 import {
   EmailAuthProvider,
   reauthenticateWithCredential,
   updatePassword,
 } from "firebase/auth";
 import { toast } from "sonner";
-import { Coins, History, KeyRound, Loader2, Mail, Shield, User as UserIcon, Wallet } from "lucide-react";
+import { Camera, Coins, History, KeyRound, Loader2, Mail, Shield, User as UserIcon, Wallet } from "lucide-react";
 import { motion } from "framer-motion";
+import { fileToResizedDataUrl } from "@/lib/imageUtils";
 
 export default function Profile() {
-  const { user, profile, isAdmin } = useAuth();
+  const { user, profile, isAdmin, refreshProfile } = useAuth();
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [currentPwd, setCurrentPwd] = useState("");
   const [newPwd, setNewPwd] = useState("");
   const [confirmPwd, setConfirmPwd] = useState("");
   const [saving, setSaving] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !user) return;
+    if (file.size > 5 * 1024 * 1024) return toast.error("ไฟล์ใหญ่เกินไป (สูงสุด 5MB)");
+    setUploadingAvatar(true);
+    try {
+      const dataUrl = await fileToResizedDataUrl(file, 256, 0.85);
+      await update(dbRef(db, `users/${user.uid}`), { avatarUrl: dataUrl });
+      await refreshProfile();
+      toast.success("อัปโหลดรูปโปรไฟล์สำเร็จ");
+    } catch (err: any) {
+      toast.error("อัปโหลดไม่สำเร็จ", { description: err?.message });
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
+  const handleRemoveAvatar = async () => {
+    if (!user) return;
+    try {
+      await update(dbRef(db, `users/${user.uid}`), { avatarUrl: null });
+      await refreshProfile();
+      toast.success("ลบรูปโปรไฟล์แล้ว");
+    } catch (e: any) {
+      toast.error("ลบไม่สำเร็จ", { description: e?.message });
+    }
+  };
 
   if (!profile || !user) {
     return (
@@ -82,8 +115,34 @@ export default function Profile() {
         <Card className="card-elegant mt-8 p-6">
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-4">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-xl">
-                <UserIcon className="h-8 w-8 text-white" />
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadingAvatar}
+                  className="group relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-xl transition-all hover:border-white/30"
+                  title="เปลี่ยนรูปโปรไฟล์"
+                >
+                  {profile.avatarUrl ? (
+                    <img src={profile.avatarUrl} alt="avatar" className="h-full w-full object-cover" />
+                  ) : (
+                    <UserIcon className="h-9 w-9 text-white" />
+                  )}
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 transition-opacity group-hover:opacity-100">
+                    {uploadingAvatar ? (
+                      <Loader2 className="h-5 w-5 animate-spin text-white" />
+                    ) : (
+                      <Camera className="h-5 w-5 text-white" />
+                    )}
+                  </div>
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleAvatarChange}
+                />
               </div>
               <div>
                 <div className="flex items-center gap-2">
@@ -97,6 +156,16 @@ export default function Profile() {
                 <p className="mt-1 flex items-center gap-2 text-sm text-white/50">
                   <Mail className="h-3.5 w-3.5" /> {profile.email}
                 </p>
+                <div className="mt-2 flex gap-2">
+                  <Button size="sm" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={uploadingAvatar}>
+                    <Camera className="h-3.5 w-3.5" /> เปลี่ยนรูป
+                  </Button>
+                  {profile.avatarUrl && (
+                    <Button size="sm" variant="ghost" onClick={handleRemoveAvatar}>
+                      ลบรูป
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
 
