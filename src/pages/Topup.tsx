@@ -29,6 +29,7 @@ export default function Topup() {
   const { user, profile, refreshProfile } = useAuth();
   const [tab, setTab] = useState("truewallet");
   const [historyPage, setHistoryPage] = useState(1);
+  const [historyFilter, setHistoryFilter] = useState<"all" | "success" | "failed">("all");
   const [history, setHistory] = useState<TopupType[]>([]);
 
   useEffect(() => {
@@ -43,7 +44,15 @@ export default function Topup() {
     return () => off();
   }, [user]);
 
-  const paged = usePaged(history, historyPage, 10);
+  useEffect(() => { setHistoryPage(1); }, [historyFilter]);
+
+  const filteredHistory = useMemo(() => {
+    if (historyFilter === "all") return history;
+    // Treat legacy entries (no status) as "success"
+    return history.filter((t) => (t.status ?? "success") === historyFilter);
+  }, [history, historyFilter]);
+
+  const paged = usePaged(filteredHistory, historyPage, 10);
 
   // TrueWallet
   const [phone, setPhone] = useState(SHOP_TRUEWALLET_PHONE);
@@ -110,6 +119,7 @@ export default function Topup() {
       method: "code",
       amount: d.value,
       ref: `SPECIAL:${d.code}`,
+      status: "success",
     });
 
     toast.success(`เติม ${d.value} point สำเร็จ!`);
@@ -142,11 +152,21 @@ export default function Topup() {
           method: "truewallet",
           amount,
           ref: giftLink,
+          status: "success",
         });
         toast.success(`เติมเงินสำเร็จ +${amount} บาท`);
         setPhone(""); setGiftLink("");
         await refreshProfile();
       } else {
+        await recordTopup({
+          userId: user.uid,
+          username: profile.username,
+          method: "truewallet",
+          amount: 0,
+          ref: giftLink,
+          status: "failed",
+          error: typeof data.message === "string" ? data.message : "verify failed",
+        });
         toast.error("เติมเงินไม่สำเร็จ", { description: data.message });
       }
     } catch (e: any) {
@@ -183,12 +203,30 @@ export default function Topup() {
       const data = await verifyBankSlip(qrText);
       if (data.status !== "success") {
         const msg = typeof data.message === "string" ? data.message : data.message?.massage_th || "ตรวจสอบไม่สำเร็จ";
+        await recordTopup({
+          userId: user.uid,
+          username: profile.username,
+          method: "bank",
+          amount: 0,
+          ref: qrText.slice(0, 60),
+          status: "failed",
+          error: msg,
+        });
         toast.error("สลิปไม่ถูกต้อง", { description: msg });
         setBankLoading(false);
         return;
       }
       const receiverName = data.receiver?.name || "";
       if (!isReceiverNameMatch(receiverName)) {
+        await recordTopup({
+          userId: user.uid,
+          username: profile.username,
+          method: "bank",
+          amount: 0,
+          ref: data.transactionId || qrText.slice(0, 60),
+          status: "failed",
+          error: `ผู้รับไม่ตรงกับร้าน: ${receiverName}`,
+        });
         toast.error("ชื่อผู้รับไม่ตรงกับร้าน", {
           description: `ผู้รับในสลิป: ${receiverName}`,
         });
@@ -205,6 +243,7 @@ export default function Topup() {
         method: "bank",
         amount,
         ref,
+        status: "success",
       });
       toast.success(`เติมเงินสำเร็จ! +${amount} point`);
       await refreshProfile();
@@ -352,27 +391,65 @@ export default function Topup() {
             </div>
           </div>
 
-          {history.length === 0 ? (
-            <p className="py-8 text-center text-sm text-white/40">ยังไม่มีรายการเติมเงิน</p>
+          {/* Filter chips */}
+          <div className="mb-4 flex flex-wrap gap-2">
+            {([
+              { key: "all", label: `ทั้งหมด (${history.length})` },
+              { key: "success", label: `สำเร็จ (${history.filter(t => (t.status ?? "success") === "success").length})` },
+              { key: "failed", label: `ไม่ผ่าน (${history.filter(t => t.status === "failed").length})` },
+            ] as const).map((opt) => (
+              <button
+                key={opt.key}
+                onClick={() => setHistoryFilter(opt.key)}
+                className={`rounded-full border px-4 py-1.5 text-xs font-medium transition ${
+                  historyFilter === opt.key
+                    ? "border-transparent bg-white text-black"
+                    : "border-white/10 bg-white/[0.04] text-white/70 hover:border-white/20 hover:text-white"
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+
+          {filteredHistory.length === 0 ? (
+            <p className="py-8 text-center text-sm text-white/40">
+              {history.length === 0 ? "ยังไม่มีรายการเติมเงิน" : "ไม่มีรายการตรงกับตัวกรอง"}
+            </p>
           ) : (
             <>
               <div className="space-y-2">
                 {paged.slice.map((t) => {
                   const Icon = t.method === "truewallet" ? Wallet : t.method === "bank" ? Banknote : KeyRound;
                   const label = t.method === "truewallet" ? "TrueMoney" : t.method === "bank" ? "ธนาคาร" : "Special Code";
+                  const status = t.status ?? "success";
+                  const isFailed = status === "failed";
                   return (
-                    <div key={t.id} className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-4">
+                    <div key={t.id} className={`flex items-center justify-between gap-3 rounded-xl border p-4 ${
+                      isFailed ? "border-destructive/30 bg-destructive/5" : "border-white/10 bg-white/[0.03]"
+                    }`}>
                       <div className="flex items-center gap-3">
                         <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04]">
                           <Icon className="h-4 w-4 text-white/80" />
                         </div>
                         <div className="min-w-0">
-                          <p className="text-sm font-semibold">{label}</p>
-                          <p className="truncate text-xs text-white/40" title={t.ref}>{t.ref || "-"}</p>
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-semibold">{label}</p>
+                            <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                              isFailed ? "bg-destructive/20 text-destructive" : "bg-success/20 text-success"
+                            }`}>
+                              {isFailed ? "ไม่ผ่าน" : "สำเร็จ"}
+                            </span>
+                          </div>
+                          <p className="truncate text-xs text-white/40" title={isFailed ? t.error : t.ref}>
+                            {isFailed ? (t.error || "ไม่ผ่านการตรวจสอบ") : (t.ref || "-")}
+                          </p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="font-display text-lg font-bold text-success">+{t.amount.toLocaleString()}</p>
+                        <p className={`font-display text-lg font-bold ${isFailed ? "text-white/30 line-through" : "text-success"}`}>
+                          {isFailed ? "—" : `+${t.amount.toLocaleString()}`}
+                        </p>
                         <p className="text-[11px] text-white/40">{new Date(t.createdAt).toLocaleString("th-TH")}</p>
                       </div>
                     </div>
