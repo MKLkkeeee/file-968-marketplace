@@ -121,7 +121,7 @@ export default function Index() {
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Button size="lg" asChild>
-              <a href="https://discord.gg/xPcm7Sg" target="_blank" rel="noopener noreferrer">
+              <a href="https://discord.gg/xPcm7SghYT" target="_blank" rel="noopener noreferrer">
                 ติดต่อแอดมิน
               </a>
             </Button>
