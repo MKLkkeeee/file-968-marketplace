@@ -7,7 +7,7 @@ import {
   onAuthStateChanged,
   updateProfile,
 } from "firebase/auth";
-import { ref, set, onValue, get } from "firebase/database";
+import { ref, set, onValue, get, update, onDisconnect, serverTimestamp } from "firebase/database";
 import { auth, db } from "@/lib/firebase";
 
 export interface UserProfile {
@@ -18,6 +18,11 @@ export interface UserProfile {
   role: "user" | "admin";
   createdAt: number;
   avatarUrl?: string;
+  lastLoginAt?: number;
+  lastLoginStatus?: "success" | "failed";
+  lastLoginError?: string;
+  online?: boolean;
+  lastSeenAt?: number;
 }
 
 interface AuthContextType {
