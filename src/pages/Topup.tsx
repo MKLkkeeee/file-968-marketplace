@@ -551,7 +551,7 @@ export default function Topup() {
                       </div>
                       <div className="text-right">
                         <p className={`font-display text-lg font-bold ${isFailed ? "text-white/30 line-through" : "text-success"}`}>
-                          {isFailed ? "—" : `+${t.amount.toLocaleString()}`}
+                          {isFailed ? "—" : `+฿${t.amount.toLocaleString()}`}
                         </p>
                         <p className="text-[11px] text-white/40">{new Date(t.createdAt).toLocaleString("th-TH")}</p>
                       </div>

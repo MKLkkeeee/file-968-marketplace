@@ -83,7 +83,7 @@ export default function ProductDetail() {
               ) : (
                 <div className="flex items-center gap-2 text-warning">
                   <Coins className="h-6 w-6" />
-                  <span className="font-display text-3xl font-bold">{product.price.toLocaleString()}</span>
+                  <span className="font-display text-3xl font-bold">฿{product.price.toLocaleString()}</span>
                   <span className="text-sm text-muted-foreground">point</span>
                 </div>
               )}

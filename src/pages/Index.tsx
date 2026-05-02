@@ -267,7 +267,7 @@ export default function Index() {
                           ) : (
                             <div className="flex items-center gap-1 text-warning">
                               <Coins className="h-4 w-4" />
-                              <span className="font-bold">{p.price.toLocaleString()}</span>
+                              <span className="font-bold">฿{p.price.toLocaleString()}</span>
                             </div>
                           )}
                           <Badge variant={stk > 0 ? "outline" : "destructive"} className="text-xs">

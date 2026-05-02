@@ -607,7 +607,7 @@ function FavoritesSection() {
                   ) : (
                     <div className="mt-1 flex items-center gap-1 text-warning">
                       <Coins className="h-3.5 w-3.5" />
-                      <span className="text-sm font-bold">{p.price.toLocaleString()}</span>
+                      <span className="text-sm font-bold">฿{p.price.toLocaleString()}</span>
                     </div>
                   )}
                 </div>
