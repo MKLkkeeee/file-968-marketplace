@@ -22,7 +22,9 @@ import {
   verifyBankSlip,
   verifyTruewalletGift,
   hasUserUsedCode,
-  markUserUsedCode
+  markUserUsedCode,
+  isSlipRefUsed,
+  markSlipRefUsed,
 } from "@/lib/store";
 
 export default function Topup() {
