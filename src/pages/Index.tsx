@@ -9,9 +9,11 @@ import { Category, Product, stockCount } from "@/lib/store";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
 import { toast } from "sonner";
-import { Coins, Package, ShoppingCart, Sparkles } from "lucide-react";
+import { Coins, Package, Search, ShoppingCart, Sparkles } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import Landing from "./Landing";
+import { Input } from "@/components/ui/input";
+import { Footer } from "@/components/Footer";
 
 export default function Index() {
   const { user, loading } = useAuth();
@@ -20,6 +22,7 @@ export default function Index() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [activeCat, setActiveCat] = useState<string>("all");
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     const unsubC = onValue(ref(db, "categories"), (snap) => {
@@ -31,7 +34,12 @@ export default function Index() {
     return () => { unsubC(); unsubP(); };
   }, []);
 
-  const filtered = activeCat === "all" ? products : products.filter((p) => p.categoryId === activeCat);
+  const byCat = activeCat === "all" ? products : products.filter((p) => p.categoryId === activeCat);
+  const q = search.trim().toLowerCase();
+  const filteredAll = q
+    ? byCat.filter((p) => `${p.name} ${p.description}`.toLowerCase().includes(q))
+    : byCat;
+  const filtered = filteredAll.slice(0, 6);
 
   const handleAdd = (e: React.MouseEvent, p: Product) => {
     e.stopPropagation();
@@ -85,8 +93,17 @@ export default function Index() {
 
       {/* Categories */}
       <section className="container py-12">
-        <div className="mb-8 flex items-center justify-between">
+        <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <h2 className="font-display text-3xl font-bold">สินค้าทั้งหมด</h2>
+          <div className="relative w-full md:max-w-xs">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="ค้นหาชื่อสินค้า..."
+              className="pl-9"
+            />
+          </div>
         </div>
         <div className="mb-8 flex flex-wrap gap-2">
           <button
@@ -160,7 +177,13 @@ export default function Index() {
             })}
           </div>
         )}
+        {filteredAll.length > 6 && (
+          <p className="mt-6 text-center text-xs text-white/40">
+            แสดง 6 จาก {filteredAll.length} รายการ — ใช้ช่องค้นหาเพื่อหารายการเพิ่มเติม
+          </p>
+        )}
       </section>
+      <Footer />
     </div>
   );
 }
