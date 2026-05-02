@@ -112,12 +112,23 @@ export const updateProduct = (id: string, data: Partial<Product>) =>
   update(ref(db, `products/${id}`), data);
 export const deleteProduct = (id: string) => remove(ref(db, `products/${id}`));
 
-/** Atomically pop the first non-empty stock line from a product. Returns null if out of stock. */
+/**
+ * Atomically pop the first non-empty stock line from a product.
+ * - ถ้าเจอบรรทัด inf ก่อน (เช่น "https://x.com = inf") จะคืนค่าด้านซ้ายโดยไม่ลบบรรทัด
+ * - ถ้าไม่มี inf ก็จะลบบรรทัดแรกออกตามปกติ
+ * Returns null if out of stock.
+ */
 export const popStockItem = async (productId: string): Promise<string | null> => {
   let popped: string | null = null;
   await runTransaction(ref(db, `products/${productId}/stockItems`), (current: string | null) => {
     if (!current) return current;
     const lines = current.split(/\r?\n/);
+    // หา inf line ก่อน — ของไม่จำกัด ใช้ก่อนเสมอ
+    const infIdx = lines.findIndex((l) => parseInfStockLine(l) !== null);
+    if (infIdx !== -1) {
+      popped = parseInfStockLine(lines[infIdx]);
+      return current; // ไม่ลบบรรทัด
+    }
     const idx = lines.findIndex((l) => l.trim().length > 0);
     if (idx === -1) return current;
     popped = lines[idx].trim();
