@@ -19,7 +19,7 @@ import {
   updatePassword,
 } from "firebase/auth";
 import { toast } from "sonner";
-import { Camera, Coins, Heart, History, KeyRound, Loader2, Mail, Package, Shield, ShoppingCart, User as UserIcon, Wallet } from "lucide-react";
+import { Camera, CheckCircle2, Clock, Coins, Heart, History, KeyRound, Loader2, Mail, Package, Shield, ShoppingCart, User as UserIcon, Wallet, XCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { fileToResizedDataUrl } from "@/lib/imageUtils";
 
