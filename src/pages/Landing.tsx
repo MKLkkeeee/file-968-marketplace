@@ -8,17 +8,14 @@ export default function Landing() {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#050505] text-white">
-      {/* Ambient luxury background — slow drifting orbs */}
       <div className="pointer-events-none absolute inset-0">
         <div className="orb-drift-1 absolute -left-40 -top-40 h-[500px] w-[500px] rounded-full bg-[radial-gradient(circle,rgba(168,85,247,0.18),transparent_70%)] blur-3xl" />
         <div className="orb-drift-2 absolute -bottom-40 -right-40 h-[600px] w-[600px] rounded-full bg-[radial-gradient(circle,rgba(56,189,248,0.15),transparent_70%)] blur-3xl" />
         <div className="cine-vignette absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,transparent_0%,rgba(0,0,0,0.6)_100%)]" />
-        {/* Animated grid */}
         <div className="absolute inset-0 cine-grid opacity-60" />
       </div>
 
       <div className="relative flex min-h-screen flex-col items-center justify-center px-6">
-        {/* Logo */}
         <div className="mb-10 flex flex-col items-center gap-4 cine-scale-in">
           <div className="relative">
             <div className="absolute inset-0 animate-pulse-glow rounded-2xl bg-white/10 blur-xl" />
@@ -32,12 +29,11 @@ export default function Landing() {
           </div>
         </div>
 
-        {/* Title — per-letter rise */}
         <h1 className="text-center font-display text-6xl font-extrabold leading-[0.95] tracking-tight md:text-8xl [perspective:1000px]">
-          <span className="block bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent">
+          <span className="block text-white drop-shadow-lg">
             <LetterReveal text="FILE 968" perLetter={45} />
           </span>
-          <span className="mt-2 block bg-gradient-to-b from-white/80 to-white/20 bg-clip-text text-transparent">
+          <span className="mt-2 block text-white/70 drop-shadow-lg">
             <LetterReveal text="SHOP" perLetter={55} delayStart={420} />
           </span>
         </h1>
@@ -50,7 +46,6 @@ export default function Landing() {
           </p>
         </Reveal>
 
-        {/* CTA buttons */}
         <Reveal delay={1100}>
           <div className="mt-12 flex w-full max-w-md items-center justify-center gap-4">
             <button
@@ -69,7 +64,6 @@ export default function Landing() {
           </div>
         </Reveal>
 
-        {/* Footer */}
         <Reveal delay={1300}>
           <div className="mt-16 flex items-center gap-6 text-xs uppercase tracking-[0.3em] text-white/30">
             <span>TrueWallet</span>
