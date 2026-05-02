@@ -244,6 +244,8 @@ function CategoryManager({ categories }: { categories: Category[] }) {
   const [edit, setEdit] = useState<Category | null>(null);
   const [name, setName] = useState("");
   const [icon, setIcon] = useState("");
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
 
   const submit = async () => {
     if (!name.trim()) return;
@@ -253,9 +255,14 @@ function CategoryManager({ categories }: { categories: Category[] }) {
     setOpen(false); setName(""); setIcon(""); setEdit(null);
   };
 
+  const filtered = categories.filter((c) =>
+    `${c.name} ${c.icon}`.toLowerCase().includes(search.toLowerCase())
+  );
+  const { slice, totalPages, page: p } = usePaged(filtered, page, 10);
+
   return (
     <>
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex items-center justify-between gap-3">
         <h3 className="font-display text-xl font-semibold">หมวดหมู่ ({categories.length})</h3>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
@@ -273,8 +280,17 @@ function CategoryManager({ categories }: { categories: Category[] }) {
           </DialogContent>
         </Dialog>
       </div>
+      <div className="mb-4 relative">
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+        <Input
+          placeholder="ค้นหาหมวดหมู่..."
+          value={search}
+          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+          className="pl-9"
+        />
+      </div>
       <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
-        {categories.map((c) => (
+        {slice.map((c) => (
           <Card key={c.id} className="flex items-center justify-between bg-secondary/40 p-4">
             <span className="font-medium">{c.icon} {c.name}</span>
             <div className="flex gap-1">
@@ -288,6 +304,7 @@ function CategoryManager({ categories }: { categories: Category[] }) {
           </Card>
         ))}
       </div>
+      <Paginator page={p} totalPages={totalPages} onChange={setPage} />
     </>
   );
 }
