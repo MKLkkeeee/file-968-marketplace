@@ -252,3 +252,40 @@
   opacity: 0.6;
 }
 .btn-cta:disabled::before { display: none; }
+
+/* === Lucky Wheel === */
+@keyframes wheel-glow-pulse {
+  0%, 100% { box-shadow: 0 0 60px -10px hsl(var(--primary) / 0.55), 0 0 120px -20px hsl(45 100% 55% / 0.35); }
+  50%      { box-shadow: 0 0 80px -8px hsl(var(--primary) / 0.85), 0 0 160px -10px hsl(45 100% 55% / 0.55); }
+}
+.wheel-glow { animation: wheel-glow-pulse 3s ease-in-out infinite; }
+
+@keyframes wheel-bulb {
+  0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 8px 2px hsl(45 100% 65%); }
+  50%      { opacity: 0.35; transform: scale(0.85); box-shadow: 0 0 4px 1px hsl(45 100% 65% / 0.4); }
+}
+.wheel-bulb { animation: wheel-bulb 1.4s ease-in-out infinite; }
+
+@keyframes screen-shake {
+  0%, 100% { transform: translate(0, 0) rotate(0); }
+  10% { transform: translate(-3px, -2px) rotate(-0.3deg); }
+  20% { transform: translate(3px, 2px) rotate(0.3deg); }
+  30% { transform: translate(-2px, 1px) rotate(-0.2deg); }
+  40% { transform: translate(2px, -1px) rotate(0.2deg); }
+  50% { transform: translate(-1px, 2px) rotate(-0.1deg); }
+  60% { transform: translate(1px, -2px) rotate(0.1deg); }
+  70%, 100% { transform: translate(0, 0) rotate(0); }
+}
+.screen-shake { animation: screen-shake 0.6s ease-in-out; }
+
+@keyframes pointer-bounce {
+  0%, 100% { transform: translate(-50%, 0); }
+  50%      { transform: translate(-50%, -3px); }
+}
+.wheel-pointer { animation: pointer-bounce 1.6s ease-in-out infinite; }
+
+@keyframes wheel-ticks {
+  0%, 100% { transform: translate(-50%, 0) rotate(0deg); }
+  50%      { transform: translate(-50%, 0) rotate(-12deg); }
+}
+.wheel-pointer-ticking { animation: wheel-ticks 0.08s linear infinite; }
