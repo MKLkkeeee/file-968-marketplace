@@ -177,7 +177,7 @@ export default function Index() {
               </SelectContent>
             </Select>
           </div>
-        </div>
+        </Reveal>
         <div className="mb-8 flex flex-wrap gap-2">
           <button
             onClick={() => setActiveCat("all")}
