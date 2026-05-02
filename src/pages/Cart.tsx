@@ -243,14 +243,62 @@ export default function Cart() {
                   </p>
                 )}
 
-                <Button
-                  className="mt-5 w-full bg-gradient-primary text-primary-foreground"
-                  onClick={checkout}
-                  disabled={buying}
-                >
-                  {buying && <Loader2 className="h-4 w-4 animate-spin" />}
-                  {user ? "ชำระเงิน (หัก Point)" : "เข้าสู่ระบบเพื่อซื้อ"}
-                </Button>
+                {user ? (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        className="mt-5 w-full bg-gradient-primary text-primary-foreground"
+                        disabled={buying || items.length === 0}
+                      >
+                        {buying && <Loader2 className="h-4 w-4 animate-spin" />}
+                        ชำระเงิน (หัก Point)
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle className="flex items-center gap-2">
+                          <ShoppingBag className="h-5 w-5" />
+                          ยืนยันการสั่งซื้อ
+                        </AlertDialogTitle>
+                        <AlertDialogDescription asChild>
+                          <div className="space-y-2">
+                            <p>คุณแน่ใจใช่ไหมที่จะซื้อสินค้า?</p>
+                            <div className="max-h-48 overflow-y-auto rounded-lg border border-white/10 bg-white/[0.03] p-3 text-sm">
+                              {items.map((it) => (
+                                <div key={it.product.id} className="flex items-center justify-between gap-2 py-1">
+                                  <span className="line-clamp-1 text-white/80">{it.product.name}</span>
+                                  <span className="shrink-0 text-white/60">× {it.qty}</span>
+                                </div>
+                              ))}
+                            </div>
+                            <div className="flex items-center justify-between pt-1 text-sm">
+                              <span className="text-white/60">รวมทั้งหมด</span>
+                              <span className="font-display text-lg font-bold text-warning">
+                                {finalPrice.toLocaleString()} point
+                              </span>
+                            </div>
+                          </div>
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={checkout}
+                          className="bg-gradient-primary text-primary-foreground"
+                        >
+                          ยืนยันการซื้อ
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                ) : (
+                  <Button
+                    className="mt-5 w-full bg-gradient-primary text-primary-foreground"
+                    onClick={() => navigate("/login")}
+                  >
+                    เข้าสู่ระบบเพื่อซื้อ
+                  </Button>
+                )}
               </Card>
             </div>
           </div>
