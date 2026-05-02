@@ -7,7 +7,7 @@ import {
   onAuthStateChanged,
   updateProfile,
 } from "firebase/auth";
-import { ref, set, onValue, get } from "firebase/database";
+import { ref, set, onValue, get, update, onDisconnect, serverTimestamp } from "firebase/database";
 import { auth, db } from "@/lib/firebase";
 
 export interface UserProfile {
@@ -18,6 +18,11 @@ export interface UserProfile {
   role: "user" | "admin";
   createdAt: number;
   avatarUrl?: string;
+  lastLoginAt?: number;
+  lastLoginStatus?: "success" | "failed";
+  lastLoginError?: string;
+  online?: boolean;
+  lastSeenAt?: number;
 }
 
 interface AuthContextType {
@@ -43,6 +48,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(u);
       if (u) {
         const profileRef = ref(db, `users/${u.uid}`);
+        // Mark online + register onDisconnect to flip offline + record lastSeen
+        try {
+          await update(profileRef, { online: true, lastSeenAt: Date.now() });
+          onDisconnect(profileRef).update({ online: false, lastSeenAt: serverTimestamp() as any });
+        } catch {}
         const unsubProfile = onValue(profileRef, (snap) => {
           if (snap.exists()) setProfile(snap.val() as UserProfile);
         });
@@ -71,14 +81,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       points: 0,
       role: isFirstUser ? "admin" : "user",
       createdAt: Date.now(),
+      lastLoginAt: Date.now(),
+      lastLoginStatus: "success",
+      online: true,
+      lastSeenAt: Date.now(),
     };
     await set(ref(db, `users/${cred.user.uid}`), newProfile);
   };
 
   const login = async (identifier: string, password: string) => {
     let email = identifier.trim();
+    let targetUid: string | null = null;
     if (!email.includes("@")) {
-      // Treat as username — look up the email from RTDB
       const snap = await get(ref(db, "users"));
       if (!snap.exists()) throw new Error("ไม่พบบัญชีผู้ใช้");
       const users = snap.val() as Record<string, UserProfile>;
@@ -87,11 +101,51 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       );
       if (!match) throw new Error("ไม่พบชื่อผู้ใช้นี้");
       email = match.email;
+      targetUid = match.uid;
     }
-    await signInWithEmailAndPassword(auth, email, password);
+    try {
+      const cred = await signInWithEmailAndPassword(auth, email, password);
+      await update(ref(db, `users/${cred.user.uid}`), {
+        lastLoginAt: Date.now(),
+        lastLoginStatus: "success",
+        lastLoginError: null,
+      });
+    } catch (err: any) {
+      // Best-effort: record failed attempt if we know the uid
+      if (!targetUid) {
+        try {
+          const snap = await get(ref(db, "users"));
+          if (snap.exists()) {
+            const users = snap.val() as Record<string, UserProfile>;
+            const match = Object.values(users).find(
+              (u) => (u.email || "").toLowerCase() === email.toLowerCase()
+            );
+            if (match) targetUid = match.uid;
+          }
+        } catch {}
+      }
+      if (targetUid) {
+        try {
+          await update(ref(db, `users/${targetUid}`), {
+            lastLoginAt: Date.now(),
+            lastLoginStatus: "failed",
+            lastLoginError: err?.code || err?.message || "unknown",
+          });
+        } catch {}
+      }
+      throw err;
+    }
   };
 
   const logout = async () => {
+    if (auth.currentUser) {
+      try {
+        await update(ref(db, `users/${auth.currentUser.uid}`), {
+          online: false,
+          lastSeenAt: Date.now(),
+        });
+      } catch {}
+    }
     await signOut(auth);
   };
 
