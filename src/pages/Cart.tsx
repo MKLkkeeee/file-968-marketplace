@@ -259,7 +259,7 @@ export default function Cart() {
                         disabled={buying || items.length === 0}
                       >
                         {buying && <Loader2 className="h-4 w-4 animate-spin" />}
-                        ชำระเงิน (หัก Point)
+                        ชำระเงิน
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
