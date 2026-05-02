@@ -112,7 +112,7 @@ export default function Register() {
               />
             </div>
             <div>
-              <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-white/60">รหัสผ่าน (อย่างน้อย 6 ตัว)</label>
+              <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-white/60">รหัสผ่าน</label>
               <input
                 type="password"
                 required
@@ -121,6 +121,21 @@ export default function Register() {
                 placeholder="••••••••"
                 className="w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-white/30 focus:bg-white/[0.06]"
               />
+              {password.length > 0 && (
+                <ul className="mt-2 grid grid-cols-1 gap-1 text-xs sm:grid-cols-2">
+                  {checks.map((c) => (
+                    <li
+                      key={c.label}
+                      className={"flex items-center gap-1.5 " + (c.ok ? "text-success" : "text-white/40")}
+                    >
+                      <span className={"inline-block h-3.5 w-3.5 rounded-full text-center text-[10px] leading-[14px] " + (c.ok ? "bg-success/20" : "bg-white/10")}>
+                        {c.ok ? "✓" : "•"}
+                      </span>
+                      {c.label}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
             <button
               type="submit"
