@@ -122,7 +122,7 @@ export default function Cart() {
       categoryIds: d.categoryIds,
     });
     toast.success(`ใช้โค้ดส่วนลด ${d.value}% สำเร็จ`, {
-      description: `ประหยัด ${saved.toLocaleString()} ฿${(hasProductFilter || hasCategoryFilter) ? " (เฉพาะสินค้าที่เข้าเงื่อนไข)" : ""}`,
+      description: `ประหยัด ฿${saved.toLocaleString()}${(hasProductFilter || hasCategoryFilter) ? " (เฉพาะสินค้าที่เข้าเงื่อนไข)" : ""}`,
     });
   };
 
@@ -348,7 +348,7 @@ export default function Cart() {
                       </div>
                       {isRestricted && (
                         <p className="text-xs text-warning/80">
-                          * ใช้กับสินค้าที่เข้าเงื่อนไขเท่านั้น ({eligibleSubtotal.toLocaleString()} บาท)
+                          * ใช้กับสินค้าที่เข้าเงื่อนไขเท่านั้น (฿{eligibleSubtotal.toLocaleString()})
                         </p>
                       )}
                     </>

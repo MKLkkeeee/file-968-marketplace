@@ -63,7 +63,7 @@ export default function Admin() {
     const amount = Number(pointInputs[uid]);
     
     if (!amount || amount <= 0) {
-      toast.error("กรุณาระบุจำนวนเงิน (บาท)");
+      toast.error("กรุณาระบุจำนวนเงิน");
       return;
     }
 
@@ -72,7 +72,7 @@ export default function Admin() {
       const current = target?.points ?? 0;
       if (amount > current) {
         toast.error("ลบไม่สำเร็จ", {
-          description: `ผู้ใช้มีเพียง ${current.toLocaleString()} บาท ไม่สามารถลบ ${amount.toLocaleString()} บาทได้`,
+          description: `ผู้ใช้มีเพียง ฿${current.toLocaleString()} ไม่สามารถลบ ฿${amount.toLocaleString()} ได้`,
         });
         return;
       }
@@ -81,7 +81,7 @@ export default function Admin() {
     try {
       const delta = mode === "add" ? amount : -amount;
       await adjustPoints(uid, delta);
-      toast.success(mode === "add" ? `เพิ่ม ${amount} บาท สำเร็จ` : `ลบ ${amount} บาท สำเร็จ`);
+      toast.success(mode === "add" ? `เพิ่ม ฿${amount} สำเร็จ` : `ลบ ฿${amount} สำเร็จ`);
       setPointInputs((prev) => ({
         ...prev,
         [uid]: "",

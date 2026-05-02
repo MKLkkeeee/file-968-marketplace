@@ -179,7 +179,7 @@ export const transferPointsByUsername = async (
   amount: number
 ) => {
   if (!Number.isFinite(amount) || amount <= 0) {
-    throw new Error("จำนวนบาทต้องมากกว่า 0");
+    throw new Error("จำนวนเงินต้องมากกว่า 0");
   }
   const intAmount = Math.floor(amount);
 
