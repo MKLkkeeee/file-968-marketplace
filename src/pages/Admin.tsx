@@ -527,21 +527,25 @@ function ProductManager({ categories, products }: { categories: Category[]; prod
 }
 
 function DiscountManager({
-  discounts, products, categories,
+  discounts, products, categories, users,
 }: {
-  discounts: DiscountCode[]; products: Product[]; categories: Category[];
+  discounts: DiscountCode[]; products: Product[]; categories: Category[]; users: UserProfile[];
 }) {
   const [open, setOpen] = useState(false);
   type Scope = "all" | "categories" | "products";
+  type UserScope = "all" | "new" | "specific";
   const [form, setForm] = useState<{
     code: string; type: "discount" | "point"; value: number; maxUses: number; active: boolean;
     scope: Scope; productIds: string[]; categoryIds: string[];
+    userScope: UserScope; newUserDays: number; userIds: string[];
   }>({
     code: "", type: "discount", value: 10, maxUses: 100, active: true,
     scope: "all", productIds: [], categoryIds: [],
+    userScope: "all", newUserDays: 2, userIds: [],
   });
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [userSearch, setUserSearch] = useState("");
 
   const submit = async () => {
     if (!form.code.trim()) {
@@ -556,6 +560,9 @@ function DiscountManager({
         return toast.error("กรุณาเลือกอย่างน้อย 1 สินค้า");
       }
     }
+    if (form.type === "point" && form.userScope === "specific" && form.userIds.length === 0) {
+      return toast.error("กรุณาเลือกอย่างน้อย 1 ผู้ใช้");
+    }
     const payload: any = {
       code: form.code, type: form.type, value: form.value,
       maxUses: form.maxUses, active: form.active,
@@ -565,10 +572,15 @@ function DiscountManager({
       else if (form.scope === "products") payload.productIds = form.productIds;
       // scope === "all" → ไม่ต้องส่ง productIds/categoryIds (= ทุกสินค้า)
     }
+    if (form.type === "point") {
+      payload.userScope = form.userScope;
+      if (form.userScope === "new") payload.newUserDays = form.newUserDays;
+      if (form.userScope === "specific") payload.userIds = form.userIds;
+    }
     await createDiscount(payload);
     toast.success("บันทึกข้อมูลสำเร็จ");
     setOpen(false); 
-    setForm({ code: "", type: "discount", value: 10, maxUses: 100, active: true, scope: "all", productIds: [], categoryIds: [] });
+    setForm({ code: "", type: "discount", value: 10, maxUses: 100, active: true, scope: "all", productIds: [], categoryIds: [], userScope: "all", newUserDays: 2, userIds: [] });
   };
 
   const toggleProduct = (id: string) => {
@@ -581,6 +593,12 @@ function DiscountManager({
     setForm((f) => ({
       ...f,
       categoryIds: f.categoryIds.includes(id) ? f.categoryIds.filter((x) => x !== id) : [...f.categoryIds, id],
+    }));
+  };
+  const toggleUser = (id: string) => {
+    setForm((f) => ({
+      ...f,
+      userIds: f.userIds.includes(id) ? f.userIds.filter((x) => x !== id) : [...f.userIds, id],
     }));
   };
 
