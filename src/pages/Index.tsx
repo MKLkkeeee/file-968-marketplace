@@ -126,10 +126,10 @@ export default function Index() {
             </div>
           </Reveal>
           <h1 className="mt-6 font-display text-5xl md:text-7xl font-extrabold leading-[0.95] tracking-tight [perspective:1000px]">
-            <span className="block bg-gradient-to-b from-white via-white to-white/70 bg-clip-text text-transparent">
+            <span className="block text-white drop-shadow-lg">
               <LetterReveal text="FILE 968" perLetter={42} />
             </span>
-            <span className="mt-1 block bg-gradient-to-b from-white/90 to-white/50 bg-clip-text text-transparent">
+            <span className="mt-1 block text-white/70 drop-shadow-lg">
               <LetterReveal text="SHOP" perLetter={55} delayStart={380} />
             </span>
           </h1>
