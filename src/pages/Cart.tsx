@@ -147,19 +147,24 @@ export default function Cart() {
     setBuying(true);
     try {
       const delivered: { productId: string; productName: string; price: number; deliveredItem: string }[] = [];
-      // Pop stock items atomically
+      // Pop stock items in parallel for speed (each pop is an atomic transaction)
+      const popPromises: Promise<void>[] = [];
       for (const it of items) {
         for (let i = 0; i < it.qty; i++) {
-          const item = await popStockItem(it.product.id);
-          if (!item) throw new Error(`สินค้า ${it.product.name} หมดสต๊อกระหว่างการซื้อ`);
-          delivered.push({
-            productId: it.product.id,
-            productName: it.product.name,
-            price: it.product.price,
-            deliveredItem: item,
-          });
+          popPromises.push(
+            popStockItem(it.product.id).then((item) => {
+              if (!item) throw new Error(`สินค้า ${it.product.name} หมดสต๊อกระหว่างการซื้อ`);
+              delivered.push({
+                productId: it.product.id,
+                productName: it.product.name,
+                price: it.product.price,
+                deliveredItem: item,
+              });
+            })
+          );
         }
       }
+      await Promise.all(popPromises);
 
       await adjustPoints(user.uid, -finalPrice);
       await createOrder({
