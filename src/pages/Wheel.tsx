@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { onValue, ref } from "firebase/database";
+import { onValue, ref, query, limitToLast } from "firebase/database";
 import { db } from "@/lib/firebase";
 import {
-  WheelSlice, WheelConfig, getWheelConfig,
+  WheelSlice, WheelConfig, WheelSpin, getWheelConfig,
   popWheelStock, recordWheelSpin, adjustPoints,
 } from "@/lib/store";
 import { useAuth } from "@/contexts/AuthContext";
@@ -13,29 +13,78 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Coins, Sparkles, Gift } from "lucide-react";
+import { Coins, Sparkles, Gift, Trophy, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import confetti from "canvas-confetti";
+
+const BULB_COUNT = 24;
+
+function fireConfetti() {
+  const duration = 2000;
+  const end = Date.now() + duration;
+  const colors = ["#fbbf24", "#f59e0b", "#ef4444", "#22d3ee", "#a78bfa", "#34d399"];
+  (function frame() {
+    confetti({
+      particleCount: 4,
+      angle: 60,
+      spread: 60,
+      origin: { x: 0, y: 0.7 },
+      colors,
+    });
+    confetti({
+      particleCount: 4,
+      angle: 120,
+      spread: 60,
+      origin: { x: 1, y: 0.7 },
+      colors,
+    });
+    if (Date.now() < end) requestAnimationFrame(frame);
+  })();
+  // big burst
+  confetti({
+    particleCount: 120,
+    spread: 90,
+    startVelocity: 45,
+    origin: { x: 0.5, y: 0.5 },
+    colors,
+  });
+}
+
+function timeAgo(ts: number) {
+  const s = Math.max(1, Math.floor((Date.now() - ts) / 1000));
+  if (s < 60) return `${s} วิ`;
+  if (s < 3600) return `${Math.floor(s / 60)} นาที`;
+  if (s < 86400) return `${Math.floor(s / 3600)} ชม`;
+  return `${Math.floor(s / 86400)} วัน`;
+}
 
 export default function Wheel() {
   const { user, profile, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const [config, setConfig] = useState<WheelConfig>({ enabled: false, spinCost: 0, updatedAt: 0 });
   const [slices, setSlices] = useState<WheelSlice[]>([]);
+  const [recent, setRecent] = useState<WheelSpin[]>([]);
   const [angle, setAngle] = useState(0);
   const [spinning, setSpinning] = useState(false);
+  const [shake, setShake] = useState(false);
+  const [pointerTicking, setPointerTicking] = useState(false);
   const [result, setResult] = useState<{ slice: WheelSlice; reward: string } | null>(null);
   const [showResult, setShowResult] = useState(false);
-  const wheelRef = useRef<HTMLDivElement>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     (async () => setConfig(await getWheelConfig()))();
-    const off = onValue(ref(db, "wheel/slices"), (s) => {
+    const off1 = onValue(ref(db, "wheel/slices"), (s) => {
       const list = s.exists() ? Object.values(s.val() as Record<string, WheelSlice>) : [];
       setSlices(list);
     });
-    return () => off();
+    const off2 = onValue(query(ref(db, "wheel/spins"), limitToLast(20)), (s) => {
+      const list = s.exists() ? Object.values(s.val() as Record<string, WheelSpin>) : [];
+      setRecent(list.sort((a, b) => b.createdAt - a.createdAt));
+    });
+    return () => { off1(); off2(); };
   }, []);
 
   const activeSlices = useMemo(
@@ -65,14 +114,13 @@ export default function Wheel() {
     }
 
     setSpinning(true);
+    setPointerTicking(true);
     try {
-      // Deduct cost first
       if (config.spinCost > 0) await adjustPoints(user.uid, -config.spinCost);
 
       const idx = pickWeighted();
       const chosen = activeSlices[idx];
 
-      // For item type, try to pop stock — if empty, fall back to "เสียดาย"
       let reward = "";
       let finalSlice = chosen;
       if (chosen.type === "item") {
@@ -80,7 +128,6 @@ export default function Wheel() {
         if (popped) {
           reward = popped;
         } else {
-          // Of out stock: convert to nothing
           finalSlice = { ...chosen, type: "nothing", label: chosen.label + " (หมด)" };
           reward = "-";
         }
@@ -92,15 +139,15 @@ export default function Wheel() {
         reward = "-";
       }
 
-      // Animate: spin to land pointer (top, 0deg) at the middle of slice idx
+      // Land pointer (top, 0deg) at the middle of slice idx
       const sliceMid = idx * sliceAngle + sliceAngle / 2;
-      const turns = 6 + Math.floor(Math.random() * 3); // 6-8 full turns
-      const target = turns * 360 + (360 - sliceMid); // pointer at top
+      const turns = 6 + Math.floor(Math.random() * 3);
+      const target = turns * 360 + (360 - sliceMid);
       const newAngle = angle + (target - (angle % 360));
       setAngle(newAngle);
 
-      // Wait for animation (must match CSS transition)
       await new Promise((r) => setTimeout(r, 5200));
+      setPointerTicking(false);
 
       await recordWheelSpin({
         userId: user.uid,
@@ -115,10 +162,17 @@ export default function Wheel() {
       await refreshProfile();
       setResult({ slice: finalSlice, reward });
       setShowResult(true);
+
+      if (finalSlice.type !== "nothing") {
+        fireConfetti();
+        setShake(true);
+        setTimeout(() => setShake(false), 650);
+      }
     } catch (e: any) {
       toast.error("หมุนไม่สำเร็จ", { description: e?.message || String(e) });
     } finally {
       setSpinning(false);
+      setPointerTicking(false);
     }
   };
 
@@ -135,7 +189,7 @@ export default function Wheel() {
     );
   }
 
-  // Build conic-gradient background of the wheel
+  // Conic gradient with subtle alternating brightness for 3D feel
   const conic = N > 0
     ? `conic-gradient(from -${sliceAngle / 2}deg, ${activeSlices
         .map((s, i) => {
@@ -156,10 +210,13 @@ export default function Wheel() {
         className="container py-10"
       >
         <div className="mb-6 text-center">
-          <h1 className="font-display text-4xl font-bold">วงล้อนำโชค</h1>
+          <h1 className="font-display text-4xl font-bold">
+            <span className="bg-gradient-to-r from-warning via-amber-300 to-warning bg-clip-text text-transparent">
+              วงล้อนำโชค
+            </span>
+          </h1>
           <p className="mt-2 text-muted-foreground">
-            หมุน 1 ครั้ง ใช้{" "}
-            <span className="font-bold text-warning">{config.spinCost.toLocaleString()} Point</span>
+            หมุน 1 ครั้ง ใช้ <span className="font-bold text-warning">{config.spinCost.toLocaleString()} Point</span>
           </p>
           {profile && (
             <p className="mt-1 text-sm text-white/50">
@@ -168,81 +225,173 @@ export default function Wheel() {
           )}
         </div>
 
-        <div className="mx-auto flex max-w-md flex-col items-center">
-          <div className="relative aspect-square w-full max-w-[360px]">
-            {/* Pointer */}
-            <div className="absolute left-1/2 top-0 z-20 -translate-x-1/2 -translate-y-1">
-              <div className="h-0 w-0 border-x-[14px] border-t-[26px] border-x-transparent border-t-warning drop-shadow-[0_4px_8px_rgba(0,0,0,0.6)]" />
+        <div className="grid gap-8 lg:grid-cols-[1fr,320px]">
+          {/* Wheel column */}
+          <div ref={wrapRef} className={"flex flex-col items-center " + (shake ? "screen-shake" : "")}>
+            <div className="relative aspect-square w-full max-w-[420px]">
+              {/* Outer bulb ring */}
+              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-amber-200/30 via-yellow-500/10 to-transparent p-3">
+                {/* Bulbs */}
+                {Array.from({ length: BULB_COUNT }).map((_, i) => {
+                  const a = (i / BULB_COUNT) * 360;
+                  return (
+                    <span
+                      key={i}
+                      className="wheel-bulb absolute left-1/2 top-1/2 h-2 w-2 rounded-full bg-amber-300"
+                      style={{
+                        transform: `translate(-50%, -50%) rotate(${a}deg) translateY(calc(-50% + 6px))`,
+                        animationDelay: `${(i % 8) * 0.1}s`,
+                      }}
+                    />
+                  );
+                })}
+
+                {/* Pointer */}
+                <div className={"wheel-pointer absolute left-1/2 top-0 z-30 -translate-x-1/2 " + (pointerTicking ? "wheel-pointer-ticking" : "")}>
+                  <div className="relative">
+                    <div className="h-0 w-0 border-x-[16px] border-t-[30px] border-x-transparent border-t-amber-400 drop-shadow-[0_4px_8px_rgba(0,0,0,0.7)]" />
+                    <div className="absolute left-1/2 top-1 h-2 w-2 -translate-x-1/2 rounded-full bg-white/80" />
+                  </div>
+                </div>
+
+                {/* Wheel disk with glow */}
+                <div className="wheel-glow relative h-full w-full rounded-full p-2">
+                  <div
+                    className="relative h-full w-full overflow-hidden rounded-full border-[6px] border-amber-400/80"
+                    style={{
+                      background: conic,
+                      transform: `rotate(${angle}deg)`,
+                      transition: spinning
+                        ? "transform 5s cubic-bezier(0.17, 0.67, 0.21, 0.99)"
+                        : "none",
+                      boxShadow:
+                        "inset 0 0 40px rgba(0,0,0,0.45), inset 0 0 80px rgba(255,255,255,0.06)",
+                    }}
+                  >
+                    {/* Slice separators (white lines) */}
+                    {activeSlices.map((_, i) => {
+                      const rot = i * sliceAngle;
+                      return (
+                        <div
+                          key={i}
+                          className="absolute left-1/2 top-0 h-1/2 w-px origin-bottom bg-white/30"
+                          style={{ transform: `rotate(${rot - sliceAngle / 2}deg)` }}
+                        />
+                      );
+                    })}
+
+                    {/* Slice labels */}
+                    {activeSlices.map((s, i) => {
+                      const rot = i * sliceAngle + sliceAngle / 2;
+                      return (
+                        <div
+                          key={s.id}
+                          className="pointer-events-none absolute left-1/2 top-1/2 origin-left"
+                          style={{
+                            transform: `rotate(${rot}deg) translate(0, -50%)`,
+                            width: "50%",
+                          }}
+                        >
+                          <div className="flex justify-end pr-5 text-xs font-extrabold uppercase tracking-wider text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]">
+                            <span className="max-w-[120px] truncate">{s.label}</span>
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                    {/* Inner radial sheen for 3D */}
+                    <div
+                      className="pointer-events-none absolute inset-0 rounded-full"
+                      style={{
+                        background:
+                          "radial-gradient(circle at 30% 25%, rgba(255,255,255,0.18), transparent 45%), radial-gradient(circle at 70% 80%, rgba(0,0,0,0.35), transparent 50%)",
+                      }}
+                    />
+                  </div>
+
+                  {/* Center hub */}
+                  <div className="pointer-events-none absolute left-1/2 top-1/2 z-20 h-16 w-16 -translate-x-1/2 -translate-y-1/2">
+                    <div className="absolute inset-0 rounded-full bg-gradient-to-br from-amber-300 via-amber-500 to-amber-700 shadow-[0_8px_20px_rgba(0,0,0,0.5),inset_0_2px_6px_rgba(255,255,255,0.6)]" />
+                    <div className="absolute inset-2 rounded-full bg-gradient-to-br from-zinc-800 to-black shadow-inner" />
+                    <Sparkles className="absolute left-1/2 top-1/2 h-6 w-6 -translate-x-1/2 -translate-y-1/2 text-amber-300" />
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {/* Wheel ring */}
-            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-warning/40 via-primary/20 to-transparent p-2 shadow-[0_0_60px_-10px_hsl(var(--primary)/0.6)]">
-              <div
-                ref={wheelRef}
-                className="relative h-full w-full rounded-full border-4 border-white/10"
-                style={{
-                  background: conic,
-                  transform: `rotate(${angle}deg)`,
-                  transition: spinning ? "transform 5s cubic-bezier(0.17, 0.67, 0.21, 0.99)" : "none",
-                }}
-              >
-                {/* Slice labels */}
-                {activeSlices.map((s, i) => {
-                  const rot = i * sliceAngle + sliceAngle / 2;
+            <Button
+              onClick={spin}
+              disabled={spinning || N < 2 || !user}
+              className="btn-cta mt-8 h-14 w-full max-w-xs bg-gradient-primary text-lg font-bold text-primary-foreground"
+            >
+              {spinning ? "กำลังหมุน..." : !user ? "เข้าสู่ระบบเพื่อหมุน" : `หมุน — ${config.spinCost} Point`}
+            </Button>
+
+            {N < 2 && <p className="mt-3 text-sm text-white/40">วงล้อยังไม่มีช่องเพียงพอ</p>}
+
+            {/* Legend */}
+            {activeSlices.length > 0 && (
+              <Card className="card-elegant mt-8 w-full max-w-xl p-5">
+                <h3 className="mb-3 flex items-center gap-2 font-display text-lg font-semibold">
+                  <Gift className="h-4 w-4" /> ของรางวัลในวงล้อ
+                </h3>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {activeSlices.map((s) => (
+                    <div key={s.id} className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] p-2 text-sm">
+                      <span className="h-4 w-4 shrink-0 rounded-full" style={{ backgroundColor: s.color }} />
+                      <span className="truncate flex-1">{s.label}</span>
+                      <span className="text-xs text-white/40">
+                        {totalWeight > 0 ? `${((s.weight / totalWeight) * 100).toFixed(0)}%` : "—"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            )}
+          </div>
+
+          {/* Recent wins column */}
+          <Card className="card-elegant h-fit p-5 lg:sticky lg:top-20">
+            <h3 className="mb-4 flex items-center gap-2 font-display text-lg font-semibold">
+              <Trophy className="h-4 w-4 text-warning" />
+              ผลล่าสุด
+            </h3>
+            {recent.length === 0 ? (
+              <p className="py-6 text-center text-sm text-white/40">ยังไม่มีผู้หมุน</p>
+            ) : (
+              <div className="max-h-[480px] space-y-2 overflow-y-auto pr-1">
+                {recent.map((r) => {
+                  const isWin = r.type !== "nothing";
                   return (
                     <div
-                      key={s.id}
-                      className="absolute left-1/2 top-1/2 origin-left"
-                      style={{
-                        transform: `rotate(${rot}deg) translate(0, -50%)`,
-                        width: "50%",
-                      }}
+                      key={r.id}
+                      className={
+                        "flex items-center gap-3 rounded-lg border p-2.5 text-sm transition-colors " +
+                        (isWin
+                          ? "border-warning/30 bg-warning/5"
+                          : "border-white/10 bg-white/[0.02]")
+                      }
                     >
-                      <div
-                        className="flex justify-end pr-6 text-xs font-bold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
-                        style={{ transform: "rotate(0deg)" }}
-                      >
-                        <span className="max-w-[110px] truncate">{s.label}</span>
+                      <div className={"flex h-8 w-8 shrink-0 items-center justify-center rounded-full " + (isWin ? "bg-warning/20 text-warning" : "bg-white/10 text-white/40")}>
+                        {r.type === "point" ? <Coins className="h-4 w-4" /> : isWin ? <Gift className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm">
+                          <span className="font-semibold text-white">{r.username}</span>{" "}
+                          <span className="text-white/50">ได้</span>{" "}
+                          <span className={"font-medium " + (isWin ? "text-warning" : "text-white/40")}>{r.sliceLabel}</span>
+                        </p>
+                        <p className="mt-0.5 flex items-center gap-1 text-[11px] text-white/40">
+                          <Clock className="h-3 w-3" /> {timeAgo(r.createdAt)} ที่แล้ว
+                        </p>
                       </div>
                     </div>
                   );
                 })}
-
-                {/* Center hub */}
-                <div className="absolute left-1/2 top-1/2 z-10 h-12 w-12 -translate-x-1/2 -translate-y-1/2 rounded-full border-4 border-white/20 bg-gradient-to-br from-warning to-warning/60 shadow-lg" />
               </div>
-            </div>
-          </div>
-
-          <Button
-            onClick={spin}
-            disabled={spinning || N < 2 || !user}
-            className="btn-cta mt-8 h-14 w-full max-w-xs bg-gradient-primary text-lg font-bold text-primary-foreground"
-          >
-            {spinning ? "กำลังหมุน..." : !user ? "เข้าสู่ระบบเพื่อหมุน" : `หมุน — ${config.spinCost} Point`}
-          </Button>
-
-          {N < 2 && (
-            <p className="mt-3 text-sm text-white/40">วงล้อยังไม่มีช่องเพียงพอ</p>
-          )}
-        </div>
-
-        {/* Slice list / legend */}
-        {activeSlices.length > 0 && (
-          <Card className="card-elegant mx-auto mt-8 max-w-xl p-5">
-            <h3 className="mb-3 flex items-center gap-2 font-display text-lg font-semibold">
-              <Gift className="h-4 w-4" /> ของรางวัลในวงล้อ
-            </h3>
-            <div className="grid gap-2 sm:grid-cols-2">
-              {activeSlices.map((s) => (
-                <div key={s.id} className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] p-2 text-sm">
-                  <span className="h-4 w-4 shrink-0 rounded-full" style={{ backgroundColor: s.color }} />
-                  <span className="truncate">{s.label}</span>
-                </div>
-              ))}
-            </div>
+            )}
           </Card>
-        )}
+        </div>
       </motion.div>
 
       {/* Result dialog */}
@@ -284,7 +433,7 @@ export default function Wheel() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>ปิด</AlertDialogCancel>
-            <AlertDialogAction onClick={() => { setShowResult(false); }}>หมุนอีก</AlertDialogAction>
+            <AlertDialogAction onClick={() => setShowResult(false)}>หมุนอีก</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
